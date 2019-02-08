@@ -1,13 +1,13 @@
-;;; ox-xml2rfc.el --- XML2RFC Back-End for Org Export Engine -*- lexical-binding: t; -*-
+;;; ox-rfc.el --- RFC Back-End for Org Export Engine -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2019 Christian E. Hopps
 
 ;; Author: Christian Hopps <chopps@gmail.com>
-;; Keywords: org, xml2rfc
+;; Keywords: org, rfc
 
 ;;; Commentary:
 
-;; This library implements an XML2RFC back-end for Org exporter, based on `md'
+;; This library implements an RFC back-end for Org exporter, based on `md'
 ;; and `man' back-ends. It exports into XML defined in RFC7749.
 ;; See Org manual for more information.
 
@@ -20,88 +20,75 @@
 
 ;;; User-Configurable Variables
 
-(defgroup org-export-xml2rfc nil
-  "Options specific to XML2RFC export back-end."
+(defgroup org-export-rfc nil
+  "Options specific to RFC export back-end."
   :tag "Org Export XML2RC"
   :group 'org-export)
 
-;; (defcustom org-xml2rfc-headline-style 'atx
-;;   "Style used to format headlines.
-;; This variable can be set to either `atx' or `setext'."
-;;   :group 'org-export-xml2rfc
-;;   :type '(choice
-;; 	  (const :tag "Use \"atx\" style" atx)
-;; 	  (const :tag "Use \"Setext\" style" setext)))
-
-;; (defcustom org-xml2rfc-footnote-format "<sup>%s</sup>"
-;;   "Format string for the footnote reference.
-;; The %s will be replaced by the footnote reference itself."
-;;   :group 'org-export-xml2rfc
-;;   :type 'string
-;;   :version "26.1"
-;;   :package-version '(Org . "9.0"))
-
 
 ;;; Define Back-End
-(defun org-xml2rfc-company (info)
+(defun org-rfc-company (info)
   (message "gotcompany"))
 
 
 
-(org-export-define-derived-backend 'xml2rfc 'html
+(org-export-define-derived-backend 'rfc 'html
   :filters-alist '((:filter-parse-tree .
-                                       (org-xml2rfc-separate-elements)))
+                                       (org-rfc-separate-elements)))
   :menu-entry
 
-  '(?x "Export to XML2RFC"
+  '(?x "Export to RFC"
        ((?X "To XML temporary buffer"
-	    (lambda (a s v b) (org-xml2rfc-export-as-xml a s v)))
-	(?x "To XML file" (lambda (a s v b) (org-xml2rfc-export-to-xml a s v)))
+	    (lambda (a s v b) (org-rfc-export-as-xml a s v)))
+	(?x "To XML file" (lambda (a s v b) (org-rfc-export-to-xml a s v)))
         (?T "To TEXT temporary buffer"
-	    (lambda (a s v b) (org-xml2rfc-export-as-text a s v)))
+	    (lambda (a s v b) (org-rfc-export-as-text a s v)))
 	(?o "To XML file and open"
 	    (lambda (a s v b)
-	      (if a (org-xml2rfc-export-to-xml t s v)
-		(org-open-file (org-xml2rfc-export-to-xml nil s v))))))
+	      (if a (org-rfc-export-to-xml t s v)
+		(org-open-file (org-rfc-export-to-xml nil s v))))))
        )
   :translate-alist '(
-                     (bold . org-xml2rfc-bold)
-		     (code . org-xml2rfc-verbatim)
-		     (example-block . org-xml2rfc-example-block)
-		     (export-block . org-xml2rfc-export-block)
-		     (fixed-width . org-xml2rfc-example-block)
-		     (headline . org-xml2rfc-headline)
-		     (horizontal-rule . org-xml2rfc-horizontal-rule)
-		     (inline-src-block . org-xml2rfc-verbatim)
-		     (inner-template . org-xml2rfc-inner-template)
-		     (italic . org-xml2rfc-italic)
-		     (item . org-xml2rfc-item)
-		     (keyword . org-xml2rfc-keyword)
-		     (line-break . org-xml2rfc-line-break)
-		     (link . org-xml2rfc-link)
-		     (node-property . org-xml2rfc-node-property)
-		     (paragraph . org-xml2rfc-paragraph)
-		     (plain-list . org-xml2rfc-plain-list)
-		     (property-drawer . org-xml2rfc-property-drawer)
-		     (quote-block . org-xml2rfc-quote-block)
-		     (section . org-xml2rfc-section)
-                     (special-block . org-xml2rfc-special-block)
-		     (src-block . org-xml2rfc-example-block)
+                     (bold . org-rfc-bold)
+		     (code . org-rfc-verbatim)
+		     (example-block . org-rfc-example-block)
+		     (export-block . org-rfc-export-block)
+		     (fixed-width . org-rfc-example-block)
+		     (headline . org-rfc-headline)
+		     (horizontal-rule . org-rfc-horizontal-rule)
+		     (inline-src-block . org-rfc-verbatim)
+		     (inner-template . org-rfc-inner-template)
+		     (italic . org-rfc-italic)
+		     (item . org-rfc-item)
+		     (keyword . org-rfc-keyword)
+		     (line-break . org-rfc-line-break)
+		     (link . org-rfc-link)
+		     (node-property . org-rfc-node-property)
+		     (paragraph . org-rfc-paragraph)
+		     (plain-list . org-rfc-plain-list)
+		     (property-drawer . org-rfc-property-drawer)
+		     (quote-block . org-rfc-quote-block)
+		     (section . org-rfc-section)
+                     (special-block . org-rfc-special-block)
+		     (src-block . org-rfc-example-block)
                      (subscript . org-html-subscript)
                      (superscript . org-html-superscript)
-		     (template . org-xml2rfc-template)
-		     (verbatim . org-xml2rfc-verbatim)
+		     (template . org-rfc-template)
+		     (verbatim . org-rfc-verbatim)
                      )
   :options-alist
-  '((:company "COMPANY" nil nil parse)
-    (:submissionType "SUBMISSION_TYPE" nil nil t)))
+  '((:rfc-category "RFC_CATEGORY" nil nil t)
+    (:rfc-ipr "RFC_IPR" nil nil t)
+    (:rfc-stream "RFC_STREAM" nil nil t)
+    (:rfc-consensus "RFC_CONSENSUS" nil nil t)
+    ))
 
-  ;; '((:xml2rfc-footnote-format nil nil org-xml2rfc-footnote-format)
-  ;;   (:xml2rfc-footnotes-section nil nil org-xml2rfc-footnotes-section)
-  ;;   (:xml2rfc-headline-style nil nil org-xml2rfc-headline-style)))
+  ;; '((:rfc-footnote-format nil nil org-rfc-footnote-format)
+  ;;   (:rfc-footnotes-section nil nil org-rfc-footnotes-section)
+  ;;   (:rfc-headline-style nil nil org-rfc-headline-style)))
 
 
-(defun org-xml2rfc-separate-elements (tree _backend info)
+(defun org-rfc-separate-elements (tree _backend info)
   "Fix blank lines between elements.
 
 TREE is the parse tree being exported.  BACKEND is the export
@@ -116,7 +103,7 @@ to this rule:
      paragraph and the next sub-list when the latter ends the
      current item.
 
-Assume BACKEND is `xml2rfc'."
+Assume BACKEND is `rfc'."
   (org-element-map tree (remq 'item org-element-all-elements)
     (lambda (e)
       (org-element-put-property
@@ -138,7 +125,7 @@ Assume BACKEND is `xml2rfc'."
 
 ;;;; Bold
 
-(defun org-xml2rfc-bold (_bold contents _info)
+(defun org-rfc-bold (_bold contents _info)
   "Transcode BOLD object into XML format.
 CONTENTS is the text within bold markup.  INFO is a plist used as
 a communication channel."
@@ -147,8 +134,8 @@ a communication channel."
 
 ;;;; Code and Verbatim
 
-(defun org-xml2rfc-verbatim (verbatim _contents _info)
-  "Transcode VERBATIM object into XML2RFC format.
+(defun org-rfc-verbatim (verbatim _contents _info)
+  "Transcode VERBATIM object into RFC format.
 CONTENTS is nil.  INFO is a plist used as a communication
 channel."
   (let ((value (org-element-property :value verbatim)))
@@ -162,8 +149,8 @@ channel."
 
 ;;;; Example Block, Src Block and Export Block
 
-(defun org-xml2rfc-example-block (example-block _contents info)
-  "Transcode EXAMPLE-BLOCK element into XML2RFC format.
+(defun org-rfc-example-block (example-block _contents info)
+  "Transcode EXAMPLE-BLOCK element into RFC format.
 CONTENTS is nil.  INFO is a plist used as a communication
 channel."
   (concat "<figure><artwork><![CDATA[\n"
@@ -172,7 +159,7 @@ channel."
            (org-export-format-code-default example-block info)
           "]]></artwork></figure>"))
 
-(defun org-xml2rfc-special-block (special-block contents info)
+(defun org-rfc-special-block (special-block contents info)
   "Transcode a SPECIAL-BLOCK element from Org to LaTeX.
 CONTENTS holds the contents of the block.  INFO is a plist
 holding contextual information."
@@ -183,26 +170,26 @@ holding contextual information."
       "")
      (t (org-trim contents)))))
 
-(defun org-xml2rfc-export-block (export-block contents info)
-  "Transcode a EXPORT-BLOCK element from Org to XML2RFC.
+(defun org-rfc-export-block (export-block contents info)
+  "Transcode a EXPORT-BLOCK element from Org to RFC.
 CONTENTS is nil.  INFO is a plist holding contextual information."
-  (if (member (org-element-property :type export-block) '("RFC" "XML2RFC"))
+  (if (member (org-element-property :type export-block) '("RFC" "RFC"))
       (org-remove-indentation (org-element-property :value export-block))
     ;; Also include HTML export blocks.
     (org-export-with-backend 'html export-block contents info)))
 
 ;; This is too simple and messes up diagrams
-;; (defun org-xml2rfc-indent (spaces contents)
+;; (defun org-rfc-indent (spaces contents)
 ;;   (let ((indent (make-string spaces ? )))
 ;;     (replace-regexp-in-string "^" indent contents)))
 
-(defun org-xml2rfc-indent (spaces contents)
+(defun org-rfc-indent (spaces contents)
   contents)
 
 ;;;; Headline
 
-(defun org-xml2rfc-headline (headline contents info)
-  "Transcode HEADLINE element into XML2RFC format.
+(defun org-rfc-headline (headline contents info)
+  "Transcode HEADLINE element into RFC format.
 CONTENTS is the headline contents.  INFO is a plist used as
 a communication channel."
   (unless (org-element-property :footnote-section-p headline)
@@ -222,20 +209,20 @@ a communication channel."
 		   (and char (format "[#%c] " char)))))
 	   ;; Headline text without tags.
 	   (heading (concat todo priority title))
-	   (style (plist-get info :xml2rfc-headline-style)))
-      (let ((anchor (or (and (org-xml2rfc--headline-referred-p headline info)
+	   (style (plist-get info :rfc-headline-style)))
+      (let ((anchor (or (and (org-rfc--headline-referred-p headline info)
 		             (format " anchor=\"%s\""
 			             (or (org-element-property :CUSTOM_ID headline)
 			                 (org-export-get-reference headline info))))
                         "")))
 
-        (org-xml2rfc-indent 2 (format "<section title=\"%s\"%s>\n%s\n</section>\n"
+        (org-rfc-indent 2 (format "<section title=\"%s\"%s>\n%s\n</section>\n"
                                       title anchor
-                                      (org-xml2rfc-indent 2 contents)))))))
+                                      (org-rfc-indent 2 contents)))))))
 
 
 
-(defun org-xml2rfc--headline-referred-p (headline info)
+(defun org-rfc--headline-referred-p (headline info)
   "Non-nil when HEADLINE is being referred to.
 INFO is a plist used as a communication channel.  Links and table
 of contents can refer to headlines."
@@ -276,8 +263,8 @@ of contents can refer to headlines."
 	       (_ nil))))
        info t))))
 
-(defun org-xml2rfc--headline-title (style level title &optional anchor tags)
-  "Generate a headline title in the preferred XML2RFC headline style.
+(defun org-rfc--headline-title (style level title &optional anchor tags)
+  "Generate a headline title in the preferred RFC headline style.
 STYLE is the preferred style (`atx' or `setext').  LEVEL is the
 header level.  TITLE is the headline title.  ANCHOR is the HTML
 anchor tag for the section as a string.  TAGS are the tags set on
@@ -295,8 +282,8 @@ the section."
 
 ;;;; Horizontal Rule
 
-(defun org-xml2rfc-horizontal-rule (_horizontal-rule _contents _info)
-  "Transcode HORIZONTAL-RULE element into XML2RFC format.
+(defun org-rfc-horizontal-rule (_horizontal-rule _contents _info)
+  "Transcode HORIZONTAL-RULE element into RFC format.
 CONTENTS is the horizontal rule contents.  INFO is a plist used
 as a communication channel."
   "---")
@@ -304,8 +291,8 @@ as a communication channel."
 
 ;;;; Italic
 
-(defun org-xml2rfc-italic (_italic contents _info)
-  "Transcode ITALIC object into XML2RFC format.
+(defun org-rfc-italic (_italic contents _info)
+  "Transcode ITALIC object into RFC format.
 CONTENTS is the text within italic markup.  INFO is a plist used
 as a communication channel."
   (format "*%s*" contents))
@@ -313,8 +300,8 @@ as a communication channel."
 
 ;;;; Item
 
-;; (defun org-xml2rfc-item (item contents info)
-;;   "Transcode ITEM element into XML2RFC format.
+;; (defun org-rfc-item (item contents info)
+;;   "Transcode ITEM element into RFC format.
 ;; CONTENTS is the item contents.  INFO is a plist used as
 ;; a communication channel."
 ;;   (let* ((type (org-element-property :type (org-export-get-parent item)))
@@ -339,8 +326,8 @@ as a communication channel."
 ;; 		 (concat "<dd>" (org-trim (replace-regexp-in-string "^" "    " contents) "</dd>"))
 ;;                  )))
 
-(defun org-xml2rfc-item (item contents info)
-  "Transcode ITEM element into XML2RFC format.
+(defun org-rfc-item (item contents info)
+  "Transcode ITEM element into RFC format.
 CONTENTS is the item contents.  INFO is a plist used as
 a communication channel."
   (let* ((type (org-element-property :type (org-export-get-parent item)))
@@ -371,12 +358,12 @@ a communication channel."
 
 ;;;; Keyword
 
-(defun org-xml2rfc-keyword (keyword contents info)
-  "Transcode a KEYWORD element into XML2RFC format.
+(defun org-rfc-keyword (keyword contents info)
+  "Transcode a KEYWORD element into RFC format.
 CONTENTS is nil.  INFO is a plist used as a communication
 channel."
   (pcase (org-element-property :key keyword)
-    ((or "RFC" "XML2RFC") (org-element-property :value keyword))
+    ((or "RFC" "RFC") (org-element-property :value keyword))
     ("TOC"
      (let ((case-fold-search t)
 	   (value (org-element-property :value keyword)))
@@ -386,14 +373,14 @@ channel."
 			   (string-to-number (match-string 0 value))))
 	       (local? (string-match-p "\\<local\\>" value)))
 	   (org-remove-indentation
-	    (org-xml2rfc--build-toc info depth keyword local?)))))))
+	    (org-rfc--build-toc info depth keyword local?)))))))
     (_ (org-export-with-backend 'html keyword contents info))))
 
 
 ;;;; Line Break
 
-(defun org-xml2rfc-line-break (_line-break _contents _info)
-  "Transcode LINE-BREAK object into XML2RFC format.
+(defun org-rfc-line-break (_line-break _contents _info)
+  "Transcode LINE-BREAK object into RFC format.
 CONTENTS is nil.  INFO is a plist used as a communication
 channel."
   "  \n")
@@ -401,11 +388,11 @@ channel."
 
 ;;;; Link
 
-(defun org-xml2rfc-link (link contents info)
-  "Transcode LINE-BREAK object into XML2RFC format.
+(defun org-rfc-link (link contents info)
+  "Transcode LINE-BREAK object into RFC format.
 CONTENTS is the link's description.  INFO is a plist used as
 a communication channel."
-  (let ((link-org-files-as-xml2rfc
+  (let ((link-org-files-as-rfc
 	 (lambda (raw-path)
 	   ;; Treat links to `file.org' as links to `file.xml'.
 	   (if (string= ".org" (downcase (file-name-extension raw-path ".")))
@@ -414,14 +401,14 @@ a communication channel."
 	(type (org-element-property :type link)))
     (cond
      ;; Link type is handled by a special function.
-     ((org-export-custom-protocol-maybe link contents 'xml2rfc))
+     ((org-export-custom-protocol-maybe link contents 'rfc))
      ((member type '("custom-id" "id" "fuzzy"))
       (let ((destination (if (string= type "fuzzy")
 			     (org-export-resolve-fuzzy-link link info)
 			   (org-export-resolve-id-link link info))))
 	(pcase (org-element-type destination)
 	  (`plain-text			; External file.
-	   (let ((path (funcall link-org-files-as-xml2rfc destination)))
+	   (let ((path (funcall link-org-files-as-rfc destination)))
 	     (if (not contents) (format "<%s>" path)
 	       (format "[%s](%s)" contents path))))
 	  (`headline
@@ -472,7 +459,7 @@ a communication channel."
 		 ((member type '("http" "https" "ftp" "mailto"))
 		  (concat type ":" raw-path))
 		 ((string= type "file")
-		  (org-export-file-uri (funcall link-org-files-as-xml2rfc raw-path)))
+		  (org-export-file-uri (funcall link-org-files-as-rfc raw-path)))
 		 (t raw-path))))
 	  (if (not contents) (format "<%s>" path)
 	    (format "[%s](%s)" contents path)))))))
@@ -480,8 +467,8 @@ a communication channel."
 
 ;;;; Node Property
 
-(defun org-xml2rfc-node-property (node-property _contents _info)
-  "Transcode a NODE-PROPERTY element into XML2RFC syntax.
+(defun org-rfc-node-property (node-property _contents _info)
+  "Transcode a NODE-PROPERTY element into RFC syntax.
 CONTENTS is nil.  INFO is a plist holding contextual
 information."
   (format "%s:%s"
@@ -491,17 +478,17 @@ information."
 
 ;;;; Paragraph
 
-(defun org-xml2rfc-paragraph (paragraph contents _info)
-  "Transcode PARAGRAPH element into XML2RFC format.
+(defun org-rfc-paragraph (paragraph contents _info)
+  "Transcode PARAGRAPH element into RFC format.
 CONTENTS is the paragraph contents.  INFO is a plist used as
 a communication channel."
-  (format "<t>\n%s\n</t>" (org-xml2rfc-indent 2 (org-trim contents))))
+  (format "<t>\n%s\n</t>" (org-rfc-indent 2 (org-trim contents))))
 
 
 ;;;; Plain List
 
-(defun org-xml2rfc-plain-list (plain-list contents _info)
-  "Transcode PLAIN-LIST element into XML2RFC format.
+(defun org-rfc-plain-list (plain-list contents _info)
+  "Transcode PLAIN-LIST element into RFC format.
 CONTENTS is the plain-list contents.  INFO is a plist used as
 a communication channel."
   (let* ((type (pcase (org-element-property :type plain-list)
@@ -516,8 +503,8 @@ a communication channel."
 
 ;;;; Property Drawer
 
-(defun org-xml2rfc-property-drawer (_property-drawer contents _info)
-  "Transcode a PROPERTY-DRAWER element into XML2RFC format.
+(defun org-rfc-property-drawer (_property-drawer contents _info)
+  "Transcode a PROPERTY-DRAWER element into RFC format.
 CONTENTS holds the contents of the drawer.  INFO is a plist
 holding contextual information."
   (and (org-string-nw-p contents)
@@ -526,8 +513,8 @@ holding contextual information."
 
 ;;;; Quote Block
 
-(defun org-xml2rfc-quote-block (_quote-block contents _info)
-  "Transcode QUOTE-BLOCK element into XML2RFC format.
+(defun org-rfc-quote-block (_quote-block contents _info)
+  "Transcode QUOTE-BLOCK element into RFC format.
 CONTENTS is the quote-block contents.  INFO is a plist used as
 a communication channel."
   (replace-regexp-in-string
@@ -537,13 +524,13 @@ a communication channel."
 
 ;;;; Section
 
-(defun org-xml2rfc-section (_section contents _info)
-  "Transcode SECTION element into XML2RFC format.
+(defun org-rfc-section (_section contents _info)
+  "Transcode SECTION element into RFC format.
 CONTENTS is the section contents.  INFO is a plist used as
 a communication channel."
   contents)
 
-;; (defun org-xml2rfc-section (section contents info)
+;; (defun org-rfc-section (section contents info)
 ;;   "Transcode a SECTION element from Org to HTML.
 ;; CONTENTS holds the contents of the section.  INFO is a plist
 ;; holding contextual information."
@@ -572,7 +559,7 @@ a communication channel."
 
 ;;;; Subscript
 
-(defun org-xml2rfc-subscript (_subscript contents _info)
+(defun org-rfc-subscript (_subscript contents _info)
   "Transcode a SUBSCRIPT object from Org to HTML.
 CONTENTS is the contents of the object.  INFO is a plist holding
 contextual information."
@@ -580,7 +567,7 @@ contextual information."
 
 ;;;; Superscript
 
-(defun org-xml2rfc-superscript (_superscript contents _info)
+(defun org-rfc-superscript (_superscript contents _info)
   "Transcode a SUPERSCRIPT object from Org to HTML.
 CONTENTS is the contents of the object.  INFO is a plist holding
 contextual information."
@@ -588,7 +575,7 @@ contextual information."
 
 ;;;; Template
 
-(defun org-xml2rfc--build-toc (info &optional n keyword local)
+(defun org-rfc--build-toc (info &optional n keyword local)
   "Return a table of contents.
 
 INFO is a plist used as a communication channel.
@@ -603,9 +590,9 @@ When optional argument LOCAL is non-nil, build a table of
 contents according to the current headline."
   (concat
    (unless local
-     (let ((style (plist-get info :xml2rfc-headline-style))
+     (let ((style (plist-get info :rfc-headline-style))
 	   (title (org-html--translate "Table of Contents" info)))
-       (org-xml2rfc--headline-title style 1 title nil)))
+       (org-rfc--headline-title style 1 title nil)))
    (mapconcat
     (lambda (headline)
       (let* ((indentation
@@ -623,7 +610,7 @@ contents according to the current headline."
 	      (format "[%s](#%s)"
 		      (org-export-data-with-backend
 		       (org-export-get-alt-title headline info)
-		       (org-export-toc-entry-backend 'xml2rfc)
+		       (org-export-toc-entry-backend 'rfc)
 		       info)
 		      (or (org-element-property :CUSTOM_ID headline)
 			  (org-export-get-reference headline info))))
@@ -635,50 +622,50 @@ contents according to the current headline."
     (org-export-collect-headlines info n (and local keyword)) "\n")
    "\n"))
 
-(defun org-xml2rfc--footnote-formatted (footnote info)
+(defun org-rfc--footnote-formatted (footnote info)
   "Formats a single footnote entry FOOTNOTE.
 FOOTNOTE is a cons cell of the form (number . definition).
 INFO is a plist with contextual information."
   (let* ((fn-num (car footnote))
          (fn-text (cdr footnote))
-         (fn-format (plist-get info :xml2rfc-footnote-format))
+         (fn-format (plist-get info :rfc-footnote-format))
          (fn-anchor (format "fn.%d" fn-num))
          (fn-href (format " href=\"#fnr.%d\"" fn-num))
          (fn-link-to-ref (org-html--anchor fn-anchor fn-num fn-href info)))
     (concat (format fn-format fn-link-to-ref) " " fn-text "\n")))
 
-(defun org-xml2rfc--footnote-section (info)
+(defun org-rfc--footnote-section (info)
   "Format the footnote section.
 INFO is a plist used as a communication channel."
   (let* ((fn-alist (org-export-collect-footnote-definitions info))
          (fn-alist (cl-loop for (n _type raw) in fn-alist collect
                             (cons n (org-trim (org-export-data raw info)))))
-         (headline-style (plist-get info :xml2rfc-headline-style))
+         (headline-style (plist-get info :rfc-headline-style))
          (section-title (org-html--translate "Footnotes" info)))
     (when fn-alist
-      (format (plist-get info :xml2rfc-footnotes-section)
-              (org-xml2rfc--headline-title headline-style 1 section-title)
-              (mapconcat (lambda (fn) (org-xml2rfc--footnote-formatted fn info))
+      (format (plist-get info :rfc-footnotes-section)
+              (org-rfc--headline-title headline-style 1 section-title)
+              (mapconcat (lambda (fn) (org-rfc--footnote-formatted fn info))
                          fn-alist
                          "\n")))))
 
-(defun org-xml2rfc-inner-template (contents info)
-  "Return body of document after converting it to XML2RFC syntax.
+(defun org-rfc-inner-template (contents info)
+  "Return body of document after converting it to RFC syntax.
 CONTENTS is the transcoded contents string.  INFO is a plist
 holding export options."
   ;; Make sure CONTENTS is separated from table of contents and
   ;; footnotes with at least a blank line.
   ;; Table of contents.
-  (let ((depth (plist-get info :with-toc))
-        (title (org-export-data (plist-get info :title) info))
-        (category (or (plist-get info :category) "std"))
-        (consensus (or (plist-get info :consensus) "yes"))
-        (ipr (or (plist-get info :ipr) "trust200902"))
-        (author (plist-get info :author))
-        (email (plist-get info :email))
+  (let ((author (plist-get info :author))
+        (category (or (plist-get info :rfc-category) "std"))
+        (consensus (or (plist-get info :rfc-consensus) "yes"))
         (company (plist-get info :company))
-        (submissionType (or (plist-get info :submissionType) "IETF"))
-        (do-toc (if (plist-get info :with-toc) "yes" "no"))
+        (depth (plist-get info :with-toc))
+        (email (plist-get info :email))
+        (ipr (or (plist-get info :rfc-ipr) "trust200902"))
+        (stream (or (plist-get info :rfc-stream) "IETF"))
+        (title (org-export-data (plist-get info :title) info))
+        (with-toc (if (plist-get info :with-toc) "yes" "no"))
         )
     (message "AUTHOR: %s EMAIL: %s COMPANY: %s" author email company)
     (concat
@@ -686,7 +673,7 @@ holding export options."
      ;; Replace this with actual code.
      "<?xml version=\"1.0\"?>
 <?xml-stylesheet type=\"text/xsl\" href=\"rfc2629.xslt\"?>
-<?rfc toc=\"" do-toc "\"?>
+<?rfc toc=\"" with-toc "\"?>
 <?rfc compact=\"no\"?>
 <?rfc subcompact=\"no\"?>
 <?rfc symrefs=\"yes\" ?>
@@ -712,7 +699,7 @@ holding export options."
   "</front>"
 
   ;; (when depth
-  ;;   (concat (org-xml2rfc--build-toc info (and (wholenump depth) depth)) "\n"))
+  ;;   (concat (org-rfc--build-toc info (and (wholenump depth) depth)) "\n"))
 
   "<middle>\n"
   ;; Document contents.
@@ -726,10 +713,10 @@ holding export options."
 
   "</back></rfc>"
   ;; Footnotes section.
-  (org-xml2rfc--footnote-section info))))
+  (org-rfc--footnote-section info))))
 
-(defun org-xml2rfc-template (contents _info)
-  "Return complete document string after XML2RFC conversion.
+(defun org-rfc-template (contents _info)
+  "Return complete document string after RFC conversion.
 CONTENTS is the transcoded contents string.  INFO is a plist used
 as a communication channel."
   contents)
@@ -739,7 +726,7 @@ as a communication channel."
 ;;; Interactive function
 
 ;;;###autoload
-(defun org-xml2rfc-export-as-xml (&optional async subtreep visible-only)
+(defun org-rfc-export-as-xml (&optional async subtreep visible-only)
   "Export current buffer to a XML buffer.
 
 If narrowing is active in the current buffer, only export its
@@ -758,14 +745,14 @@ first.
 When optional argument VISIBLE-ONLY is non-nil, don't export
 contents of hidden elements.
 
-Export is done in a buffer named \"*Org XML2RFC Export*\", which will
+Export is done in a buffer named \"*Org RFC Export*\", which will
 be displayed when `org-export-show-temporary-export-buffer' is
 non-nil."
   (interactive)
-  (org-export-to-buffer 'xml2rfc "*Org XML2RC Export*"
+  (org-export-to-buffer 'rfc "*Org XML2RC Export*"
     async subtreep visible-only nil nil (lambda () (text-mode))))
 
-(defun org-xml2rfc-export-as-text (&optional async subtreep visible-only)
+(defun org-rfc-export-as-text (&optional async subtreep visible-only)
   "Export current buffer to a XML buffer.
 
 If narrowing is active in the current buffer, only export its
@@ -784,31 +771,31 @@ first.
 When optional argument VISIBLE-ONLY is non-nil, don't export
 contents of hidden elements.
 
-Export is done in a buffer named \"*Org XML2RFC Export*\", which will
+Export is done in a buffer named \"*Org RFC Export*\", which will
 be displayed when `org-export-show-temporary-export-buffer' is
 non-nil."
   (interactive)
-  (org-export-to-buffer 'xml2rfc "*Org XML2RC Export*"
+  (org-export-to-buffer 'rfc "*Org XML2RC Export*"
     async subtreep visible-only nil nil
     (lambda ()
       (shell-command-on-region
        (point-min) (point-max)
-       "xml2rfc -q --v3 -o /dev/stdout --text /dev/stdin"
-       (current-buffer) t "*Org XML2RFC Error*" t)
+       "rfc -q --v3 -o /dev/stdout --text /dev/stdin"
+       (current-buffer) t "*Org RFC Error*" t)
       (deactivate-mark))))
 
 ;;;###autoload
-(defun org-xml2rfc-convert-region-to-xml ()
-  "Assume the current region has Org syntax, and convert it to XML2RFC.
+(defun org-rfc-convert-region-to-xml ()
+  "Assume the current region has Org syntax, and convert it to RFC.
 This can be used in any buffer.  For example, you can write an
-itemized list in Org syntax in a XML2RFC buffer and use
+itemized list in Org syntax in a RFC buffer and use
 this command to convert it."
   (interactive)
-  (org-export-replace-region-by 'xml2rfc))
+  (org-export-replace-region-by 'rfc))
 
 
 ;;;###autoload
-(defun org-xml2rfc-export-to-xml (&optional async subtreep visible-only)
+(defun org-rfc-export-to-xml (&optional async subtreep visible-only)
   "Export current buffer to a XML file.
 
 If narrowing is active in the current buffer, only export its
@@ -830,10 +817,10 @@ contents of hidden elements.
 Return output file's name."
   (interactive)
   (let ((outfile (org-export-output-file-name ".xml" subtreep)))
-    (org-export-to-file 'xml2rfc outfile async subtreep visible-only)))
+    (org-export-to-file 'rfc outfile async subtreep visible-only)))
 
 ;;;###autoload
-(defun org-xml2rfc-publish-to-xml (plist filename pub-dir)
+(defun org-rfc-publish-to-xml (plist filename pub-dir)
   "Publish an org file to XML.
 
 FILENAME is the filename of the Org file to be published.  PLIST
@@ -841,12 +828,12 @@ is the property list for the given project.  PUB-DIR is the
 publishing directory.
 
 Return output file name."
-  (org-publish-org-to 'xml2rfc filename ".xml" plist pub-dir))
+  (org-publish-org-to 'rfc filename ".xml" plist pub-dir))
 
-(provide 'ox-xml2rfc)
+(provide 'ox-rfc)
 
 ;; Local variables:
 ;; generated-autoload-file: "org-loaddefs.el"
 ;; End:
 
-;;; ox-xml2rfc.el ends here
+;;; ox-rfc.el ends here
