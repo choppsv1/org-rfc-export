@@ -22,8 +22,55 @@
 
 (defgroup org-export-rfc nil
   "Options specific to RFC export back-end."
-  :tag "Org Export XML2RC"
+  :tag "Org Export RFC"
   :group 'org-export)
+
+(defcustom org-rfc-ref-cache-directory (expand-file-name (concat temporary-file-directory ".org-rfc-ref-cache/"))
+  "Local directory to store downloaded IETF references. Created if necessary."
+  :type 'directory
+  :group 'org-export-rfc)
+
+(defcustom org-rfc-ref-draft-url-directory "http://xml2rfc.ietf.org/public/rfc/bibxml-ids/"
+  "The base URL to fetch IETF drafts references from."
+  :type 'string
+  :group 'org-export-rfc)
+
+(defcustom org-rfc-ref-ieee-url-directory "http://xml2rfc.ietf.org/public/rfc/bibxml-ieee/"
+  "The base URL to fetch IEEE references from."
+  :type 'string
+  :group 'org-export-rfc)
+
+(defcustom org-rfc-ref-rfc-url-directory  "http://www.rfc-editor.org/refs/bibxml/"
+  "The base URL to fetch IETF RFCs references from."
+  :type 'string
+  :group 'org-export-rfc)
+
+
+(defun org-rfc-ref-fetch-to-cache (basename &optional reload)
+  (let* ((pathname (concat (file-name-as-directory org-rfc-ref-cache-directory) "reference." basename ".xml"))
+         url)
+    (if (and (file-exists-p pathname) (not reload))
+        (message "Cached path %s" pathname)
+      (make-directory org-rfc-ref-cache-directory t)
+      (cond
+       ((string-prefix-p "RFC" basename)
+        (setq url (concat org-rfc-ref-rfc-url-directory (concat "reference." basename ".xml"))))
+       ((string-prefix-p "I-D" basename)
+        (setq url (concat org-rfc-ref-draft-url-directory (concat "reference." basename ".xml"))))
+       ((string-prefix-p "IEEE" basename)
+        (setq url (concat org-rfc-ref-ieee-url-directory (concat "reference." basename ".xml"))))
+       (t (error)))
+      (message url)
+      (url-copy-file url pathname t)
+      (message "Downloading %s to %s" url pathname)
+      pathname)
+    pathname))
+
+(defun org-rfc-load-file-as-string (pathname)
+  (with-temp-buffer
+    (insert-file-contents pathname)
+    (buffer-string)))
+
 
 
 ;;; Define Back-End
@@ -37,11 +84,11 @@
                                        (org-rfc-separate-elements)))
   :menu-entry
 
-  '(?x "Export to RFC"
+  '(?r "Export to RFC"
        ((?X "To XML temporary buffer"
 	    (lambda (a s v b) (org-rfc-export-as-xml a s v)))
 	(?x "To XML file" (lambda (a s v b) (org-rfc-export-to-xml a s v)))
-        (?T "To TEXT temporary buffer"
+        (?U "To UTF-8 temporary buffer"
 	    (lambda (a s v b) (org-rfc-export-as-text a s v)))
 	(?o "To XML file and open"
 	    (lambda (a s v b)
@@ -168,6 +215,8 @@ holding contextual information."
      ((string= (downcase block-type) "abstract")
       (plist-put info :abstract (format "<abstract>%s</abstract>" (org-trim contents)))
       "")
+     ;; ((string= (downcase block-type) "xml")
+     ;;  (org-remove-indentation (org-element-property :value special-block)))
      (t (org-trim contents)))))
 
 (defun org-rfc-export-block (export-block contents info)
@@ -194,6 +243,7 @@ CONTENTS is the headline contents.  INFO is a plist used as
 a communication channel."
   (unless (org-element-property :footnote-section-p headline)
     (let* ((level (org-export-get-relative-level headline info))
+           (ptitle (org-export-data (org-element-property :title (org-export-get-parent headline)) info))
            (title (org-export-data (org-element-property :title headline) info))
 	   (todo (and (plist-get info :with-todo-keywords)
 		      (let ((todo (org-element-property :todo-keyword
@@ -215,10 +265,19 @@ a communication channel."
 			             (or (org-element-property :CUSTOM_ID headline)
 			                 (org-export-get-reference headline info))))
                         "")))
-
-        (org-rfc-indent 2 (format "<section title=\"%s\"%s>\n%s\n</section>\n"
-                                      title anchor
-                                      (org-rfc-indent 2 contents)))))))
+        (cond
+         ((string= "References" title) (plist-put info :in-back t)
+          (concat "</middle>\n<back>\n" contents))
+         ((string= "Normative References" title)
+          (format "<references title=\"%s\">\n%s</references>\n" title contents))
+         ((string= "Informative References" title)
+          (format "<references title=\"%s\">\n%s</references>\n" title contents))
+         ((string= "Normative References" ptitle)
+          (org-rfc-reference headline contents info))
+         ((string= "Informative References" ptitle)
+          (org-rfc-reference headline contents info))
+         (t (format "<section title=\"%s\"%s>\n%s\n</section>\n" title anchor
+                 (org-rfc-indent 2 contents))))))))
 
 
 
@@ -325,12 +384,12 @@ as a communication channel."
 ;; 	    (and contents
 ;; 		 (concat "<dd>" (org-trim (replace-regexp-in-string "^" "    " contents) "</dd>"))
 ;;                  )))
-
 (defun org-rfc-item (item contents info)
   "Transcode ITEM element into RFC format.
 CONTENTS is the item contents.  INFO is a plist used as
 a communication channel."
   (let* ((type (org-element-property :type (org-export-get-parent item)))
+         (pname (org-element-property :type (org-export-get-parent item)))
 	 (struct (org-element-property :structure item))
 	 (bullet (if (not (eq type 'ordered)) "-"
 		   (concat (number-to-string
@@ -345,14 +404,14 @@ a communication channel."
        (tag
 	(format "<dt>%s</dt> <dd>%s</dd>" (org-export-data tag info) contents))
        (t (concat bullet
-	    (make-string (- 4 (length bullet)) ? )
-	    (pcase (org-element-property :checkbox item)
-	      (`on "[X] ")
-	      (`trans "[-] ")
-	      (`off "[ ] "))
-	    (and contents
-		 (concat "<dd>" (org-trim (replace-regexp-in-string "^" "    " contents) "</dd>"))
-            )))))))
+	          (make-string (- 4 (length bullet)) ? )
+	          (pcase (org-element-property :checkbox item)
+	            (`on "[X] ")
+	            (`trans "[-] ")
+	            (`off "[ ] "))
+	          (and contents
+		       (concat "<dd>" (org-trim (replace-regexp-in-string "^" "    " contents) "</dd>"))
+                       )))))))
 
 
 
@@ -517,9 +576,25 @@ holding contextual information."
   "Transcode QUOTE-BLOCK element into RFC format.
 CONTENTS is the quote-block contents.  INFO is a plist used as
 a communication channel."
-  (replace-regexp-in-string
-   "^" "> "
-   (replace-regexp-in-string "\n\\'" "" contents)))
+  (format "<blockquote>%s</blockquote>" (org-trim contents)))
+
+;;;; Reference (headline)
+
+(defun org-rfc-reference (headline contents info)
+  "A reference item."
+  (let ((title (org-export-data (org-element-property :title headline) info)))
+    (cond
+     ((string-prefix-p "RFC" title t)
+      (let ((rfcref (substring title 3)))
+        (org-rfc-load-file-as-string (org-rfc-ref-fetch-to-cache (concat "RFC." rfcref)))))
+     ((string-prefix-p "I-D." title t)
+      (org-rfc-load-file-as-string (org-rfc-ref-fetch-to-cache title)))
+     (t
+      (let ((refauthor (org-export-data (org-element-property :ref_author headline) info))
+            (reftitle (org-export-data (org-element-property :ref_title headline) info))
+            (refdate (org-export-data (org-element-property :ref_date headline) info))
+            )
+        (format "<reference><front><title>%s</title><author fullname=\"%s\"><organization/></author><date %s/></front></reference>" reftitle refauthor refdate))))))
 
 
 ;;;; Section
@@ -683,7 +758,7 @@ holding export options."
 <rfc ipr=\"" ipr "\"
      category=\"" category "\"
      docName=\"draft-chopps-ipsecme-iptfs-00\"
-     submissionType=\"" submissionType "\"
+     submissionType=\"" stream "\"
      consensus=\"" consensus "\"
      version=\"3\">
  <front>
@@ -704,12 +779,10 @@ holding export options."
   "<middle>\n"
   ;; Document contents.
   contents
-  "</middle>\n"
-  "<back>"
 
-  (with-temp-buffer
-    (insert-file-contents "references.xml")
-    (buffer-string))
+  ;; (with-temp-buffer
+  ;;   (insert-file-contents "references.xml")
+  ;;   (buffer-string))
 
   "</back></rfc>"
   ;; Footnotes section.
@@ -749,7 +822,7 @@ Export is done in a buffer named \"*Org RFC Export*\", which will
 be displayed when `org-export-show-temporary-export-buffer' is
 non-nil."
   (interactive)
-  (org-export-to-buffer 'rfc "*Org XML2RC Export*"
+  (org-export-to-buffer 'rfc "*Org RFC Export*"
     async subtreep visible-only nil nil (lambda () (text-mode))))
 
 (defun org-rfc-export-as-text (&optional async subtreep visible-only)
@@ -775,12 +848,12 @@ Export is done in a buffer named \"*Org RFC Export*\", which will
 be displayed when `org-export-show-temporary-export-buffer' is
 non-nil."
   (interactive)
-  (org-export-to-buffer 'rfc "*Org XML2RC Export*"
+  (org-export-to-buffer 'rfc "*Org RFC Export*"
     async subtreep visible-only nil nil
     (lambda ()
       (shell-command-on-region
        (point-min) (point-max)
-       "rfc -q --v3 -o /dev/stdout --text /dev/stdin"
+       "xml2rfc --quiet --v3 -o /dev/stdout --text /dev/stdin"
        (current-buffer) t "*Org RFC Error*" t)
       (deactivate-mark))))
 
