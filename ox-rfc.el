@@ -1,15 +1,17 @@
 ;;; ox-rfc.el --- RFC Back-End for Org Export Engine -*- lexical-binding: t; -*-
 
+;; Copyright (C) 2012-2019 Free Software Foundation, Inc.
 ;; Copyright (C) 2019 Christian E. Hopps
 
 ;; Author: Christian Hopps <chopps@gmail.com>
-;; Keywords: org, rfc
+;; Keywords: org, rfc, xml
 
 ;;; Commentary:
 
-;; This library implements an RFC back-end for Org exporter, based on `md'
-;; and `man' back-ends. It exports into XML defined in RFC7749.
-;; See Org manual for more information.
+;; This library implements an RFC (xml2rfc) back-end for Org exporter, based on
+;; `md' and `man' back-ends. It exports into XML as defined in RFC7991, and can
+;; then use `xml2rfc` to further convert to text. See Org manual for more
+;; information.
 
 ;;; Code:
 
@@ -46,6 +48,9 @@
   :group 'org-export-rfc)
 
 
+
+;;; Utility Functions
+
 (defun org-rfc-ref-fetch-to-cache (basename &optional reload)
   (let* ((pathname (concat (file-name-as-directory org-rfc-ref-cache-directory) "reference." basename ".xml"))
          url)
@@ -72,7 +77,6 @@
   (replace-regexp-in-string "<\\?xml [^>]+>" ""
                             (org-rfc-load-file-as-string pathname)))
 
-
 (defun org-rfc-docname-from-buffer ()
   (file-name-sans-extension (file-name-nondirectory (buffer-file-name (buffer-base-buffer)))))
 
@@ -85,12 +89,54 @@
         (org-export-output-file-name (concat "-" verstr extension))
       (concat docname "-" verstr extension))))
 
+(defun org-rfc-author-list-from-prop (pname &optional item)
+  (let ((author (if item
+                    (org-element-property pname item)
+                  (plist-get (org-export-get-environment 'rfc) pname)))
+        (lfmt (concat "<author fullname=\"%s\">\n"
+                      "  <organization>%s</organization>\n"
+                      "  <address><email>%s</email></address>\n"
+                      "</author>"))
+        (sfmt "<author fullname=\"%s\"/>"))
+    (if (string-prefix-p "(" author)
+        (mapconcat
+         (lambda (x) (if (not (listp x))
+                         (format sfmt x)
+                       (format lfmt (car x) (caddr x) (cadr x))))
+         (read author)
+         "\n")
+      (format sfmt author))))
+
 
 ;;; Define Back-End
 
-(org-export-define-derived-backend 'rfc 'html
-  :filters-alist '((:filter-parse-tree .
-                                       (org-rfc-separate-elements)))
+(org-export-define-backend 'rfc
+  '((bold . org-rfc-bold)
+    (code . org-rfc-verbatim)
+    ;; (entity . org-rfc-entity)
+    (example-block . org-rfc-example-block)
+    (export-block . org-rfc-export-block)
+    (fixed-width . org-rfc-example-block)
+    (headline . org-rfc-headline)
+    (inline-src-block . org-rfc-verbatim)
+    (inner-template . org-rfc-inner-template)
+    (italic . org-rfc-italic)
+    (item . org-rfc-item)
+    (line-break . org-rfc-line-break)
+    (link . org-rfc-link)
+    (node-property . org-rfc-node-property)
+    (paragraph . org-rfc-paragraph)
+    (plain-list . org-rfc-plain-list)
+    (plain-text . org-rfc-plain-text)
+    (quote-block . org-rfc-quote-block)
+    (section . org-rfc-section)
+    (special-block . org-rfc-special-block)
+    (src-block . org-rfc-src-block)
+    (subscript . org-html-subscript)
+    (superscript . org-html-superscript)
+    (template . org-rfc-template)
+    (verbatim . org-rfc-verbatim)
+    )
   :menu-entry
 
   '(?r "Export to RFC"
@@ -104,34 +150,6 @@
 	      (if a
                   (org-rfc-export-to-text t s v)
                 (org-open-file (org-rfc-export-to-text nil s v)))))))
-  :translate-alist '(
-                     (bold . org-rfc-bold)
-		     (code . org-rfc-verbatim)
-		     (example-block . org-rfc-example-block)
-		     (export-block . org-rfc-export-block)
-		     (fixed-width . org-rfc-example-block)
-		     (headline . org-rfc-headline)
-		     (horizontal-rule . org-rfc-horizontal-rule)
-		     (inline-src-block . org-rfc-verbatim)
-		     (inner-template . org-rfc-inner-template)
-		     (italic . org-rfc-italic)
-		     (item . org-rfc-item)
-		     (keyword . org-rfc-keyword)
-		     (line-break . org-rfc-line-break)
-		     (link . org-rfc-link)
-		     (node-property . org-rfc-node-property)
-		     (paragraph . org-rfc-paragraph)
-		     (plain-list . org-rfc-plain-list)
-		     (property-drawer . org-rfc-property-drawer)
-		     (quote-block . org-rfc-quote-block)
-		     (section . org-rfc-section)
-                     (special-block . org-rfc-special-block)
-		     (src-block . org-rfc-example-block)
-                     (subscript . org-html-subscript)
-                     (superscript . org-html-superscript)
-		     (template . org-rfc-template)
-		     (verbatim . org-rfc-verbatim)
-                     )
   :options-alist
   '((:rfc-authors "RFC_AUTHORS" nil nil t)
     (:rfc-category "RFC_CATEGORY" nil "std" t)
@@ -143,45 +161,9 @@
     (:rfc-xml-version "RFC_XML_VERSION" nil "2" t)
     ))
 
-  ;; '((:rfc-footnote-format nil nil org-rfc-footnote-format)
-  ;;   (:rfc-footnotes-section nil nil org-rfc-footnotes-section)
-  ;;   (:rfc-headline-style nil nil org-rfc-headline-style)))
-
 (defun org-rfc-render-v3 ()
   (let ((v (plist-get (org-export-get-environment 'rfc) :rfc-xml-version)))
     (not (or (not v) (< (string-to-number v) 3)))))
-
-
-(defun org-rfc-separate-elements (tree _backend info)
-  "Fix blank lines between elements.
-
-TREE is the parse tree being exported.  BACKEND is the export
-back-end used.  INFO is a plist used as a communication channel.
-
-Enforce a blank line between elements.  There are two exceptions
-to this rule:
-
-  1. Preserve blank lines between sibling items in a plain list,
-
-  2. In an item, remove any blank line before the very first
-     paragraph and the next sub-list when the latter ends the
-     current item.
-
-Assume BACKEND is `rfc'."
-  (org-element-map tree (remq 'item org-element-all-elements)
-    (lambda (e)
-      (org-element-put-property
-       e :post-blank
-       (if (and (eq (org-element-type e) 'paragraph)
-		(eq (org-element-type (org-element-property :parent e)) 'item)
-		(org-export-first-sibling-p e info)
-		(let ((next (org-export-get-next-element e info)))
-		  (and (eq (org-element-type next) 'plain-list)
-		       (not (org-export-get-next-element next info)))))
-	   0
-	 1))))
-  ;; Return updated tree.
-  tree)
 
 
 
@@ -196,21 +178,6 @@ a communication channel."
   (format "<em>%s</em>" contents))
 
 
-;;;; Code and Verbatim
-
-(defun org-rfc-verbatim (verbatim _contents _info)
-  "Transcode VERBATIM object into RFC format.
-CONTENTS is nil.  INFO is a plist used as a communication
-channel."
-  (let ((value (org-element-property :value verbatim)))
-    (format (cond ((not (string-match "`" value)) "`%s`")
-		  ((or (string-prefix-p "`" value)
-		       (string-suffix-p "`" value))
-		   "`` %s ``")
-		  (t "``%s``"))
-	    value)))
-
-
 ;;;; Example Block, Src Block and Export Block
 
 (defun org-rfc-example-block (example-block _contents info)
@@ -223,18 +190,21 @@ channel."
            (org-export-format-code-default example-block info)
           "]]></artwork></figure>"))
 
-(defun org-rfc-special-block (special-block contents info)
-  "Transcode a SPECIAL-BLOCK element from Org to LaTeX.
-CONTENTS holds the contents of the block.  INFO is a plist
-holding contextual information."
-  (let ((block-type (org-element-property :type special-block)))
-    (cond
-     ((string= (downcase block-type) "abstract")
-      (plist-put info :abstract (format "<abstract>%s</abstract>" (org-trim contents)))
-      "")
-     ;; ((string= (downcase block-type) "xml")
-     ;;  (org-remove-indentation (org-element-property :value special-block)))
-     (t (org-trim contents)))))
+(defun org-rfc-src-block (src-block _contents info)
+  "Transcode EXAMPLE-BLOCK element into RFC format.
+CONTENTS is nil.  INFO is a plist used as a communication
+channel."
+  (if (org-rfc-render-v3)
+      (concat "<figure><sourcecode><![CDATA[\n"
+              ;; (org-remove-indentation
+              ;;  (org-export-format-code-default example-block info))
+              (org-export-format-code-default src-block info)
+              "]]></sourcecode></figure>")
+    (concat "<figure><artwork><![CDATA[\n"
+            ;; (org-remove-indentation
+            ;;  (org-export-format-code-default example-block info))
+            (org-export-format-code-default src-block info)
+            "]]></artwork></figure>")))
 
 (defun org-rfc-export-block (export-block contents info)
   "Transcode a EXPORT-BLOCK element from Org to RFC.
@@ -243,14 +213,6 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
       (org-remove-indentation (org-element-property :value export-block))
     ;; Also include HTML export blocks.
     (org-export-with-backend 'html export-block contents info)))
-
-;; This is too simple and messes up diagrams
-;; (defun org-rfc-indent (spaces contents)
-;;   (let ((indent (make-string spaces ? )))
-;;     (replace-regexp-in-string "^" indent contents)))
-
-(defun org-rfc-is-legacy ()
-  contents)
 
 ;;;; Headline
 
@@ -294,9 +256,7 @@ a communication channel."
          ((string= "Informative References" ptitle)
           (org-rfc-reference headline contents info))
          (t (format "<section title=\"%s\"%s>\n%s\n</section>\n" title anchor
-                 (org-rfc-indent 2 contents))))))))
-
-
+                 contents)))))))
 
 (defun org-rfc--headline-referred-p (headline info)
   "Non-nil when HEADLINE is being referred to.
@@ -356,51 +316,18 @@ the section."
         (let ((level-mark (make-string level ?#)))
           (concat "\n" anchor-lines level-mark " " title tags "\n\n")))))
 
-;;;; Horizontal Rule
-
-(defun org-rfc-horizontal-rule (_horizontal-rule _contents _info)
-  "Transcode HORIZONTAL-RULE element into RFC format.
-CONTENTS is the horizontal rule contents.  INFO is a plist used
-as a communication channel."
-  "---")
-
-
 ;;;; Italic
 
 (defun org-rfc-italic (_italic contents _info)
   "Transcode ITALIC object into RFC format.
 CONTENTS is the text within italic markup.  INFO is a plist used
 as a communication channel."
-  (format "*%s*" contents))
-
+  (if (org-rfc-render-v3)
+      (format "<em>%s</em>" contents)
+    contents))
 
 ;;;; Item
 
-;; (defun org-rfc-item (item contents info)
-;;   "Transcode ITEM element into RFC format.
-;; CONTENTS is the item contents.  INFO is a plist used as
-;; a communication channel."
-;;   (let* ((type (org-element-property :type (org-export-get-parent item)))
-;; 	 (struct (org-element-property :structure item))
-;; 	 (bullet (if (not (eq type 'ordered)) "-"
-;; 		   (concat (number-to-string
-;; 			    (car (last (org-list-get-item-number
-;; 					(org-element-property :begin item)
-;; 					struct
-;; 					(org-list-prevs-alist struct)
-;; 					(org-list-parents-alist struct)))))
-;; 			   "."))))
-;;     (concat bullet
-;; 	    (make-string (- 4 (length bullet)) ? )
-;; 	    (pcase (org-element-property :checkbox item)
-;; 	      (`on "[X] ")
-;; 	      (`trans "[-] ")
-;; 	      (`off "[ ] "))
-;; 	    (let ((tag (org-element-property :tag item)))
-;; 	      (and tag (format "<dt><em>%s</em></dt> " (org-export-data tag info))))
-;; 	    (and contents
-;; 		 (concat "<dd>" (org-trim (replace-regexp-in-string "^" "    " contents) "</dd>"))
-;;                  )))
 (defun org-rfc-item (item contents info)
   "Transcode ITEM element into RFC format.
 CONTENTS is the item contents.  INFO is a plist used as
@@ -425,39 +352,18 @@ a communication channel."
 	          (and contents
 		       (concat "<t>" (org-trim contents) "</t>"))))))))
 
-
-
-;;;; Keyword
-
-(defun org-rfc-keyword (keyword contents info)
-  "Transcode a KEYWORD element into RFC format.
-CONTENTS is nil.  INFO is a plist used as a communication
-channel."
-  (pcase (org-element-property :key keyword)
-    ((or "RFC" "RFC") (org-element-property :value keyword))
-    ("TOC"
-     (let ((case-fold-search t)
-	   (value (org-element-property :value keyword)))
-       (cond
-	((string-match-p "\\<headlines\\>" value)
-	 (let ((depth (and (string-match "\\<[0-9]+\\>" value)
-			   (string-to-number (match-string 0 value))))
-	       (local? (string-match-p "\\<local\\>" value)))
-	   (org-remove-indentation
-	    (org-rfc--build-toc info depth keyword local?)))))))
-    (_ (org-export-with-backend 'html keyword contents info))))
-
-
 ;;;; Line Break
 
 (defun org-rfc-line-break (_line-break _contents _info)
   "Transcode LINE-BREAK object into RFC format.
 CONTENTS is nil.  INFO is a plist used as a communication
 channel."
-  "  \n")
+  (if (org-rfc-render-v3) "<br>" "<vspace/>"))
 
 
 ;;;; Link
+
+;;;; XXX Not done converting this from org-md yet.
 
 (defun org-rfc-link (link contents info)
   "Transcode LINE-BREAK object into RFC format.
@@ -487,21 +393,22 @@ a communication channel."
                   (dpparent (org-export-get-parent-element dparent))
                   (ppname (org-element-property :raw-value dpparent)))
 	     (if (not (string= "References" ppname))
-                 (message "XXXXXXXXXXXXXX %s %s" dpparent ppname)
-	         (format
-	          "[%s](#%s)"
-	          ;; Description.
-	          (cond ((org-string-nw-p contents))
-		        ((org-export-numbered-headline-p destination info)
-		         (mapconcat #'number-to-string
-			            (org-export-get-headline-number destination info)
-			            "."))
-		        (t (org-export-data (org-element-property :title destination)
-				            info)))
+                 (format
+                  "<xref target=\"%s\"/>"
 	          ;; Reference.
 	          (or (org-element-property :CUSTOM_ID destination)
-		      (org-export-get-reference destination info)))
-               (format "<xref target=\"%s\"/>" (org-export-data (org-element-property :title destination) info)))))
+		      (org-export-get-reference destination info))
+	          ;; ;; Description.
+	          ;; (cond ((org-string-nw-p contents))
+		  ;;       ((org-export-numbered-headline-p destination info)
+		  ;;        (mapconcat #'number-to-string
+		  ;;                   (org-export-get-headline-number destination info)
+		  ;;                   "."))
+		  ;;       (t (org-export-data (org-element-property :title destination)
+		  ;;       	            info)))
+                  )
+               (let ((xtarget (org-export-data (org-element-property :title destination) info)))
+                 (format "<xref target=\"%s\"/>" xtarget)))))
 	  (_
 	   (let ((description
 		  (or (org-string-nw-p contents)
@@ -559,7 +466,7 @@ information."
   "Transcode PARAGRAPH element into RFC format.
 CONTENTS is the paragraph contents.  INFO is a plist used as
 a communication channel."
-  (format "<t>\n%s\n</t>" (org-rfc-indent 2 (org-trim contents))))
+  (format "<t>%s</t>" (org-trim contents)))
 
 
 ;;;; Plain List
@@ -582,43 +489,30 @@ a communication channel."
 	           (other (error "Unknown HTML list type: %s" other)))))
       (format "<t><list style=\"%s\">\n%s</list></t>" style contents))))
 
-;;;; Property Drawer
 
-(defun org-rfc-property-drawer (_property-drawer contents _info)
-  "Transcode a PROPERTY-DRAWER element into RFC format.
-CONTENTS holds the contents of the drawer.  INFO is a plist
-holding contextual information."
-  (and (org-string-nw-p contents)
-       (replace-regexp-in-string "^" "    " contents)))
+;;;; Plain Text
+
+(defun org-rfc-plain-text (text info)
+  "Convert plain text characters from TEXT to HTML equivalent.
+Possible conversions are set in `org-html-protect-char-alist'."
+  (let ((protect-alist '(("&" . "&amp;")
+                         ("<" . "&lt;")
+                         (">" . "&gt;"))))
+    (dolist (pair protect-alist text)
+      (setq text (replace-regexp-in-string (car pair) (cdr pair) text t t)))))
 
 
 ;;;; Quote Block
 
-(defun org-rfc-quote-block (_quote-block contents _info)
+(defun org-rfc-quote-block (quote-block contents info)
   "Transcode QUOTE-BLOCK element into RFC format.
 CONTENTS is the quote-block contents.  INFO is a plist used as
 a communication channel."
-  (format "<blockquote>%s</blockquote>" (org-trim contents)))
+  (if (org-rfc-render-v3)
+      (format "<blockquote>%s</blockquote>" (org-trim contents))
+    (org-rfc-example-block quote-block contents info)))
 
 ;;;; Reference (headline)
-
-(defun org-rfc-author-list-from-prop (pname &optional item)
-  (let ((author (if item
-                    (org-element-property pname item)
-                  (plist-get (org-export-get-environment 'rfc) pname)))
-        (lfmt (concat "<author fullname=\"%s\">\n"
-                      "  <organization>%s</organization>\n"
-                      "  <address><email>%s</email></address>\n"
-                      "</author>"))
-        (sfmt "<author fullname=\"%s\"/>"))
-    (if (string-prefix-p "(" author)
-        (mapconcat
-         (lambda (x) (if (not (listp x))
-                         (format sfmt x)
-                       (format lfmt (car x) (caddr x) (cadr x))))
-         (read author)
-         "\n")
-      (format sfmt author))))
 
 (defun org-rfc-reference (headline contents info)
   "A reference item."
@@ -658,8 +552,6 @@ a communication channel."
             (format "<reference anchor=\"%s\"><front><title>%s</title>%s%s</front>%s%s</reference>" title reftitle author refdate refcontent refann)
           (format "<reference anchor=\"%s\"><front><title>%s</title>%s%s</front>%s</reference>" title reftitle author refdate refann)))))))
 
-
-
 ;;;; Section
 
 (defun org-rfc-section (_section contents _info)
@@ -668,40 +560,15 @@ CONTENTS is the section contents.  INFO is a plist used as
 a communication channel."
   contents)
 
-;; (defun org-rfc-section (section contents info)
-;;   "Transcode a SECTION element from Org to HTML.
-;; CONTENTS holds the contents of the section.  INFO is a plist
-;; holding contextual information."
-;;   (let ((parent (org-export-get-parent-headline section)))
-;;     ;; Before first headline: no container, just return CONTENTS.
-;;     (if (not parent) contents
-;;       (progn (plist-put info :abstract (format "<abstract>%s</abstract>" (org-trim contents))) "")
-;;       (concat "SECSTART" contents "SECEND"))))
-
-;;       ;; ;; Get div's class and id references.
-;;       ;; (let* ((class-num (+ (org-export-get-relative-level parent info)
-;;       ;;   		   (1- (plist-get info :html-toplevel-hlevel))))
-;;       ;;        (section-number
-;;       ;;         (and (org-export-numbered-headline-p parent info)
-;;       ;;   	   (mapconcat
-;;       ;;   	    #'number-to-string
-;;       ;;   	    (org-export-get-headline-number parent info) "-"))))
-;;       ;;   ;; Build return value.
-;;       ;;   (format "<div class=\"outline-text-%d\" id=\"text-%s\">\n%s</div>\n"
-;;       ;;   	class-num
-;;       ;;   	(or (org-element-property :CUSTOM_ID parent)
-;;       ;;   	    section-number
-;;       ;;   	    (org-export-get-reference parent info))
-;;       ;;   	(or contents ""))))))
-
-
 ;;;; Subscript
 
 (defun org-rfc-subscript (_subscript contents _info)
   "Transcode a SUBSCRIPT object from Org to HTML.
 CONTENTS is the contents of the object.  INFO is a plist holding
 contextual information."
-  (format "<sub>%s</sub>" contents))
+  (if (org-rfc-render-v3)
+      (format "<sub>%s</sub>" contents)
+    contents))
 
 ;;;; Superscript
 
@@ -709,83 +576,12 @@ contextual information."
   "Transcode a SUPERSCRIPT object from Org to HTML.
 CONTENTS is the contents of the object.  INFO is a plist holding
 contextual information."
-  (format "<sup>%s</sup>" contents))
+  (if (org-rfc-render-v3)
+      (format "<sup>%s</sup>" contents)
+    contents))
+
 
 ;;;; Template
-
-(defun org-rfc--build-toc (info &optional n keyword local)
-  "Return a table of contents.
-
-INFO is a plist used as a communication channel.
-
-Optional argument N, when non-nil, is an integer specifying the
-depth of the table.
-
-Optional argument KEYWORD specifies the TOC keyword, if any, from
-which the table of contents generation has been initiated.
-
-When optional argument LOCAL is non-nil, build a table of
-contents according to the current headline."
-  (concat
-   (unless local
-     (let ((style (plist-get info :rfc-headline-style))
-	   (title (org-html--translate "Table of Contents" info)))
-       (org-rfc--headline-title style 1 title nil)))
-   (mapconcat
-    (lambda (headline)
-      (let* ((indentation
-	      (make-string
-	       (* 4 (1- (org-export-get-relative-level headline info)))
-	       ?\s))
-	     (bullet
-	      (if (not (org-export-numbered-headline-p headline info)) "-   "
-		(let ((prefix
-		       (format "%d." (org-last (org-export-get-headline-number
-						headline info)))))
-		  (concat prefix (make-string (max 1 (- 4 (length prefix)))
-					      ?\s)))))
-	     (title
-	      (format "[%s](#%s)"
-		      (org-export-data-with-backend
-		       (org-export-get-alt-title headline info)
-		       (org-export-toc-entry-backend 'rfc)
-		       info)
-		      (or (org-element-property :CUSTOM_ID headline)
-			  (org-export-get-reference headline info))))
-	     (tags (and (plist-get info :with-tags)
-			(not (eq 'not-in-toc (plist-get info :with-tags)))
-			(org-make-tag-string
-			 (org-export-get-tags headline info)))))
-	(concat indentation bullet title tags)))
-    (org-export-collect-headlines info n (and local keyword)) "\n")
-   "\n"))
-
-(defun org-rfc--footnote-formatted (footnote info)
-  "Formats a single footnote entry FOOTNOTE.
-FOOTNOTE is a cons cell of the form (number . definition).
-INFO is a plist with contextual information."
-  (let* ((fn-num (car footnote))
-         (fn-text (cdr footnote))
-         (fn-format (plist-get info :rfc-footnote-format))
-         (fn-anchor (format "fn.%d" fn-num))
-         (fn-href (format " href=\"#fnr.%d\"" fn-num))
-         (fn-link-to-ref (org-html--anchor fn-anchor fn-num fn-href info)))
-    (concat (format fn-format fn-link-to-ref) " " fn-text "\n")))
-
-(defun org-rfc--footnote-section (info)
-  "Format the footnote section.
-INFO is a plist used as a communication channel."
-  (let* ((fn-alist (org-export-collect-footnote-definitions info))
-         (fn-alist (cl-loop for (n _type raw) in fn-alist collect
-                            (cons n (org-trim (org-export-data raw info)))))
-         (headline-style (plist-get info :rfc-headline-style))
-         (section-title (org-html--translate "Footnotes" info)))
-    (when fn-alist
-      (format (plist-get info :rfc-footnotes-section)
-              (org-rfc--headline-title headline-style 1 section-title)
-              (mapconcat (lambda (fn) (org-rfc--footnote-formatted fn info))
-                         fn-alist
-                         "\n")))))
 
 (defun org-rfc-inner-template (contents info)
   "Return body of document after converting it to RFC syntax.
@@ -830,38 +626,35 @@ holding export options."
           "    consensus=\"" consensus "\""
           "    tocInclude=\"" toc-inc "\""
           "    version=\"3\""))
-">
- <front>
-  <title abbrev=\"" title "\">" title "</title>\n"
-
+     ">
+  <front>
+    <title abbrev=\"" title "\">" title "</title>\n"
   (org-rfc-author-list-from-prop :rfc-authors)
-
-  "<date/>"
-
+  "  <date/>"
   (or (plist-get info :abstract) "")
-
-  "</front>"
-
-  ;; (when depth
-  ;;   (concat (org-rfc--build-toc info (and (wholenump depth) depth)) "\n"))
-
-  "<middle>\n"
+  "  </front>"
+  "  <middle>\n"
   ;; Document contents.
   contents
-
-  ;; (with-temp-buffer
-  ;;   (insert-file-contents "references.xml")
-  ;;   (buffer-string))
-
-  "</back></rfc>"
-  ;; Footnotes section.
-  (org-rfc--footnote-section info))))
+  "  </back>
+</rfc>")))
 
 (defun org-rfc-template (contents _info)
   "Return complete document string after RFC conversion.
 CONTENTS is the transcoded contents string.  INFO is a plist used
 as a communication channel."
   contents)
+
+;;;; Verbatim
+
+(defun org-rfc-verbatim (verbatim _contents _info)
+  "Transcode VERBATIM object into RFC format.
+CONTENTS is nil.  INFO is a plist used as a communication
+channel."
+  (let ((value (org-element-property :value verbatim)))
+    (if (org-rfc-render-v3)
+        (format "<tt>%s</tt>" value)
+      (format "<spanx>%s</spanx>" value))))
 
 
 
