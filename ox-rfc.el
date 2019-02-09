@@ -16,7 +16,6 @@
 ;;; Code:
 
 (require 'cl-lib)
-(require 'ox-html)
 (require 'ox-publish)
 
 
@@ -132,8 +131,8 @@
     (section . org-rfc-section)
     (special-block . org-rfc-special-block)
     (src-block . org-rfc-src-block)
-    (subscript . org-html-subscript)
-    (superscript . org-html-superscript)
+    (subscript . org-rfc-subscript)
+    (superscript . org-rfc-superscript)
     (template . org-rfc-template)
     (verbatim . org-rfc-verbatim)
     )
@@ -418,25 +417,10 @@ a communication channel."
 			 ((atom number) (number-to-string number))
 			 (t (mapconcat #'number-to-string number ".")))))))
 	     (when description
-	       (format "[%s](#%s)"
-		       description
-		       (org-export-get-reference destination info))))))))
-     ((org-export-inline-image-p link org-html-inline-image-rules)
-      (let ((path (let ((raw-path (org-element-property :path link)))
-		    (cond ((not (equal "file" type)) (concat type ":" raw-path))
-			  ((not (file-name-absolute-p raw-path)) raw-path)
-			  (t (expand-file-name raw-path)))))
-	    (caption (org-export-data
-		      (org-export-get-caption
-		       (org-export-get-parent-element link)) info)))
-	(format "![img](%s)"
-		(if (not (org-string-nw-p caption)) path
-		  (format "%s \"%s\"" path caption)))))
-     ((string= type "coderef")
-      (let ((ref (org-element-property :path link)))
-	(format (org-export-get-coderef-format ref contents)
-		(org-export-resolve-coderef ref info))))
-     ((equal type "radio") contents)
+	       (format "<eref target=\"%s\">%s</eref>"
+		       (org-export-get-reference destination info)
+		       description)))))))
+     ;; Need to test this case.
      (t (let* ((raw-path (org-element-property :path link))
 	       (path
 		(cond
@@ -445,8 +429,8 @@ a communication channel."
 		 ((string= type "file")
 		  (org-export-file-uri (funcall link-org-files-as-rfc raw-path)))
 		 (t raw-path))))
-	  (if (not contents) (format "<%s>" path)
-	    (format "[%s](%s)" contents path)))))))
+	  (if (not contents) (format "<eref target=\"%s\"/>" path)
+	    (format "<eref target=\"%s\">%s</eref>" path contents)))))))
 
 
 ;;;; Node Property
@@ -493,8 +477,7 @@ a communication channel."
 ;;;; Plain Text
 
 (defun org-rfc-plain-text (text info)
-  "Convert plain text characters from TEXT to HTML equivalent.
-Possible conversions are set in `org-html-protect-char-alist'."
+  "Convert plain text characters from TEXT to HTML equivalent."
   (let ((protect-alist '(("&" . "&amp;")
                          ("<" . "&lt;")
                          (">" . "&gt;"))))
