@@ -49,8 +49,7 @@
 (defun org-rfc-ref-fetch-to-cache (basename &optional reload)
   (let* ((pathname (concat (file-name-as-directory org-rfc-ref-cache-directory) "reference." basename ".xml"))
          url)
-    (if (and (file-exists-p pathname) (not reload))
-        (message "Cached path %s" pathname)
+    (unless (and (file-exists-p pathname) (not reload))
       (make-directory org-rfc-ref-cache-directory t)
       (cond
        ((string-prefix-p "RFC" basename)
@@ -60,9 +59,7 @@
        ((string-prefix-p "IEEE" basename)
         (setq url (concat org-rfc-ref-ieee-url-directory (concat "reference." basename ".xml"))))
        (t (error)))
-      (message url)
       (url-copy-file url pathname t)
-      (message "Downloading %s to %s" url pathname)
       pathname)
     pathname))
 
@@ -71,13 +68,25 @@
     (insert-file-contents pathname)
     (buffer-string)))
 
+(defun org-rfc-load-ref-file-as-string (pathname)
+  (replace-regexp-in-string "<\\?xml [^>]+>" ""
+                            (org-rfc-load-file-as-string pathname)))
+
+
+(defun org-rfc-docname-from-buffer ()
+  (file-name-sans-extension (file-name-nondirectory (buffer-file-name (buffer-base-buffer)))))
+
+(defun org-rfc-export-output-file-name (extension)
+  (let ((docname (plist-get (org-export-get-environment 'rfc) :rfc-name))
+        (verstr (plist-get (org-export-get-environment 'rfc) :rfc-version)))
+    (if (not verstr)
+        (error "#+RFC_VERSION: must be provided for export"))
+    (if (not docname)
+        (org-export-output-file-name (concat "-" verstr extension))
+      (concat docname "-" verstr extension))))
 
 
 ;;; Define Back-End
-(defun org-rfc-company (info)
-  (message "gotcompany"))
-
-
 
 (org-export-define-derived-backend 'rfc 'html
   :filters-alist '((:filter-parse-tree .
@@ -88,13 +97,13 @@
        ((?X "To XML temporary buffer"
 	    (lambda (a s v b) (org-rfc-export-as-xml a s v)))
 	(?x "To XML file" (lambda (a s v b) (org-rfc-export-to-xml a s v)))
-        (?U "To UTF-8 temporary buffer"
-	    (lambda (a s v b) (org-rfc-export-as-text a s v)))
-	(?o "To XML file and open"
-	    (lambda (a s v b)
-	      (if a (org-rfc-export-to-xml t s v)
-		(org-open-file (org-rfc-export-to-xml nil s v))))))
-       )
+        (?T "To TEXT temporary buffer" (lambda (a s v b) (org-rfc-export-as-text a s v)))
+        (?t "To TEXT file" (lambda (a s v b) (org-rfc-export-to-text a s v)))
+	(?o "To TEXT file and open"
+            (lambda (a s v b)
+	      (if a
+                  (org-rfc-export-to-text t s v)
+                (org-open-file (org-rfc-export-to-text nil s v)))))))
   :translate-alist '(
                      (bold . org-rfc-bold)
 		     (code . org-rfc-verbatim)
@@ -124,15 +133,23 @@
 		     (verbatim . org-rfc-verbatim)
                      )
   :options-alist
-  '((:rfc-category "RFC_CATEGORY" nil nil t)
-    (:rfc-ipr "RFC_IPR" nil nil t)
-    (:rfc-stream "RFC_STREAM" nil nil t)
-    (:rfc-consensus "RFC_CONSENSUS" nil nil t)
+  '((:rfc-authors "RFC_AUTHORS" nil nil t)
+    (:rfc-category "RFC_CATEGORY" nil "std" t)
+    (:rfc-consensus "RFC_CONSENSUS" nil "true" t)
+    (:rfc-ipr "RFC_IPR" nil "trust200902" t)
+    (:rfc-name "RFC_NAME" nil nil t)
+    (:rfc-stream "RFC_STREAM" nil "IETF" t)
+    (:rfc-version "RFC_VERSION" nil nil t)
+    (:rfc-xml-version "RFC_XML_VERSION" nil "2" t)
     ))
 
   ;; '((:rfc-footnote-format nil nil org-rfc-footnote-format)
   ;;   (:rfc-footnotes-section nil nil org-rfc-footnotes-section)
   ;;   (:rfc-headline-style nil nil org-rfc-headline-style)))
+
+(defun org-rfc-render-v3 ()
+  (let ((v (plist-get (org-export-get-environment 'rfc) :rfc-xml-version)))
+    (not (or (not v) (< (string-to-number v) 3)))))
 
 
 (defun org-rfc-separate-elements (tree _backend info)
@@ -232,7 +249,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 ;;   (let ((indent (make-string spaces ? )))
 ;;     (replace-regexp-in-string "^" indent contents)))
 
-(defun org-rfc-indent (spaces contents)
+(defun org-rfc-is-legacy ()
   contents)
 
 ;;;; Headline
@@ -401,17 +418,12 @@ a communication channel."
 			   "."))))
     (let ((tag (org-element-property :tag item)))
       (cond
-       (tag
-	(format "<dt>%s</dt> <dd>%s</dd>" (org-export-data tag info) contents))
+       (tag (if (org-rfc-render-v3)
+	        (format "<dt>%s</dt> <dd>%s</dd>" (org-export-data tag info) contents)
+	      (replace-regexp-in-string "<t>" (format "<t hangText=\"%s:\">" (org-export-data tag info)) contents)))
        (t (concat bullet
-	          (make-string (- 4 (length bullet)) ? )
-	          (pcase (org-element-property :checkbox item)
-	            (`on "[X] ")
-	            (`trans "[-] ")
-	            (`off "[ ] "))
 	          (and contents
-		       (concat "<dd>" (org-trim (replace-regexp-in-string "^" "    " contents) "</dd>"))
-                       )))))))
+		       (concat "<t>" (org-trim contents) "</t>"))))))))
 
 
 
@@ -471,19 +483,25 @@ a communication channel."
 	     (if (not contents) (format "<%s>" path)
 	       (format "[%s](%s)" contents path))))
 	  (`headline
-	   (format
-	    "[%s](#%s)"
-	    ;; Description.
-	    (cond ((org-string-nw-p contents))
-		  ((org-export-numbered-headline-p destination info)
-		   (mapconcat #'number-to-string
-			      (org-export-get-headline-number destination info)
-			      "."))
-		  (t (org-export-data (org-element-property :title destination)
-				      info)))
-	    ;; Reference.
-	    (or (org-element-property :CUSTOM_ID destination)
-		(org-export-get-reference destination info))))
+	   (let* ((dparent (org-export-get-parent-element destination))
+                  (dpparent (org-export-get-parent-element dparent))
+                  (ppname (org-element-property :raw-value dpparent)))
+	     (if (not (string= "References" ppname))
+                 (message "XXXXXXXXXXXXXX %s %s" dpparent ppname)
+	         (format
+	          "[%s](#%s)"
+	          ;; Description.
+	          (cond ((org-string-nw-p contents))
+		        ((org-export-numbered-headline-p destination info)
+		         (mapconcat #'number-to-string
+			            (org-export-get-headline-number destination info)
+			            "."))
+		        (t (org-export-data (org-element-property :title destination)
+				            info)))
+	          ;; Reference.
+	          (or (org-element-property :CUSTOM_ID destination)
+		      (org-export-get-reference destination info)))
+               (format "<xref target=\"%s\"/>" (org-export-data (org-element-property :title destination) info)))))
 	  (_
 	   (let ((description
 		  (or (org-string-nw-p contents)
@@ -550,15 +568,19 @@ a communication channel."
   "Transcode PLAIN-LIST element into RFC format.
 CONTENTS is the plain-list contents.  INFO is a plist used as
 a communication channel."
-  (let* ((type (pcase (org-element-property :type plain-list)
-	         (`ordered "ol")
-	         (`unordered "ul")
-	         (`descriptive "dl")
-	         (other (error "Unknown HTML list type: %s" other))))
-         (class (format "org-%s" type))
-         (attributes (org-export-read-attribute :attr_html plain-list)))
-    (format "<%s>\n%s</%s>" type contents type)))
-
+  (if (org-rfc-render-v3)
+      (let* ((type (pcase (org-element-property :type plain-list)
+	             (`ordered "ol")
+	             (`unordered "ul")
+	             (`descriptive "dl")
+	             (other (error "Unknown HTML list type: %s" other)))))
+        (format "<%s>\n%s</%s>" type contents type))
+    (let* ((style (pcase (org-element-property :type plain-list)
+	           (`ordered "numbers")
+	           (`unordered "symbols")
+	           (`descriptive "hanging")
+	           (other (error "Unknown HTML list type: %s" other)))))
+      (format "<t><list style=\"%s\">\n%s</list></t>" style contents))))
 
 ;;;; Property Drawer
 
@@ -580,21 +602,62 @@ a communication channel."
 
 ;;;; Reference (headline)
 
+(defun org-rfc-author-list-from-prop (pname &optional item)
+  (let ((author (if item
+                    (org-element-property pname item)
+                  (plist-get (org-export-get-environment 'rfc) pname)))
+        (lfmt (concat "<author fullname=\"%s\">\n"
+                      "  <organization>%s</organization>\n"
+                      "  <address><email>%s</email></address>\n"
+                      "</author>"))
+        (sfmt "<author fullname=\"%s\"/>"))
+    (if (string-prefix-p "(" author)
+        (mapconcat
+         (lambda (x) (if (not (listp x))
+                         (format sfmt x)
+                       (format lfmt (car x) (caddr x) (cadr x))))
+         (read author)
+         "\n")
+      (format sfmt author))))
+
 (defun org-rfc-reference (headline contents info)
   "A reference item."
   (let ((title (org-export-data (org-element-property :title headline) info)))
     (cond
      ((string-prefix-p "RFC" title t)
       (let ((rfcref (substring title 3)))
-        (org-rfc-load-file-as-string (org-rfc-ref-fetch-to-cache (concat "RFC." rfcref)))))
+        (org-rfc-load-ref-file-as-string (org-rfc-ref-fetch-to-cache (concat "RFC." rfcref)))))
      ((string-prefix-p "I-D." title t)
-      (org-rfc-load-file-as-string (org-rfc-ref-fetch-to-cache title)))
+      (org-rfc-load-ref-file-as-string (org-rfc-ref-fetch-to-cache title)))
      (t
-      (let ((refauthor (org-export-data (org-element-property :ref_author headline) info))
-            (reftitle (org-export-data (org-element-property :ref_title headline) info))
-            (refdate (org-export-data (org-element-property :ref_date headline) info))
-            )
-        (format "<reference><front><title>%s</title><author fullname=\"%s\"><organization/></author><date %s/></front></reference>" reftitle refauthor refdate))))))
+      ;; (message "PROP: %s %s" title (org-element-context headline))
+      (let ((refann (org-trim (org-export-data (org-element-property :REF_ANNOTATION headline) info)))
+            (author (org-rfc-author-list-from-prop :REF_AUTHOR headline))
+            (refcontent (org-trim (org-export-data (org-element-property :REF_CONTENT headline) info)))
+            (refdate (org-export-data (org-element-property :REF_DATE headline) info))
+            (reftitle (org-export-data (org-element-property :REF_TITLE headline) info)))
+        (if (not reftitle)
+            (setq reftitile title))
+        (if (not refdate)
+            (setq refdate "")
+          (let* ((date (nthcdr 3 (parse-time-string refdate)))
+                 (day (and (car date)))
+                 (month (cadr date))
+                 (year (caddr date)))
+            (setq day (or (and day (format " day=\"%s\"" day)) ""))
+            (setq month (or (and month (format " month=\"%s\"" month)) ""))
+            (setq year (or (and year (format " year=\"%s\"" year)) ""))
+            (setq refdate (format "<date%s%s%s/>" day month year))))
+        (if (not refcontent)
+            (setq refcontent "")
+          (setq refcontent (format "<refcontent>%s</refcontent>" refcontent)))
+        (if (not refann)
+            (setq refann "")
+          (setq refann (format "<annotation>%s</annotation>" refann)))
+        (if (org-rfc-render-v3)
+            (format "<reference anchor=\"%s\"><front><title>%s</title>%s%s</front>%s%s</reference>" title reftitle author refdate refcontent refann)
+          (format "<reference anchor=\"%s\"><front><title>%s</title>%s%s</front>%s</reference>" title reftitle author refdate refann)))))))
+
 
 
 ;;;; Section
@@ -736,17 +799,20 @@ holding export options."
         (consensus (or (plist-get info :rfc-consensus) "yes"))
         (company (plist-get info :company))
         (depth (plist-get info :with-toc))
+        (docname (org-rfc-export-output-file-name ""))
         (email (plist-get info :email))
         (ipr (or (plist-get info :rfc-ipr) "trust200902"))
         (stream (or (plist-get info :rfc-stream) "IETF"))
         (title (org-export-data (plist-get info :title) info))
         (with-toc (if (plist-get info :with-toc) "yes" "no"))
+        (toc-inc (if (plist-get info :with-toc) "true" "false"))
         )
-    (message "AUTHOR: %s EMAIL: %s COMPANY: %s" author email company)
     (concat
-
      ;; Replace this with actual code.
-     "<?xml version=\"1.0\"?>
+     ;; <?rfc toc=\"" with-toc "\" ?>
+     "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+<!DOCTYPE rfc SYSTEM \"rfc2629.dtd\" [
+  ]>
 <?xml-stylesheet type=\"text/xsl\" href=\"rfc2629.xslt\"?>
 <?rfc toc=\"" with-toc "\"?>
 <?rfc compact=\"no\"?>
@@ -757,20 +823,23 @@ holding export options."
 <?rfc strict=\"yes\"?>
 <rfc ipr=\"" ipr "\"
      category=\"" category "\"
-     docName=\"draft-chopps-ipsecme-iptfs-00\"
-     submissionType=\"" stream "\"
-     consensus=\"" consensus "\"
-     version=\"3\">
+     docName=\"" docname "\"
+     submissionType=\"" stream "\""
+     (if (org-rfc-render-v3)
+         (concat
+          "    consensus=\"" consensus "\""
+          "    tocInclude=\"" toc-inc "\""
+          "    version=\"3\""))
+">
  <front>
-  <title abbrev=\"\">" title "</title>
-    <author initials=\"C\" surname=\"Hopps\" fullname='Christian E. Hopps' >
-      <organization>LabN Consulting, L.L.C.</organization>
-      <address>
-        <email>chopps@chopps.org</email>
-      </address>
-    </author>
-<date/>"
+  <title abbrev=\"" title "\">" title "</title>\n"
+
+  (org-rfc-author-list-from-prop :rfc-authors)
+
+  "<date/>"
+
   (or (plist-get info :abstract) "")
+
   "</front>"
 
   ;; (when depth
@@ -825,7 +894,7 @@ non-nil."
   (org-export-to-buffer 'rfc "*Org RFC Export*"
     async subtreep visible-only nil nil (lambda () (text-mode))))
 
-(defun org-rfc-export-as-text (&optional async subtreep visible-only)
+(defun org-rfc-export-as-text (&optional async subtreep visible-only buffer outfile)
   "Export current buffer to a XML buffer.
 
 If narrowing is active in the current buffer, only export its
@@ -848,24 +917,19 @@ Export is done in a buffer named \"*Org RFC Export*\", which will
 be displayed when `org-export-show-temporary-export-buffer' is
 non-nil."
   (interactive)
-  (org-export-to-buffer 'rfc "*Org RFC Export*"
+  (if (not buffer) (setq buffer "*Org RFC TEXT Export*"))
+  (if (not outfile) (setq outfile "/dev/stdout"))
+  (org-export-to-buffer 'rfc buffer
     async subtreep visible-only nil nil
     (lambda ()
-      (shell-command-on-region
-       (point-min) (point-max)
-       "xml2rfc --quiet --v3 -o /dev/stdout --text /dev/stdin"
-       (current-buffer) t "*Org RFC Error*" t)
-      (deactivate-mark))))
-
-;;;###autoload
-(defun org-rfc-convert-region-to-xml ()
-  "Assume the current region has Org syntax, and convert it to RFC.
-This can be used in any buffer.  For example, you can write an
-itemized list in Org syntax in a RFC buffer and use
-this command to convert it."
-  (interactive)
-  (org-export-replace-region-by 'rfc))
-
+      (let ((exitcode (shell-command-on-region
+                       (point-min)
+                       (point-max)
+                       (format "xml2rfc --quiet -o %s --text /dev/stdin" outfile)
+                       (current-buffer) t "*Org RFC Error*" t)))
+        (deactivate-mark)
+        (if exitcode
+            (pop-to-buffer "*Org RFC Error*"))))))
 
 ;;;###autoload
 (defun org-rfc-export-to-xml (&optional async subtreep visible-only)
@@ -889,19 +953,38 @@ contents of hidden elements.
 
 Return output file's name."
   (interactive)
-  (let ((outfile (org-export-output-file-name ".xml" subtreep)))
+  (let ((outfile (org-rfc-export-output-file-name ".xml")))
     (org-export-to-file 'rfc outfile async subtreep visible-only)))
 
-;;;###autoload
-(defun org-rfc-publish-to-xml (plist filename pub-dir)
-  "Publish an org file to XML.
+(defun org-rfc-export-to-text (&optional async subtreep visible-only)
+  "Export current buffer to a TEXT file.
 
-FILENAME is the filename of the Org file to be published.  PLIST
-is the property list for the given project.  PUB-DIR is the
-publishing directory.
+If narrowing is active in the current buffer, only export its
+narrowed part.
 
-Return output file name."
-  (org-publish-org-to 'rfc filename ".xml" plist pub-dir))
+If a region is active, export that region.
+
+A non-nil optional argument ASYNC means the process should happen
+asynchronously.  The resulting file should be accessible through
+the `org-export-stack' interface.
+
+When optional argument SUBTREEP is non-nil, export the sub-tree
+at point, extracting information from the headline properties
+first.
+
+When optional argument VISIBLE-ONLY is non-nil, don't export
+contents of hidden elements.
+
+Return output file's name."
+  (interactive)
+  (let ((outfile (org-rfc-export-output-file-name ".txt"))
+        (cbuf (current-buffer)))
+    (message "Outfile: %s" outfile)
+    (with-temp-buffer
+      (let ((tbuf (current-buffer)))
+        (switch-to-buffer cbuf)
+        (org-rfc-export-as-text async subtreep visible-only tbuf outfile)))
+    outfile))
 
 (provide 'ox-rfc)
 
