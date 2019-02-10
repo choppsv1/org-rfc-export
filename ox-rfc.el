@@ -653,64 +653,28 @@ as a communication channel."
 
 ;;;; Table
 
-(defun org-html-table (table contents info)
+(defun org-rfc-table (table contents info)
   "Transcode a TABLE element from Org to RFC format.
 CONTENTS is the contents of the table.  INFO is a plist holding
 contextual information."
-  (if (org-rfc-render-v3)
+  (if (not (org-rfc-render-v3))
       (org-rfc-example-block table contents info)
     (if (eq (org-element-property :type table) 'table.el)
-      ;; "table.el" table.  Convert it using appropriate tools.
-      (org-rfc-table--table.el-table table info)
-
-    ;; Standard table.
-    (let* ((caption (org-export-get-caption table))
-	   (number (org-export-get-ordinal
-		    table info nil #'org-html--has-caption-p))
-	   (attributes
-	    (org-html--make-attribute-string
-	     (org-combine-plists
-	      (and (org-element-property :name table)
-		   (list :id (org-export-get-reference table info)))
-	      (and (not (org-html-html5-p info))
-		   (plist-get info :html-table-attributes))
-	      (org-export-read-attribute :attr_html table))))
-	   (alignspec
-	    (if (bound-and-true-p org-html-format-table-no-css)
-		"align=\"%s\""
-	      "class=\"org-%s\""))
-	   (table-column-specs
-	    (lambda (table info)
-	      (mapconcat
-	       (lambda (table-cell)
-		 (let ((alignment (org-export-table-cell-alignment
-				   table-cell info)))
-		   (concat
-		    ;; Begin a colgroup?
-		    (when (org-export-table-cell-starts-colgroup-p
-			   table-cell info)
-		      "\n<colgroup>")
-		    ;; Add a column.  Also specify its alignment.
-		    (format "\n%s"
-			    (org-html-close-tag
-			     "col" (concat " " (format alignspec alignment)) info))
-		    ;; End a colgroup?
-		    (when (org-export-table-cell-ends-colgroup-p
-			   table-cell info)
-		      "\n</colgroup>"))))
-	       (org-html-table-first-row-data-cells table info) "\n"))))
-      (format "<table%s>\n%s\n%s\n%s</table>"
-	      (if (equal attributes "") "" (concat " " attributes))
-	      (if (not caption) ""
-		(format (if (plist-get info :html-table-caption-above)
-			    "<caption class=\"t-above\">%s</caption>"
-			  "<caption class=\"t-bottom\">%s</caption>")
-			(concat
-			 "<span class=\"table-number\">"
-			 (format (org-html--translate "Table %d:" info) number)
-			 "</span> " (org-export-data caption info))))
-	      (funcall table-column-specs table info)
-	      contents)))))
+        ;; "table.el" table.  Convert it using appropriate tools.
+        (org-rfc-table--table.el-table table info)
+      ;; Standard table.
+      (let* ((caption (org-export-get-caption table))
+	     (number (org-export-get-ordinal
+		      table info nil #'org-html--has-caption-p))
+	     (alignspec
+	      (if (bound-and-true-p org-html-format-table-no-css)
+		  "align=\"%s\""
+	        "class=\"org-%s\"")))
+        (format "<table>\n%s\n%s</table>"
+	        (if (not caption) ""
+		  (format "<name>%s</name>" (org-export-data caption info)))
+	        contents))
+        )))
 
 (defun org-rfc-table-first-row-data-cells (table info)
   "Transcode the first row of TABLE.
@@ -745,7 +709,7 @@ INFO is a plist used as a communication channel."
   "Transcode a TABLE element from Org to RFC format.
 CONTENTS is the contents of the table.  INFO is a plist holding
 contextual information."
-  (if (org-rfc-render-v3)
+  (if (not (org-rfc-render-v3))
       contents
     (when (eq (org-element-property :type table-row) 'standard)
       (let* ((group (org-export-table-row-group table-row info))
@@ -771,18 +735,14 @@ contextual information."
 	       ;; Row is from first and only group.
 	       (t '("<tbody>" . "\n</tbody>")))))
         (concat (and start-group-p (car group-tags))
-	        (concat "\n"
-		        row-open-tag
-		        contents
-		        "\n"
-		        row-close-tag)
+	        (concat row-open-tag contents row-close-tag)
 	        (and end-group-p (cdr group-tags)))))))
 
 (defun org-rfc-table-cell (table-cell contents info)
   "Transcode a TABLE element from Org to RFC format.
 CONTENTS is the contents of the table.  INFO is a plist holding
 contextual information."
-  (if (org-rfc-render-v3)
+  (if (not (org-rfc-render-v3))
       contents
     (let* ((table-row (org-export-get-parent table-cell))
 	   (table (org-export-get-parent-table table-cell))
@@ -793,11 +753,11 @@ contextual information."
        ((and (org-export-table-has-header-p table info)
 	     (= 1 (org-export-table-row-group table-row info)))
         (let ((header-tags '("<th%s>" . "</th>")))
-	  (concat "\n" (format (car header-tags) cell-attrs)
+	  (concat (format (car header-tags) cell-attrs)
 		  contents
 		  (cdr header-tags))))
        (t (let ((data-tags '("<td%s>" . "</td>")))
-	    (concat "\n" (format (car data-tags) cell-attrs)
+	    (concat (format (car data-tags) cell-attrs)
 		    contents
 		    (cdr data-tags))))))))
 
