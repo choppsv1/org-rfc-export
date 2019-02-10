@@ -935,7 +935,7 @@ contents of hidden elements.
 
 Return output file's name."
   (interactive)
-  (org-rfc-export-to-x "html" "--html" async subtreep visible-only))
+  (org-rfc-export-to-x ".html" "--html" async subtreep visible-only))
 
 
 ;;;###autoload
@@ -960,7 +960,7 @@ contents of hidden elements.
 
 Return output file's name."
   (interactive)
-  (org-rfc-export-to-x "pdf" "--pdf" async subtreep visible-only))
+  (org-rfc-export-to-x ".pdf" "--pdf" async subtreep visible-only))
 
 
 ;;;###autoload
@@ -985,7 +985,7 @@ contents of hidden elements.
 
 Return output file's name."
   (interactive)
-  (org-rfc-export-to-x "txt" "--text" async subtreep visible-only))
+  (org-rfc-export-to-x ".txt" "--text" async subtreep visible-only))
 
 
 ;;;###autoload
