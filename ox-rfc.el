@@ -1,17 +1,37 @@
 ;;; ox-rfc.el --- RFC Back-End for Org Export Engine -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2012-2019 Free Software Foundation, Inc.
 ;; Copyright (C) 2019 Christian E. Hopps
+;; Copyright (C) 2012-2019 Free Software Foundation, Inc.
 
 ;; Author: Christian Hopps <chopps@gmail.com>
 ;; Keywords: org, rfc, xml
 
+;; From ox-html.el
+;; Author: Carsten Dominik <carsten at orgmode dot org>
+;;      Jambunathan K <kjambunathan at gmail dot com>
+
+;; From ox-md.el
+;; Author: Nicolas Goaziou <n.goaziou@gmail.com>
+
+:; This program is free software: you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; This program is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
+
+;; You should have received a copy of the GNU General Public License
+;; along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 ;;; Commentary:
 
-;; This library implements an RFC (xml2rfc) back-end for Org exporter, based on
-;; `md' and `man' back-ends. It exports into XML as defined in RFC7991, and can
-;; then use `xml2rfc` to further convert to text. See Org manual for more
-;; information.
+;; This library implements an RFC (xml2rfc) back-end for Org exporter, code was
+;; taken or modified from the `md' and `html' back-ends. It exports into XML as
+;; defined in RFC7991, and can then use `xml2rfc` to further convert to text.
+;; See Org manual for more information.
 
 ;;; Code:
 
@@ -46,6 +66,63 @@
   :type 'string
   :group 'org-export-rfc)
 
+
+
+;;; Define Back-End
+
+(org-export-define-backend 'rfc
+  '((bold . org-rfc-bold)
+    (code . org-rfc-verbatim)
+    ;; (entity . org-rfc-entity)
+    (example-block . org-rfc-example-block)
+    (export-block . org-rfc-export-block)
+    (fixed-width . org-rfc-example-block)
+    (headline . org-rfc-headline)
+    (inline-src-block . org-rfc-verbatim)
+    (inner-template . org-rfc-inner-template)
+    (italic . org-rfc-italic)
+    (item . org-rfc-item)
+    (line-break . org-rfc-line-break)
+    (link . org-rfc-link)
+    (node-property . org-rfc-node-property)
+    (paragraph . org-rfc-paragraph)
+    (plain-list . org-rfc-plain-list)
+    (plain-text . org-rfc-plain-text)
+    (quote-block . org-rfc-quote-block)
+    (section . org-rfc-section)
+    (special-block . org-rfc-special-block)
+    (src-block . org-rfc-src-block)
+    (subscript . org-rfc-subscript)
+    (superscript . org-rfc-superscript)
+    (table . org-rfc-table)
+    (table-cell . org-rfc-table-cell)
+    (table-row . org-rfc-table-row)
+    (template . org-rfc-template)
+    (verbatim . org-rfc-verbatim)
+    )
+  :menu-entry
+
+  '(?r "Export to RFC"
+       ((?X "To XML temporary buffer"
+	    (lambda (a s v b) (org-rfc-export-as-xml a s v)))
+	(?x "To XML file" (lambda (a s v b) (org-rfc-export-to-xml a s v)))
+        (?T "To TEXT temporary buffer" (lambda (a s v b) (org-rfc-export-as-text a s v)))
+        (?t "To TEXT file" (lambda (a s v b) (org-rfc-export-to-text a s v)))
+	(?o "To TEXT file and open"
+            (lambda (a s v b)
+	      (if a
+                  (org-rfc-export-to-text t s v)
+                (org-open-file (org-rfc-export-to-text nil s v)))))))
+  :options-alist
+  '((:rfc-authors "RFC_AUTHORS" nil nil t)
+    (:rfc-category "RFC_CATEGORY" nil "std" t)
+    (:rfc-consensus "RFC_CONSENSUS" nil "true" t)
+    (:rfc-ipr "RFC_IPR" nil "trust200902" t)
+    (:rfc-name "RFC_NAME" nil nil t)
+    (:rfc-stream "RFC_STREAM" nil "IETF" t)
+    (:rfc-version "RFC_VERSION" nil nil t)
+    (:rfc-xml-version "RFC_XML_VERSION" nil "2" t)
+    ))
 
 
 ;;; Utility Functions
@@ -106,64 +183,9 @@
          "\n")
       (format sfmt author))))
 
-
-;;; Define Back-End
-
-(org-export-define-backend 'rfc
-  '((bold . org-rfc-bold)
-    (code . org-rfc-verbatim)
-    ;; (entity . org-rfc-entity)
-    (example-block . org-rfc-example-block)
-    (export-block . org-rfc-export-block)
-    (fixed-width . org-rfc-example-block)
-    (headline . org-rfc-headline)
-    (inline-src-block . org-rfc-verbatim)
-    (inner-template . org-rfc-inner-template)
-    (italic . org-rfc-italic)
-    (item . org-rfc-item)
-    (line-break . org-rfc-line-break)
-    (link . org-rfc-link)
-    (node-property . org-rfc-node-property)
-    (paragraph . org-rfc-paragraph)
-    (plain-list . org-rfc-plain-list)
-    (plain-text . org-rfc-plain-text)
-    (quote-block . org-rfc-quote-block)
-    (section . org-rfc-section)
-    (special-block . org-rfc-special-block)
-    (src-block . org-rfc-src-block)
-    (subscript . org-rfc-subscript)
-    (superscript . org-rfc-superscript)
-    (template . org-rfc-template)
-    (verbatim . org-rfc-verbatim)
-    )
-  :menu-entry
-
-  '(?r "Export to RFC"
-       ((?X "To XML temporary buffer"
-	    (lambda (a s v b) (org-rfc-export-as-xml a s v)))
-	(?x "To XML file" (lambda (a s v b) (org-rfc-export-to-xml a s v)))
-        (?T "To TEXT temporary buffer" (lambda (a s v b) (org-rfc-export-as-text a s v)))
-        (?t "To TEXT file" (lambda (a s v b) (org-rfc-export-to-text a s v)))
-	(?o "To TEXT file and open"
-            (lambda (a s v b)
-	      (if a
-                  (org-rfc-export-to-text t s v)
-                (org-open-file (org-rfc-export-to-text nil s v)))))))
-  :options-alist
-  '((:rfc-authors "RFC_AUTHORS" nil nil t)
-    (:rfc-category "RFC_CATEGORY" nil "std" t)
-    (:rfc-consensus "RFC_CONSENSUS" nil "true" t)
-    (:rfc-ipr "RFC_IPR" nil "trust200902" t)
-    (:rfc-name "RFC_NAME" nil nil t)
-    (:rfc-stream "RFC_STREAM" nil "IETF" t)
-    (:rfc-version "RFC_VERSION" nil nil t)
-    (:rfc-xml-version "RFC_XML_VERSION" nil "2" t)
-    ))
-
 (defun org-rfc-render-v3 ()
   (let ((v (plist-get (org-export-get-environment 'rfc) :rfc-xml-version)))
     (not (or (not v) (< (string-to-number v) 3)))))
-
 
 
 ;;; Transcode Functions
@@ -362,7 +384,7 @@ channel."
 
 ;;;; Link
 
-;;;; XXX Not done converting this from org-md yet.
+;;;; XXX Not done testing this conversion from org-md yet.
 
 (defun org-rfc-link (link contents info)
   "Transcode LINE-BREAK object into RFC format.
@@ -433,7 +455,7 @@ a communication channel."
 	    (format "<eref target=\"%s\">%s</eref>" path contents)))))))
 
 
-;;;; Node Property
+;;;; Node Property (XXX what's this used for?)
 
 (defun org-rfc-node-property (node-property _contents _info)
   "Transcode a NODE-PROPERTY element into RFC syntax.
@@ -627,6 +649,157 @@ holding export options."
 CONTENTS is the transcoded contents string.  INFO is a plist used
 as a communication channel."
   contents)
+
+
+;;;; Table
+
+(defun org-html-table (table contents info)
+  "Transcode a TABLE element from Org to RFC format.
+CONTENTS is the contents of the table.  INFO is a plist holding
+contextual information."
+  (if (org-rfc-render-v3)
+      (org-rfc-example-block table contents info)
+    (if (eq (org-element-property :type table) 'table.el)
+      ;; "table.el" table.  Convert it using appropriate tools.
+      (org-rfc-table--table.el-table table info)
+
+    ;; Standard table.
+    (let* ((caption (org-export-get-caption table))
+	   (number (org-export-get-ordinal
+		    table info nil #'org-html--has-caption-p))
+	   (attributes
+	    (org-html--make-attribute-string
+	     (org-combine-plists
+	      (and (org-element-property :name table)
+		   (list :id (org-export-get-reference table info)))
+	      (and (not (org-html-html5-p info))
+		   (plist-get info :html-table-attributes))
+	      (org-export-read-attribute :attr_html table))))
+	   (alignspec
+	    (if (bound-and-true-p org-html-format-table-no-css)
+		"align=\"%s\""
+	      "class=\"org-%s\""))
+	   (table-column-specs
+	    (lambda (table info)
+	      (mapconcat
+	       (lambda (table-cell)
+		 (let ((alignment (org-export-table-cell-alignment
+				   table-cell info)))
+		   (concat
+		    ;; Begin a colgroup?
+		    (when (org-export-table-cell-starts-colgroup-p
+			   table-cell info)
+		      "\n<colgroup>")
+		    ;; Add a column.  Also specify its alignment.
+		    (format "\n%s"
+			    (org-html-close-tag
+			     "col" (concat " " (format alignspec alignment)) info))
+		    ;; End a colgroup?
+		    (when (org-export-table-cell-ends-colgroup-p
+			   table-cell info)
+		      "\n</colgroup>"))))
+	       (org-html-table-first-row-data-cells table info) "\n"))))
+      (format "<table%s>\n%s\n%s\n%s</table>"
+	      (if (equal attributes "") "" (concat " " attributes))
+	      (if (not caption) ""
+		(format (if (plist-get info :html-table-caption-above)
+			    "<caption class=\"t-above\">%s</caption>"
+			  "<caption class=\"t-bottom\">%s</caption>")
+			(concat
+			 "<span class=\"table-number\">"
+			 (format (org-html--translate "Table %d:" info) number)
+			 "</span> " (org-export-data caption info))))
+	      (funcall table-column-specs table info)
+	      contents)))))
+
+(defun org-rfc-table-first-row-data-cells (table info)
+  "Transcode the first row of TABLE.
+INFO is a plist used as a communication channel."
+  (let ((table-row
+	 (org-element-map table 'table-row
+	   (lambda (row)
+	     (unless (eq (org-element-property :type row) 'rule) row))
+	   info 'first-match))
+	(special-column-p (org-export-table-has-special-column-p table)))
+    (if (not special-column-p) (org-element-contents table-row)
+      (cdr (org-element-contents table-row)))))
+
+(defun org-rfc-table--table.el-table (table _info)
+  "Format table.el tables into HTML.
+INFO is a plist used as a communication channel."
+  (when (eq (org-element-property :type table) 'table.el)
+    (require 'table)
+    (let ((outbuf (with-current-buffer
+		      (get-buffer-create "*org-export-table*")
+		    (erase-buffer) (current-buffer))))
+      (with-temp-buffer
+	(insert (org-element-property :value table))
+	(goto-char 1)
+	(re-search-forward "^[ \t]*|[^|]" nil t)
+	(table-generate-source 'html outbuf))
+      (with-current-buffer outbuf
+	(prog1 (org-trim (buffer-string))
+	  (kill-buffer))))))
+
+(defun org-rfc-table-row (table-row contents info)
+  "Transcode a TABLE element from Org to RFC format.
+CONTENTS is the contents of the table.  INFO is a plist holding
+contextual information."
+  (if (org-rfc-render-v3)
+      contents
+    (when (eq (org-element-property :type table-row) 'standard)
+      (let* ((group (org-export-table-row-group table-row info))
+	     (number (org-export-table-row-number table-row info))
+	     (start-group-p
+	      (org-export-table-row-starts-rowgroup-p table-row info))
+	     (end-group-p
+	      (org-export-table-row-ends-rowgroup-p table-row info))
+	     (topp (and (equal start-group-p '(top))
+		        (equal end-group-p '(below top))))
+	     (bottomp (and (equal start-group-p '(above))
+			   (equal end-group-p '(bottom above))))
+             (row-open-tag "<tr>")
+             (row-close-tag "</tr>")
+	     (group-tags
+	      (cond
+	       ;; Row belongs to second or subsequent groups.
+	       ((not (= 1 group)) '("<tbody>" . "\n</tbody>"))
+	       ;; Row is from first group.  Table has >=1 groups.
+	       ((org-export-table-has-header-p
+	         (org-export-get-parent-table table-row) info)
+	        '("<thead>" . "\n</thead>"))
+	       ;; Row is from first and only group.
+	       (t '("<tbody>" . "\n</tbody>")))))
+        (concat (and start-group-p (car group-tags))
+	        (concat "\n"
+		        row-open-tag
+		        contents
+		        "\n"
+		        row-close-tag)
+	        (and end-group-p (cdr group-tags)))))))
+
+(defun org-rfc-table-cell (table-cell contents info)
+  "Transcode a TABLE element from Org to RFC format.
+CONTENTS is the contents of the table.  INFO is a plist holding
+contextual information."
+  (if (org-rfc-render-v3)
+      contents
+    (let* ((table-row (org-export-get-parent table-cell))
+	   (table (org-export-get-parent-table table-cell))
+	   (cell-attrs ""))
+      (when (or (not contents) (string= "" (org-trim contents)))
+        (setq contents "&#xa0;"))
+      (cond
+       ((and (org-export-table-has-header-p table info)
+	     (= 1 (org-export-table-row-group table-row info)))
+        (let ((header-tags '("<th%s>" . "</th>")))
+	  (concat "\n" (format (car header-tags) cell-attrs)
+		  contents
+		  (cdr header-tags))))
+       (t (let ((data-tags '("<td%s>" . "</td>")))
+	    (concat "\n" (format (car data-tags) cell-attrs)
+		    contents
+		    (cdr data-tags))))))))
 
 ;;;; Verbatim
 
