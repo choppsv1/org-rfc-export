@@ -106,6 +106,16 @@
        ((?X "To XML temporary buffer"
 	    (lambda (a s v b) (org-rfc-export-as-xml a s v)))
 	(?x "To XML file" (lambda (a s v b) (org-rfc-export-to-xml a s v)))
+        (?H "To HTML file and open."
+            (lambda (a s v b) (if a
+                                  (org-rfc-export-to-html t s v)
+                                (org-open-file (org-rfc-export-to-html nil s v)))))
+        (?h "To HTML file" (lambda (a s v b) (org-rfc-export-to-html a s v)))
+        (?P "To PDF file and open."
+            (lambda (a s v b) (if a
+                                  (org-rfc-export-to-pdf t s v)
+                                (org-open-file (org-rfc-export-to-pdf nil s v)))))
+        (?p "To PDF file" (lambda (a s v b) (org-rfc-export-to-pdf a s v)))
         (?T "To TEXT temporary buffer" (lambda (a s v b) (org-rfc-export-as-text a s v)))
         (?t "To TEXT file" (lambda (a s v b) (org-rfc-export-to-text a s v)))
 	(?o "To TEXT file and open"
@@ -205,11 +215,17 @@ a communication channel."
   "Transcode EXAMPLE-BLOCK element into RFC format.
 CONTENTS is nil.  INFO is a plist used as a communication
 channel."
-  (concat "<figure><artwork><![CDATA[\n"
-          ;; (org-remove-indentation
-          ;;  (org-export-format-code-default example-block info))
-           (org-export-format-code-default example-block info)
-          "]]></artwork></figure>"))
+
+  (let* ((name (org-element-property :name example-block))
+         (nameattr (if name (format "<name>%s</name>" name) "")))
+    (if name
+        (concat (format "<figure>%s<artwork><![CDATA[\n" nameattr)
+                (org-export-format-code-default example-block info)
+                "]]></artwork></figure>")
+      (concat "<artwork><![CDATA[\n"
+              (org-export-format-code-default example-block info)
+              "]]></artwork>"))))
+
 
 (defun org-rfc-src-block (src-block _contents info)
   "Transcode EXAMPLE-BLOCK element into RFC format.
@@ -611,10 +627,13 @@ holding export options."
     (concat
      ;; Replace this with actual code.
      ;; <?rfc toc=\"" with-toc "\" ?>
-     "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
-<!DOCTYPE rfc SYSTEM \"rfc2629.dtd\" [
-  ]>
-<?xml-stylesheet type=\"text/xsl\" href=\"rfc2629.xslt\"?>
+     "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+
+     (if (not (org-rfc-render-v3))
+         "<!DOCTYPE rfc SYSTEM \"rfc2629.dtd\" [
+  ]>\n"
+       "")
+"<?xml-stylesheet type=\"text/xsl\" href=\"rfc2629.xslt\"?>
 <?rfc toc=\"" with-toc "\"?>
 <?rfc compact=\"no\"?>
 <?rfc subcompact=\"no\"?>
@@ -865,6 +884,86 @@ Return output file's name."
   (let ((outfile (org-rfc-export-output-file-name ".xml")))
     (org-export-to-file 'rfc outfile async subtreep visible-only)))
 
+(defun org-rfc-export-to-x (ext cli-arg &optional async subtreep visible-only)
+  "Export current buffer to a X file.
+
+If narrowing is active in the current buffer, only export its
+narrowed part.
+
+If a region is active, export that region.
+
+A non-nil optional argument ASYNC means the process should happen
+asynchronously.  The resulting file should be accessible through
+the `org-export-stack' interface.
+
+When optional argument SUBTREEP is non-nil, export the sub-tree
+at point, extracting information from the headline properties
+first.
+
+When optional argument VISIBLE-ONLY is non-nil, don't export
+contents of hidden elements.
+
+Return output file's name."
+  (let ((xmlfile (org-rfc-export-output-file-name ".xml"))
+        (outfile (org-rfc-export-output-file-name ext)))
+    (org-export-to-file
+        'rfc xmlfile async subtreep visible-only nil nil
+        (lambda (file) (shell-command
+                        (format "xml2rfc --quiet %s -o %s %s" cli-arg outfile xmlfile))
+          outfile))))
+
+
+;;;###autoload
+(defun org-rfc-export-to-html (&optional async subtreep visible-only)
+  "Export current buffer to a HTML file.
+
+If narrowing is active in the current buffer, only export its
+narrowed part.
+
+If a region is active, export that region.
+
+A non-nil optional argument ASYNC means the process should happen
+asynchronously.  The resulting file should be accessible through
+the `org-export-stack' interface.
+
+When optional argument SUBTREEP is non-nil, export the sub-tree
+at point, extracting information from the headline properties
+first.
+
+When optional argument VISIBLE-ONLY is non-nil, don't export
+contents of hidden elements.
+
+Return output file's name."
+  (interactive)
+  (org-rfc-export-to-x "html" "--html" async subtreep visible-only))
+
+
+;;;###autoload
+(defun org-rfc-export-to-pdf (&optional async subtreep visible-only)
+  "Export current buffer to a PDF file.
+
+If narrowing is active in the current buffer, only export its
+narrowed part.
+
+If a region is active, export that region.
+
+A non-nil optional argument ASYNC means the process should happen
+asynchronously.  The resulting file should be accessible through
+the `org-export-stack' interface.
+
+When optional argument SUBTREEP is non-nil, export the sub-tree
+at point, extracting information from the headline properties
+first.
+
+When optional argument VISIBLE-ONLY is non-nil, don't export
+contents of hidden elements.
+
+Return output file's name."
+  (interactive)
+  (org-rfc-export-to-x "pdf" "--pdf" async subtreep visible-only))
+
+
+;;;###autoload
 (defun org-rfc-export-to-text (&optional async subtreep visible-only)
   "Export current buffer to a TEXT file.
 
@@ -886,14 +985,19 @@ contents of hidden elements.
 
 Return output file's name."
   (interactive)
-  (let ((outfile (org-rfc-export-output-file-name ".txt"))
-        (cbuf (current-buffer)))
-    (message "Outfile: %s" outfile)
-    (with-temp-buffer
-      (let ((tbuf (current-buffer)))
-        (switch-to-buffer cbuf)
-        (org-rfc-export-as-text async subtreep visible-only tbuf outfile)))
-    outfile))
+  (org-rfc-export-to-x "txt" "--text" async subtreep visible-only))
+
+
+;;;###autoload
+(defun org-rfc-publish-to-xml (plist filename pub-dir)
+  "Publish an org file to RFC.
+
+FILENAME is the filename of the Org file to be published.  PLIST
+is the property list for the given project.  PUB-DIR is the
+publishing directory.
+
+Return output file name."
+  (org-publish-org-to 'rfc filename ".xml" plist pub-dir))
 
 (provide 'ox-rfc)
 
