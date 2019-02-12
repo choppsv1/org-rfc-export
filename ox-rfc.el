@@ -4,14 +4,9 @@
 ;; Copyright (C) 2012-2019 Free Software Foundation, Inc.
 
 ;; Author: Christian Hopps <chopps@gmail.com>
+;; URL: https://github.com/choppsv1/org-rfc-export
+;; Version: 1.0.0
 ;; Keywords: org, rfc, xml
-
-;; From ox-html.el
-;; Author: Carsten Dominik <carsten at orgmode dot org>
-;;      Jambunathan K <kjambunathan at gmail dot com>
-
-;; From ox-md.el
-;; Author: Nicolas Goaziou <n.goaziou@gmail.com>
 
 :; This program is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -32,6 +27,11 @@
 ;; taken or modified from the `md' and `html' back-ends. It exports into XML as
 ;; defined in RFC7991, and can then use `xml2rfc` to further convert to text.
 ;; See Org manual for more information.
+
+;;; Credits:
+
+;; Started with ox-md.el by Nicolas Goaziou as a template also used code from
+;; ox-html.el by Carsten Dominik and Jambunathan K.
 
 ;;; Code:
 
