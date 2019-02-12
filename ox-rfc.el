@@ -138,6 +138,9 @@
 ;;; Utility Functions
 
 (defun org-rfc-ref-fetch-to-cache (basename &optional reload)
+  "Fetch the bibliography xml.
+The document is identified by BASENAME. If RELOAD is specified
+then the cache is overwritten."
   (let* ((pathname (concat (file-name-as-directory org-rfc-ref-cache-directory) "reference." basename ".xml"))
          url)
     (unless (and (file-exists-p pathname) (not reload))
@@ -155,18 +158,22 @@
     pathname))
 
 (defun org-rfc-load-file-as-string (pathname)
+  "Return a string containing file PATHNAME."
   (with-temp-buffer
     (insert-file-contents pathname)
     (buffer-string)))
 
 (defun org-rfc-load-ref-file-as-string (pathname)
+  "Return a string containing file PATHNAME for use as a reference."
   (replace-regexp-in-string "<\\?xml [^>]+>" ""
                             (org-rfc-load-file-as-string pathname)))
 
 (defun org-rfc-docname-from-buffer ()
+  "Get the internet draft name using the buffer's filename."
   (file-name-sans-extension (file-name-nondirectory (buffer-file-name (buffer-base-buffer)))))
 
 (defun org-rfc-export-output-file-name (extension)
+  "Get the I-D document name adding the given EXTENSION."
   (let ((docname (plist-get (org-export-get-environment 'rfc) :rfc-name))
         (verstr (plist-get (org-export-get-environment 'rfc) :rfc-version)))
     (if (not verstr)
@@ -176,6 +183,8 @@
       (concat docname "-" verstr extension))))
 
 (defun org-rfc-author-list-from-prop (pname &optional item)
+  "Return the XML for and author or list of authors.
+The author list is looked for in ITEM using property named PNAME."
   (let ((author (if item
                     (org-element-property pname item)
                   (plist-get (org-export-get-environment 'rfc) pname)))
@@ -194,6 +203,7 @@
       (format sfmt author))))
 
 (defun org-rfc-render-v3 ()
+  "Return t if rendering in xml2rfc version 3 format."
   (let ((v (plist-get (org-export-get-environment 'rfc) :rfc-xml-version)))
     (not (or (not v) (< (string-to-number v) 3)))))
 
@@ -250,7 +260,7 @@ holding contextual information."
      (t (org-trim contents)))))
 
 (defun org-rfc-src-block (src-block _contents info)
-  "Transcode EXAMPLE-BLOCK element into RFC format.
+  "Transcode SRC-BLOCK element into RFC format.
 CONTENTS is nil.  INFO is a plist used as a communication
 channel."
   (let* ((name (org-element-property :name src-block))
@@ -414,7 +424,7 @@ channel."
 ;;;; XXX Not done testing this conversion from org-md yet.
 
 (defun org-rfc-link (link contents info)
-  "Transcode LINE-BREAK object into RFC format.
+  "Transcode LINK object into RFC format.
 CONTENTS is the link's description.  INFO is a plist used as
 a communication channel."
   (let ((link-org-files-as-rfc
@@ -518,7 +528,8 @@ a communication channel."
 ;;;; Plain Text
 
 (defun org-rfc-plain-text (text info)
-  "Convert plain text characters from TEXT to HTML equivalent."
+  "Convert plain text characters from TEXT to HTML equivalent.
+INFO is a plist used as a communication channel."
   (let ((protect-alist '(("&" . "&amp;")
                          ("<" . "&lt;")
                          (">" . "&gt;"))))
@@ -538,8 +549,9 @@ a communication channel."
 
 ;;;; Reference (headline)
 
-(defun org-rfc-reference (headline contents info)
-  "A reference item."
+(defun org-rfc-reference (headline _contents info)
+  "Transcode reference to HEADLINE into RFC format.
+INFO is a plist used as a communication channel."
   (let ((title (org-export-data (org-element-property :title headline) info)))
     (cond
      ((string-prefix-p "RFC" title t)
@@ -711,7 +723,7 @@ INFO is a plist used as a communication channel."
       (cdr (org-element-contents table-row)))))
 
 (defun org-rfc-table--table.el-table (table _info)
-  "Format table.el tables into HTML.
+  "Format table.el TABLE into HTML.
 INFO is a plist used as a communication channel."
   (when (eq (org-element-property :type table) 'table.el)
     (require 'table)
@@ -728,7 +740,7 @@ INFO is a plist used as a communication channel."
 	  (kill-buffer))))))
 
 (defun org-rfc-table-row (table-row contents info)
-  "Transcode a TABLE element from Org to RFC format.
+  "Transcode a TABLE-ROW element from Org to RFC format.
 CONTENTS is the contents of the table.  INFO is a plist holding
 contextual information."
   (if (not (org-rfc-render-v3))
@@ -761,7 +773,7 @@ contextual information."
 	        (and end-group-p (cdr group-tags)))))))
 
 (defun org-rfc-table-cell (table-cell contents info)
-  "Transcode a TABLE element from Org to RFC format.
+  "Transcode a TABLE-CELL element from Org to RFC format.
 CONTENTS is the contents of the table.  INFO is a plist holding
 contextual information."
   (if (not (org-rfc-render-v3))
@@ -843,9 +855,11 @@ first.
 When optional argument VISIBLE-ONLY is non-nil, don't export
 contents of hidden elements.
 
-Export is done in a buffer named \"*Org RFC Export*\", which will
-be displayed when `org-export-show-temporary-export-buffer' is
-non-nil."
+If BUFFER is not given, export is done in a buffer named \"*Org
+RFC Export*\", which will be displayed when
+`org-export-show-temporary-export-buffer' is non-nil.
+
+If OUTFILE is non-nil the results are stored in that file."
   (interactive)
   (if (not buffer) (setq buffer "*Org RFC TEXT Export*"))
   (if (not outfile) (setq outfile "/dev/stdout"))
@@ -887,7 +901,8 @@ Return output file's name."
     (org-export-to-file 'rfc outfile async subtreep visible-only)))
 
 (defun org-rfc-export-to-x (ext cli-arg &optional async subtreep visible-only)
-  "Export current buffer to a X file.
+  "Export the current buffer to a file with the extension EXT.
+CLI-ARG is passed to xml2rfc to specify the file type.
 
 If narrowing is active in the current buffer, only export its
 narrowed part.
