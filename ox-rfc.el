@@ -449,6 +449,7 @@ a communication channel."
 	     (if (string= "References" ppname)
                  (let ((xtarget (org-export-data (org-element-property :title destination) info)))
                    (format "<xref target=\"%s\"/>" xtarget))
+               ;; Need to normalize references to allow for non leading zeros
                (format
                 "<xref%s target=\"%s\">%s</xref>"
 	        "" ;; None isn't working! (if (org-string-nw-p contents) " format=\"none\"" "")
@@ -555,7 +556,7 @@ INFO is a plist used as a communication channel."
   (let ((title (org-export-data (org-element-property :title headline) info)))
     (cond
      ((string-prefix-p "RFC" title t)
-      (let ((rfcref (substring title 3)))
+      (let ((rfcref (format "%04d" (string-to-number (substring title 3)))))
         (org-rfc-load-ref-file-as-string (org-rfc-ref-fetch-to-cache (concat "RFC." rfcref)))))
      ((string-prefix-p "I-D." title t)
       (org-rfc-load-ref-file-as-string (org-rfc-ref-fetch-to-cache title)))
