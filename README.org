@@ -2,15 +2,29 @@
 
 * Org Mode RFC (XML2RFC) Exporter ~ox-rfc.el~
 
-This is an org mode export backend to convert an Org mode formatted file into
-and RFC format. Its direct output is XML that can be input to XML2RFC to further
-format the file into text, HTML or PDF formats. The code does make some
+This is an org mode export back-end to convert an Org mode formatted file into
+~xml2rfc~ RFC format. Its direct output is XML that can be input to ~xml2rfc~ to
+further format the file into text, HTML or PDF formats. The code does make some
 assumptions about the organization of the Org mode file in order to properly
 produce and correct RFC formatted and organized file.
 
+Exporting directly to text, HTML and PDF is supported by automatically running
+~xml2rfc~ on the exported XML; however, this document does not including details
+on setting up ~xml2rfc~ (=pip install xml2rfc= usually works though!)
+
+This software is seen as a good start, but there's plenty of room for
+improvements and adding more features. I'm certainly hoping that others will
+also help with contributions to improve the code.
+
+** Formatting of this document.
+
+This document is formatted in Org mode. If you are viewing it normal ASCII then
+remember that "=" and "~" characters are used for highlighting literal text
+(e.g., verbatim or code) and should not be included if being used in an example.
+
 ** Required Document Structure
 
-The following is the expected structure of the file:
+The following is the expected structure of the Org mode RFC file:
 
 - Headlined Sections
 - Headline "References"
@@ -24,6 +38,8 @@ most sense to be placed at the top of the file:
 - Required and optional export variable settings.
 - Abstract export block
 - Example, Quote and Source blocks.
+- Lists
+- Tables
 
 *** Required and option export variables
 **** Required export variables:
@@ -112,6 +128,15 @@ NOTE: XML2RFC version 3 format only.
 *Bold*, /italic/, =verbatim= and ~code~ styles are mapped to the ~xml2rfc~ elements
 ~<strong>~, ~<em>~, ~<tt>~ and ~<tt>~ respectively.
 
+*** Citations and Links.
+
+Internal and external references are supported (TODO: test external). For
+internal links one can reference any anchor or section including the
+sub-sub-section headlines under in the "References" headline. So e.g., a
+reference to RFC7991 would be given using =[[RFC7991]]= Org mode reference
+format and then a sub-sub-section headline under "Informative References" would
+simple be "RFC7991" which ~ox-rfc.el~ will translate.
+
 *** Figures and Artwork (Examples and Source code).
 
 ~ox-rfc.el~ maps example and source blocks to ~xml2rfc~ ~<artwork>~ elements.
@@ -119,12 +144,13 @@ Additionally if a ~#+name:~ is given for the block then it the artwork will be
 placed inside a ~<figure>~ element with the ~#+name:~ value as the caption.
 
 *** Blockquotes
+
 NOTE: XML2RFC version 3 format only.
 
 ~#+begin_quote~ blocks are supported by ~xml2rfc~ version 3 format
 ~<blockquote>~.
 
-TODO: ~xml2rfc~ version 2 support needs to be added using ~<artwork>~
+TODO: ~xml2rfc~ version 2 support needs to be supported using ~<artwork>~
 
 *** Lists
 
