@@ -1,4 +1,4 @@
-;;; ox-rfc.el --- RFC Back-End for Org Export Engine
+;;; ox-rfc.el --- RFC Back-End for Org Export Engine -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2019 Christian E. Hopps
 ;; Copyright (C) 2012-2019 Free Software Foundation, Inc.
@@ -6,7 +6,8 @@
 ;; Author: Christian Hopps <chopps@gmail.com>
 ;; URL: https://github.com/choppsv1/org-rfc-export
 ;; Version: 1.0.0
-;; Keywords: org, rfc, xml
+;; Keywords: org, rfc, wp, xml
+;; Package-Requires: ((emacs "24"))
 
 :; This program is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
