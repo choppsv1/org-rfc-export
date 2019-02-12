@@ -1,4 +1,4 @@
-;;; ox-rfc.el --- RFC Back-End for Org Export Engine -*- lexical-binding: t; -*-
+;;; ox-rfc.el --- RFC Back-End for Org Export Engine
 
 ;; Copyright (C) 2019 Christian E. Hopps
 ;; Copyright (C) 2012-2019 Free Software Foundation, Inc.

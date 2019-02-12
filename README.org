@@ -44,20 +44,21 @@ most sense to be placed at the top of the file:
 *** Required and option export variables
 **** Required export variables:
 
-#+begin_example
-  ,#+RFC_VERSION: 2|3
-#+end_example
-
-**** Optional export variables:
-
-The defaults are given (if any) in the list. For multiple author documents,
-"RFC_AUTHORS" should be used and should be specified using a lisp list syntax
-(e.g., ~(("Ed Li" "el@foo.com" "Foo LLC") ("Joe Rix" "jr@bar.com" "Bar Co"))~).
+A few variables need to always be set. They are listed here:
 
 #+begin_example
   ,#+AUTHOR:
-  ,#+DATE:
   ,#+EMAIL:
+  ,#+TITLE:
+  ,#+RFC_VERSION: 00
+#+end_example
+
+The ~RFC_VERSION~ is the standard Internet Draft version number (i.e., 2 base-10
+digits with versions 0-9 given as 00-09).
+
+**** Optional export variables:
+
+#+begin_example
   ,#+NAME:
   ,#+RFC_AUTHORS:
   ,#+RFC_CATEGORY: std
@@ -66,7 +67,32 @@ The defaults are given (if any) in the list. For multiple author documents,
   ,#+RFC_NAME:
   ,#+RFC_STREAM: "IETF"
   ,#+RFC_XML_VERSION: "3"
-  ,#+TITLE:
+#+end_example
+
+- RFC_AUTHORS :: For multiple author documents. should be used and should be
+                 specified using a lisp list syntax:
+                 ~(("Ed Li" "el@foo.com" "Foo LLC") ("Joe Rix" "jr@bar.com" "Bar Co"))~).
+- RFC_CATEGORY :: the ~category <rfc>~ attribute (default "std").
+- RFC_CONSENSUS :: the ~consensus <rfc>~ attribute (default "true").
+- RFC_IPR :: the ~ipr <rfc>~ attribute (default "trust200902").
+- RFC_NAME :: The base name of the internet draft, if not specified the Org file
+              name is used.
+- RFC_STREAM :: The ~submissionType <rfc>~ attribute (default "IETF").
+- RFC_XML_VERSION :: The ~version <rfc>~ attribute (default "3").
+
+The ~toc~ export setting for generating a table of contents is honored.
+
+In addition it's usually a good idea to disable automatic superscript and
+subscript processing (changing it to ={}= is suggested) otherwise words with
+embedded underscores ('_') will transcode to subscripts.
+
+Here's what I use for the standard export options:
+
+#+begin_example
+  # Do: title, toc:table-of-contents ::fixed-width-sections |tables
+  # Do: ^:sup/sub with curly -:special-strings *:emphasis
+  # Don't: prop:no-prop-drawers \n:preserve-linebreaks ':use-smart-quotes
+  ,#+OPTIONS: prop:nil title:t toc:t \n:nil ::t |:t ^:{} -:t *:t ':nil
 #+end_example
 
 *** Abstract
