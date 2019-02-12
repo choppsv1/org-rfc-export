@@ -452,7 +452,8 @@ a communication channel."
                ;; Need to normalize references to allow for non leading zeros
                (format
                 "<xref%s target=\"%s\">%s</xref>"
-	        "" ;; None isn't working! (if (org-string-nw-p contents) " format=\"none\"" "")
+                ;; using counter as a work-around until "none" is available.
+	        (if (org-string-nw-p contents) " format=\"counter\"" "")
 	        ;; Reference.
 	        (or (org-element-property :CUSTOM_ID destination)
 		    (org-export-get-reference destination info))
