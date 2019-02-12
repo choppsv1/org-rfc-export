@@ -5,7 +5,6 @@
 
 ;; Author: Christian Hopps <chopps@gmail.com>
 ;; URL: https://github.com/choppsv1/org-rfc-export
-;; Version: 1.0.0
 ;; Keywords: org, rfc, wp, xml
 ;; Package-Requires: ((emacs "24"))
 
