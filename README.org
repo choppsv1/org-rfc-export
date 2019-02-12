@@ -130,7 +130,7 @@ Here's a full example:
   ,*** RFC7991
   ,*** StudyScarlet
   :PROPERTIES:
-  :REF_TITLE: An Study In Scarlet
+  :REF_TITLE: A Study In Scarlet
   :REF_AUTHOR: Sir Arthur Conan Doyle
   :REF_DATE: Nov 1887
   :REF_CONTENT: Beeton's Christmas Annual, Ward Lock & Co
