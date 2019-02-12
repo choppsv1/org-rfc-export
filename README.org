@@ -1,0 +1,143 @@
+#+OPTIONS: prop:nil title:t toc:nil \n:nil ::t |:t ^:{} -:t *:t ':t
+
+* Org Mode RFC (XML2RFC) Exporter ~ox-rfc.el~
+
+This is an org mode export backend to convert an Org mode formatted file into
+and RFC format. Its direct output is XML that can be input to XML2RFC to further
+format the file into text, HTML or PDF formats. The code does make some
+assumptions about the organization of the Org mode file in order to properly
+produce and correct RFC formatted and organized file.
+
+** Required Document Structure
+
+The following is the expected structure of the file:
+
+- Headlined Sections
+- Headline "References"
+  - Headline "Normative References"
+  - Headline "Informative References"
+- Appendix Sections.
+
+Additionally the following may appear anywhere; however, the first two make he
+most sense to be placed at the top of the file:
+
+- Required and optional export variable settings.
+- Abstract export block
+- Example, Quote and Source blocks.
+
+*** Required and option export variables
+**** Required export variables:
+
+#+begin_example
+  ,#+RFC_VERSION: 2|3
+#+end_example
+
+**** Optional export variables:
+
+The defaults are given (if any) in the list. For multiple author documents,
+"RFC_AUTHORS" should be used and should be specified using a lisp list syntax
+(e.g., ~(("Ed Li" "el@foo.com" "Foo LLC") ("Joe Rix" "jr@bar.com" "Bar Co"))~).
+
+#+begin_example
+  ,#+AUTHOR:
+  ,#+DATE:
+  ,#+EMAIL:
+  ,#+NAME:
+  ,#+RFC_AUTHORS:
+  ,#+RFC_CATEGORY: std
+  ,#+RFC_CONSENSUS: true
+  ,#+RFC_IPR: trust200902
+  ,#+RFC_NAME:
+  ,#+RFC_STREAM: "IETF"
+  ,#+RFC_XML_VERSION: "3"
+  ,#+TITLE:
+#+end_example
+
+*** Abstract
+
+A special export block must be used to specify and abstract it looks like so:
+
+#+begin_example
+  ,#+beging_abstract
+  This is the abstract of a document.
+  ,#+end_abstract
+#+end_example
+
+*** Headlines
+
+Normal Org mode headlined sections map to RFC sections. Headlines prior to the
+"References" section are normal sections and headlines after "References" are
+appendices.
+
+*** References
+
+The "References" headline expects 1 or 2 sub-sections titled "Normative
+References" and/or "Informative References". It then expects the actual references
+as sub-sub-section headlines below one of those 2 sub-section headlines.
+~ox-rfc.el~ automatically expands certain standard references namely headline
+names that start with: "I-D", "IEEE", or "RFC".
+
+Here's a full example:
+
+#+caption: Example References Section.
+#+begin_example
+  ,* Refereneces
+  ,** Normative Refereneces
+  ,*** RFC2119
+  ,** Informative Refereneces
+  ,*** RFC7991
+  ,*** StudyScarlet
+  :PROPERTIES:
+  :REF_TITLE: An Study In Scarlet
+  :REF_AUTHOR: Sir Arthur Conan Doyle
+  :REF_DATE: Nov 1887
+  :REF_CONTENT: Beeton's Christmas Annual, Ward Lock & Co
+  :END:
+#+end_example
+
+The Properties for creating a custom reference are as follows:
+
+- REF_ANNOTATION :: A value for the ~<annotation>~ xml2rfc element.
+- REF_AUTHOR :: Author. If multiple authors need to be specify use an list in
+                elisp format (e.g., ~("Author One" "Author Two")~)
+- REF_CONTENT :: The value for the ~<refcontent>~ xml2rfc element.
+- REF_DATE :: The value should be given in emacs ~parse-time-string~ format.
+- REF_TITLE :: Title of cited work.
+
+** Features
+
+*** Character Formatting
+NOTE: XML2RFC version 3 format only.
+
+*Bold*, /italic/, =verbatim= and ~code~ styles are mapped to the ~xml2rfc~ elements
+~<strong>~, ~<em>~, ~<tt>~ and ~<tt>~ respectively.
+
+*** Figures and Artwork (Examples and Source code).
+
+~ox-rfc.el~ maps example and source blocks to ~xml2rfc~ ~<artwork>~ elements.
+Additionally if a ~#+name:~ is given for the block then it the artwork will be
+placed inside a ~<figure>~ element with the ~#+name:~ value as the caption.
+
+*** Blockquotes
+NOTE: XML2RFC version 3 format only.
+
+~#+begin_quote~ blocks are supported by ~xml2rfc~ version 3 format
+~<blockquote>~.
+
+TODO: ~xml2rfc~ version 2 support needs to be added using ~<artwork>~
+
+*** Lists
+
+Lists are transformed correctly. Numbered, unnumbered and definition lists all
+being supported. Definition lists are better supported in ~xml2rfc~ version 3
+format using ~<dl>~ lists rather than more generic ~hanging~ style list format
+of ~xml2rfc~ version 2 format.
+
+TODO: Some work could be done here to better support bullet styles and more
+numbering formats.
+
+*** Tables
+
+Tables are translated to ~<thead>~, ~<tbody>~, ~<tr>~, ~<td>~ table elements if
+~xml2rfc~ version 3 (the default), otherwise they are quoted in ~<artwork>~ for
+~xml2rfc~ version 2 format.

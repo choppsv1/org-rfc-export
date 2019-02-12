@@ -73,7 +73,7 @@
 (org-export-define-backend 'rfc
   '((bold . org-rfc-bold)
     (code . org-rfc-verbatim)
-    ;; (entity . org-rfc-entity)
+    ;; (entity . org-rfc-entity) ; What's this.
     (example-block . org-rfc-example-block)
     (export-block . org-rfc-export-block)
     (fixed-width . org-rfc-example-block)
@@ -84,7 +84,7 @@
     (item . org-rfc-item)
     (line-break . org-rfc-line-break)
     (link . org-rfc-link)
-    (node-property . org-rfc-node-property)
+    (node-property . org-rfc-node-property) ; What's this.
     (paragraph . org-rfc-paragraph)
     (plain-list . org-rfc-plain-list)
     (plain-text . org-rfc-plain-text)
@@ -98,10 +98,10 @@
     (table-cell . org-rfc-table-cell)
     (table-row . org-rfc-table-row)
     (template . org-rfc-template)
+    ;; (underline . org-rfc-underline) ; Not supported by xml2rfc.
     (verbatim . org-rfc-verbatim)
     )
   :menu-entry
-
   '(?r "Export to RFC"
        ((?X "To XML temporary buffer"
 	    (lambda (a s v b) (org-rfc-export-as-xml a s v)))
@@ -110,14 +110,14 @@
             (lambda (a s v b) (if a
                                   (org-rfc-export-to-html t s v)
                                 (org-open-file (org-rfc-export-to-html nil s v)))))
-        (?h "To HTML file" (lambda (a s v b) (org-rfc-export-to-html a s v)))
+        ;; (?H "To HTML file" (lambda (a s v b) (org-rfc-export-to-html a s v)))
         (?P "To PDF file and open."
             (lambda (a s v b) (if a
                                   (org-rfc-export-to-pdf t s v)
                                 (org-open-file (org-rfc-export-to-pdf nil s v)))))
-        (?p "To PDF file" (lambda (a s v b) (org-rfc-export-to-pdf a s v)))
+        ;; (?p "To PDF file" (lambda (a s v b) (org-rfc-export-to-pdf a s v)))
         (?T "To TEXT temporary buffer" (lambda (a s v b) (org-rfc-export-as-text a s v)))
-        (?t "To TEXT file" (lambda (a s v b) (org-rfc-export-to-text a s v)))
+        ;; (?t "To TEXT file" (lambda (a s v b) (org-rfc-export-to-text a s v)))
 	(?o "To TEXT file and open"
             (lambda (a s v b)
 	      (if a
@@ -131,7 +131,7 @@
     (:rfc-name "RFC_NAME" nil nil t)
     (:rfc-stream "RFC_STREAM" nil "IETF" t)
     (:rfc-version "RFC_VERSION" nil nil t)
-    (:rfc-xml-version "RFC_XML_VERSION" nil "2" t)
+    (:rfc-xml-version "RFC_XML_VERSION" nil "3" t)
     ))
 
 
@@ -227,29 +227,48 @@ channel."
               "]]></artwork>"))))
 
 
-(defun org-rfc-src-block (src-block _contents info)
-  "Transcode EXAMPLE-BLOCK element into RFC format.
-CONTENTS is nil.  INFO is a plist used as a communication
-channel."
-  (if (org-rfc-render-v3)
-      (concat "<figure><sourcecode><![CDATA[\n"
-              ;; (org-remove-indentation
-              ;;  (org-export-format-code-default example-block info))
-              (org-export-format-code-default src-block info)
-              "]]></sourcecode></figure>")
-    (concat "<figure><artwork><![CDATA[\n"
-            ;; (org-remove-indentation
-            ;;  (org-export-format-code-default example-block info))
-            (org-export-format-code-default src-block info)
-            "]]></artwork></figure>")))
-
 (defun org-rfc-export-block (export-block contents info)
   "Transcode a EXPORT-BLOCK element from Org to RFC.
 CONTENTS is nil.  INFO is a plist holding contextual information."
   (if (member (org-element-property :type export-block) '("RFC" "RFC"))
       (org-remove-indentation (org-element-property :value export-block))
     ;; Also include HTML export blocks.
-    (org-export-with-backend 'html export-block contents info)))
+    (org-export-with-backend 'rfc export-block contents info)))
+
+
+(defun org-rfc-special-block (special-block contents info)
+  "Transcode a SPECIAL-BLOCK element from Org to LaTeX.
+CONTENTS holds the contents of the block.  INFO is a plist
+holding contextual information."
+  (let ((block-type (org-element-property :type special-block)))
+    (cond
+     ((string= (downcase block-type) "abstract")
+      (plist-put info :abstract (format "<abstract>%s</abstract>" (org-trim contents)))
+      "")
+     ;; ((string= (downcase block-type) "xml")
+     ;;  (org-remove-indentation (org-element-property :value special-block)))
+     (t (org-trim contents)))))
+
+(defun org-rfc-src-block (src-block _contents info)
+  "Transcode EXAMPLE-BLOCK element into RFC format.
+CONTENTS is nil.  INFO is a plist used as a communication
+channel."
+  (let* ((name (org-element-property :name src-block))
+         (nameattr (if name (format "<name>%s</name>" name) ""))
+         (figopen (if name (format "<figure>%s" nameattr)) "")
+         (figclose (if name "/<figure>" "")))
+    (if (org-rfc-render-v3)
+        ;; Do we always want figure? Or like export block only when there's a name?
+        (concat figopen "<sourcecode><![CDATA[\n"
+                ;; (org-remove-indentation
+                ;;  (org-export-format-code-default example-block info))
+                (org-export-format-code-default src-block info)
+                "]]></sourcecode>" figclose)
+      (concat figopen "<artwork><![CDATA[\n"
+              ;; (org-remove-indentation
+              ;;  (org-export-format-code-default example-block info))
+              (org-export-format-code-default src-block info)
+              "]]></artwork>" figclose))))
 
 ;;;; Headline
 
@@ -260,22 +279,13 @@ a communication channel."
   (unless (org-element-property :footnote-section-p headline)
     (let* ((level (org-export-get-relative-level headline info))
            (ptitle (org-export-data (org-element-property :title (org-export-get-parent headline)) info))
-           (title (org-export-data (org-element-property :title headline) info))
+           (title (org-trim (org-export-data (org-element-property :title headline) info)))
 	   (todo (and (plist-get info :with-todo-keywords)
 		      (let ((todo (org-element-property :todo-keyword
 							headline)))
 			(and todo (concat (org-export-data todo info) " ")))))
-	   (tags (and (plist-get info :with-tags)
-		      (let ((tag-list (org-export-get-tags headline info)))
-			(and tag-list
-			     (concat "     " (org-make-tag-string tag-list))))))
-	   (priority
-	    (and (plist-get info :with-priority)
-		 (let ((char (org-element-property :priority headline)))
-		   (and char (format "[#%c] " char)))))
 	   ;; Headline text without tags.
-	   (heading (concat todo priority title))
-	   (style (plist-get info :rfc-headline-style)))
+	   (heading (concat todo title)))
       (let ((anchor (or (and (org-rfc--headline-referred-p headline info)
 		             (format " anchor=\"%s\""
 			             (or (org-element-property :CUSTOM_ID headline)
@@ -365,6 +375,7 @@ as a communication channel."
 
 ;;;; Item
 
+
 (defun org-rfc-item (item contents info)
   "Transcode ITEM element into RFC format.
 CONTENTS is the item contents.  INFO is a plist used as
@@ -421,31 +432,23 @@ a communication channel."
 			     (org-export-resolve-fuzzy-link link info)
 			   (org-export-resolve-id-link link info))))
 	(pcase (org-element-type destination)
-	  (`plain-text			; External file.
-	   (let ((path (funcall link-org-files-as-rfc destination)))
-	     (if (not contents) (format "<%s>" path)
-	       (format "[%s](%s)" contents path))))
 	  (`headline
 	   (let* ((dparent (org-export-get-parent-element destination))
                   (dpparent (org-export-get-parent-element dparent))
                   (ppname (org-element-property :raw-value dpparent)))
-	     (if (not (string= "References" ppname))
-                 (format
-                  "<xref target=\"%s\"/>"
-	          ;; Reference.
-	          (or (org-element-property :CUSTOM_ID destination)
-		      (org-export-get-reference destination info))
-	          ;; ;; Description.
-	          ;; (cond ((org-string-nw-p contents))
-		  ;;       ((org-export-numbered-headline-p destination info)
-		  ;;        (mapconcat #'number-to-string
-		  ;;                   (org-export-get-headline-number destination info)
-		  ;;                   "."))
-		  ;;       (t (org-export-data (org-element-property :title destination)
-		  ;;       	            info)))
-                  )
-               (let ((xtarget (org-export-data (org-element-property :title destination) info)))
-                 (format "<xref target=\"%s\"/>" xtarget)))))
+	     (if (string= "References" ppname)
+                 (let ((xtarget (org-export-data (org-element-property :title destination) info)))
+                   (format "<xref target=\"%s\"/>" xtarget))
+               (format
+                "<xref%s target=\"%s\">%s</xref>"
+	        "" ;; None isn't working! (if (org-string-nw-p contents) " format=\"none\"" "")
+	        ;; Reference.
+	        (or (org-element-property :CUSTOM_ID destination)
+		    (org-export-get-reference destination info))
+	        ;; Description.
+	        (cond ((org-string-nw-p contents))
+		      (t ""))
+                ))))
 	  (_
 	   (let ((description
 		  (or (org-string-nw-p contents)
@@ -455,9 +458,9 @@ a communication channel."
 			 ((atom number) (number-to-string number))
 			 (t (mapconcat #'number-to-string number ".")))))))
 	     (when description
-	       (format "<eref target=\"%s\">%s</eref>"
+	       (format "<xref target=\"%s\">%s</xref>"
 		       (org-export-get-reference destination info)
-		       description)))))))
+                       contents)))))))
      ;; Need to test this case.
      (t (let* ((raw-path (org-element-property :path link))
 	       (path
@@ -790,7 +793,6 @@ channel."
     (if (org-rfc-render-v3)
         (format "<tt>%s</tt>" value)
       (format "<spanx>%s</spanx>" value))))
-
 
 
 ;;; Interactive function
