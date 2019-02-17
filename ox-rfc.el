@@ -1,11 +1,11 @@
 ;;; ox-rfc.el --- RFC Back-End for Org Export Engine -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2019 Christian E. Hopps
-;; Copyright (C) 2012-2019 Free Software Foundation, Inc.
 
 ;; Author: Christian Hopps <chopps@gmail.com>
 ;; URL: https://github.com/choppsv1/org-rfc-export
 ;; Keywords: org, rfc, wp, xml
+;; Package-Version: 1
 ;; Package-Requires: ((emacs "24"))
 
 :; This program is free software: you can redistribute it and/or modify
@@ -152,7 +152,7 @@ then the cache is overwritten."
         (setq url (concat org-rfc-ref-draft-url-directory (concat "reference." basename ".xml"))))
        ((string-prefix-p "IEEE" basename)
         (setq url (concat org-rfc-ref-ieee-url-directory (concat "reference." basename ".xml"))))
-       (t (error)))
+       (t (error (concat "Unknown reference prefix for: " basename))))
       (url-copy-file url pathname t)
       pathname)
     pathname))
@@ -265,7 +265,7 @@ CONTENTS is nil.  INFO is a plist used as a communication
 channel."
   (let* ((name (org-element-property :name src-block))
          (nameattr (if name (format "<name>%s</name>" name) ""))
-         (figopen (if name (format "<figure>%s" nameattr)) "")
+         (figopen (if name (format "<figure>%s" nameattr) ""))
          (figclose (if name "/<figure>" "")))
     (if (org-rfc-render-v3)
         ;; Do we always want figure? Or like export block only when there's a name?
@@ -287,15 +287,8 @@ channel."
 CONTENTS is the headline contents.  INFO is a plist used as
 a communication channel."
   (unless (org-element-property :footnote-section-p headline)
-    (let* ((level (org-export-get-relative-level headline info))
-           (ptitle (org-export-data (org-element-property :title (org-export-get-parent headline)) info))
-           (title (org-trim (org-export-data (org-element-property :title headline) info)))
-	   (todo (and (plist-get info :with-todo-keywords)
-		      (let ((todo (org-element-property :todo-keyword
-							headline)))
-			(and todo (concat (org-export-data todo info) " ")))))
-	   ;; Headline text without tags.
-	   (heading (concat todo title)))
+    (let* ((ptitle (org-export-data (org-element-property :title (org-export-get-parent headline)) info))
+           (title (org-trim (org-export-data (org-element-property :title headline) info))))
       (let ((anchor (or (and (org-rfc--headline-referred-p headline info)
 		             (format " anchor=\"%s\""
 			             (or (org-element-property :CUSTOM_ID headline)
@@ -391,7 +384,6 @@ as a communication channel."
 CONTENTS is the item contents.  INFO is a plist used as
 a communication channel."
   (let* ((type (org-element-property :type (org-export-get-parent item)))
-         (pname (org-element-property :type (org-export-get-parent item)))
 	 (struct (org-element-property :structure item))
 	 (bullet (if (not (eq type 'ordered)) "-"
 		   (concat (number-to-string
@@ -499,7 +491,7 @@ information."
 
 ;;;; Paragraph
 
-(defun org-rfc-paragraph (paragraph contents _info)
+(defun org-rfc-paragraph (_paragraph contents _info)
   "Transcode PARAGRAPH element into RFC format.
 CONTENTS is the paragraph contents.  INFO is a plist used as
 a communication channel."
@@ -529,7 +521,7 @@ a communication channel."
 
 ;;;; Plain Text
 
-(defun org-rfc-plain-text (text info)
+(defun org-rfc-plain-text (text _info)
   "Convert plain text characters from TEXT to HTML equivalent.
 INFO is a plist used as a communication channel."
   (let ((protect-alist '(("&" . "&amp;")
@@ -569,7 +561,7 @@ INFO is a plist used as a communication channel."
             (refdate (org-export-data (org-element-property :REF_DATE headline) info))
             (reftitle (org-export-data (org-element-property :REF_TITLE headline) info)))
         (if (not reftitle)
-            (setq reftitile title))
+            (setq reftitle title))
         (if (not refdate)
             (setq refdate "")
           (let* ((date (nthcdr 3 (parse-time-string refdate)))
@@ -628,13 +620,9 @@ holding export options."
   ;; Make sure CONTENTS is separated from table of contents and
   ;; footnotes with at least a blank line.
   ;; Table of contents.
-  (let ((author (plist-get info :author))
-        (category (or (plist-get info :rfc-category) "std"))
+  (let ((category (or (plist-get info :rfc-category) "std"))
         (consensus (or (plist-get info :rfc-consensus) "yes"))
-        (company (plist-get info :company))
-        (depth (plist-get info :with-toc))
         (docname (org-rfc-export-output-file-name ""))
-        (email (plist-get info :email))
         (ipr (or (plist-get info :rfc-ipr) "trust200902"))
         (stream (or (plist-get info :rfc-stream) "IETF"))
         (title (org-export-data (plist-get info :title) info))
@@ -700,12 +688,14 @@ contextual information."
         (org-rfc-table--table.el-table table info)
       ;; Standard table.
       (let* ((caption (org-export-get-caption table))
-	     (number (org-export-get-ordinal
-		      table info nil #'org-html--has-caption-p))
-	     (alignspec
-	      (if (bound-and-true-p org-html-format-table-no-css)
-		  "align=\"%s\""
-	        "class=\"org-%s\"")))
+             ;; May want to support in future.
+             ;; (number (org-export-get-ordinal
+             ;;          table info nil #'org-html--has-caption-p))
+             ;; (alignspec
+             ;;  (if (bound-and-true-p org-html-format-table-no-css)
+             ;;      "align=\"%s\""
+             ;;    "class=\"org-%s\""))
+             )
         (format "<table>\n%s\n%s</table>"
 	        (if (not caption) ""
 		  (format "<name>%s</name>" (org-export-data caption info)))
@@ -749,15 +739,15 @@ contextual information."
       contents
     (when (eq (org-element-property :type table-row) 'standard)
       (let* ((group (org-export-table-row-group table-row info))
-	     (number (org-export-table-row-number table-row info))
+	     ;; (number (org-export-table-row-number table-row info))
 	     (start-group-p
 	      (org-export-table-row-starts-rowgroup-p table-row info))
 	     (end-group-p
 	      (org-export-table-row-ends-rowgroup-p table-row info))
-	     (topp (and (equal start-group-p '(top))
-		        (equal end-group-p '(below top))))
-	     (bottomp (and (equal start-group-p '(above))
-			   (equal end-group-p '(bottom above))))
+	     ;; (topp (and (equal start-group-p '(top))
+	     ;;            (equal end-group-p '(below top))))
+	     ;; (bottomp (and (equal start-group-p '(above))
+	     ;;    	   (equal end-group-p '(bottom above))))
              (row-open-tag "<tr>")
              (row-close-tag "</tr>")
 	     (group-tags
@@ -927,7 +917,7 @@ Return output file's name."
         (outfile (org-rfc-export-output-file-name ext)))
     (org-export-to-file
         'rfc xmlfile async subtreep visible-only nil nil
-        (lambda (file) (shell-command
+        (lambda (_file) (shell-command
                         (format "xml2rfc --quiet %s -o %s %s" cli-arg outfile xmlfile))
           outfile))))
 
