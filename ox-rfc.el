@@ -266,7 +266,7 @@ channel."
   (let* ((name (org-element-property :name src-block))
          (nameattr (if name (format "<name>%s</name>" name) ""))
          (figopen (if name (format "<figure>%s" nameattr) ""))
-         (figclose (if name "/<figure>" "")))
+         (figclose (if name "</figure>" "")))
     (if (org-rfc-render-v3)
         ;; Do we always want figure? Or like export block only when there's a name?
         (concat figopen "<sourcecode><![CDATA[\n"
