@@ -1,3 +1,4 @@
 *~
 *.elc
+ert-tests/draft-*.xml
 ox-rfc-autoloads.el

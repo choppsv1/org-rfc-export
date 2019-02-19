@@ -412,22 +412,23 @@ CONTENTS is the item contents.  INFO is a plist used as
 a communication channel."
   (let* ((type (org-element-property :type (org-export-get-parent item)))
 	 (struct (org-element-property :structure item))
-	 (bullet (if (not (eq type 'ordered)) "-"
-		   (concat (number-to-string
-			    (car (last (org-list-get-item-number
-					(org-element-property :begin item)
-					struct
-					(org-list-prevs-alist struct)
-					(org-list-parents-alist struct)))))
-			   "."))))
-    (let ((tag (org-element-property :tag item)))
-      (cond
-       (tag (if (ox-rfc-render-v3)
-	        (format "<dt>%s</dt> <dd>%s</dd>" (org-export-data tag info) contents)
-	      (replace-regexp-in-string "<t>" (format "<t hangText=\"%s:\">" (org-export-data tag info)) contents)))
-       (t (concat bullet
-	          (and contents
-		       (concat "<t>" (org-trim contents) "</t>"))))))))
+	 (_bullet (if (not (eq type 'ordered)) "-"
+		    (concat (number-to-string
+			     (car (last (org-list-get-item-number
+					 (org-element-property :begin item)
+					 struct
+					 (org-list-prevs-alist struct)
+					 (org-list-parents-alist struct)))))
+			    "."))))
+    (let ((tag (org-element-property :tag item))
+          (contents (org-trim contents)))
+      (if (not (ox-rfc-render-v3))
+          (cond
+           (tag (replace-regexp-in-string "<t>" (format "<t hangText=\"%s:\">" (org-export-data tag info)) contents))
+           (t (concat "<t>" (org-trim contents) "</t>")))
+        (cond
+         (tag (format "<dt>%s</dt> <dd>%s</dd>" (org-export-data tag info) contents))
+         (t (format "<li>%s</li>" contents)))))))
 
 ;;;; Line Break
 
@@ -692,6 +693,8 @@ holding export options."
   "  <middle>\n"
   ;; Document contents.
   contents
+  (unless (plist-get info :in-back)
+    "</middle><back>")
   "  </back>
 </rfc>")))
 

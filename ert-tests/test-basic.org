@@ -1,9 +1,9 @@
 # -*- fill-column: 69; org-confirm-babel-evaluate: nil -*-
 #+STARTUP: align entitiespretty hidestars inlineimages latexpreview noindent showall
 #
-#+TITLE: Example RFC
+#+TITLE: Test Basic RFC
 #
-#+RFC_NAME: draft-chopps-lsr-example
+#+RFC_NAME: draft-test-basic
 #+RFC_AREA: routing
 #+RFC_WORKGROUP: lsr
 #+RFC_VERSION: 00

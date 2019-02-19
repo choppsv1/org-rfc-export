@@ -7,9 +7,9 @@
 <?rfc sortrefs="yes"?>
 <?rfc iprnotified="no"?>
 <?rfc strict="yes"?>
-<rfc ipr="trust200902" category="std" docName="draft-chopps-lsr-example-00" submissionType="IETF" consensus="true" tocInclude="true" version="3">
+<rfc ipr="trust200902" category="std" docName="draft-test-basic-00" submissionType="IETF" consensus="true" tocInclude="true" version="3">
   <front>
-    <title abbrev="Example RFC">Example RFC</title>
+    <title abbrev="Test Basic RFC">Test Basic RFC</title>
     <author fullname="Author One">
       <organization>Ex. Company</organization>
       <address>

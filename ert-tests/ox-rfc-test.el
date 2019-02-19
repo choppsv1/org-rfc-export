@@ -43,141 +43,35 @@
 ;;     (while (rassq new references) (setq new (+ 1 new)))
 ;;     new))
 
-(ert-deftest example-doc-xml-01 nil
-  "Check that we produce the expected XML"
+(defun test-generated (infile)
+  "Check that we produce the expected XML for file named INFILE."
   (let ((tmpfile (make-temp-file "ert-ox-rfc"))
         (tmpfile2 (make-temp-file "ert-ox-rfc"))
-        ;; This doesn't work :(
-        ;; (org-export-new-reference (lambda (refs) (org-det-new-ref refs)))
         (rubs '("anchor=\"org[^\"]*\"" "target=\"org[^\"]*\""))
-        tidyxml)
+        tidyxml
+        (verify-name (concat (file-name-base infile) "-verify.xml"))
+        )
     (with-temp-buffer
-      (insert-file-contents "../example.org")
+      (insert-file-contents infile)
       (setq tidyxml (ox-rfc-load-tidy-xml-as-string (ox-rfc-export-to-xml))))
     (dolist (x rubs)
       (setq tidyxml (replace-regexp-in-string x "" tidyxml)))
     (with-temp-file tmpfile
       (insert tidyxml))
     (with-temp-file tmpfile2
-      (insert-file-contents "example-verify.xml")
+      (insert-file-contents (concat (file-name-base infile) "-verify.xml"))
       (dolist (x rubs)
         (replace-regexp x "" nil (point-min) (point-max))))
     (should
      (string= ""
               (shell-command-to-string (format "diff %s %s" tmpfile2 tmpfile))))))
 
-;; (ert-deftest ietf-docs-test-cached ()
-;;   :tags '(:causes-redisplay)
-;;   (let* ((pathname (ietf-docs-fetch-to-cache "rfc12.txt" t))
-;;          (messages-buffer (get-buffer-create "*Messages*"))
-;;          (test (make-ert-test :body (lambda () (ietf-docs-fetch-to-cache "rfc12.txt")))))
-;;     (with-current-buffer messages-buffer
-;;       (let ((result (ert-run-test test)))
-;;         (should (equal (concat "Cached path " pathname "\n")
-;;                        (ert-test-result-messages result)))))))
+(ert-deftest basic-xml-01 nil
+  "Test basic XML generation"
+  (test-generated "test-basic.org"))
 
-;; (defmacro test-with-buffer (body)
-;;   `(with-temp-buffer
-;;      ;; do not remove trailing white-space!
-;;      (insert " RFC-3999
-;;  RFC 1222
-;;  rfc 1029
-;;  RFC5999
-;;  draft-ietf-isis-01.txt
-;;  draft-ietf-isis-03.xml
-;;  draft-ietf-isis-02  ")
-;;      ,body))
+(ert-deftest basic-xml-lists-01 nil
+  "Test lists XML generation"
+  "Check that we produce the expected XML"
+  (test-generated "test-lists.org"))
 
-
-;; (ert-deftest ietf-docs-test-space ()
-;;   (should (equal "rfc3999.txt" (test-with-buffer
-;;                                 (progn
-;;                                   (goto-char 2)
-;;                                   (ietf-docs-at-point))))))
-
-;; (ert-deftest ietf-docs-test-no-doc ()
-;;   (should-not (test-with-buffer
-;;                (progn (or (and (goto-char 1) (ietf-docs-at-point))
-;;                           (and (end-of-line)  (ietf-docs-at-point))
-;;                           (and (forward-line)  (ietf-docs-at-point))
-;;                           (and (end-of-line)  (ietf-docs-at-point))
-;;                           (and (forward-line)  (ietf-docs-at-point))
-;;                           (and (end-of-line)  (ietf-docs-at-point))
-;;                           (and (forward-line)  (ietf-docs-at-point))
-;;                           (and (end-of-line)  (ietf-docs-at-point))
-;;                           (and (forward-line)  (ietf-docs-at-point))
-;;                           (and (end-of-line)  (ietf-docs-at-point))
-;;                           (and (forward-line)  (ietf-docs-at-point))
-;;                           (and (end-of-line)  (ietf-docs-at-point))
-;;                           (and (forward-line)  (ietf-docs-at-point))
-;;                           (and (end-of-line)  (ietf-docs-at-point)))))))
-
-;; (ert-deftest ietf-docs-test-doc-line_2 ()
-;;   (should (equal "rfc1222.txt" (test-with-buffer
-;;                                 (progn (goto-char 1)
-;;                                        (forward-line)
-;;                                        (forward-char) (ietf-docs-at-point))))))
-
-;; (ert-deftest ietf-docs-test-doc-line_3 ()
-;;   (should (equal "rfc1029.txt" (test-with-buffer
-;;                                 (progn (goto-char 1)
-;;                                        (forward-line 2)
-;;                                        (forward-char 4)
-;;                                        (assert (char-equal ?\s (char-after)))
-;;                                        (ietf-docs-at-point))))))
-
-;; (ert-deftest ietf-docs-test-doc-line_4 ()
-;;   (should (equal "rfc5999.txt" (test-with-buffer
-;;                                 (progn (goto-char 1)
-;;                                        (forward-line 3)
-;;                                        (forward-char 2)
-;;                                        (assert (char-equal ?F (char-after)))
-;;                                        (ietf-docs-at-point))))))
-
-;; (ert-deftest ietf-docs-test-doc-line_5 ()
-;;   (should (equal "draft-ietf-isis-01.txt"
-;;                  (test-with-buffer
-;;                   (progn (goto-char 1)
-;;                          (forward-line 4)
-;;                          (forward-char 2)
-;;                          (assert (char-equal ?r (char-after)))
-;;                          (ietf-docs-at-point))))))
-
-;; (ert-deftest ietf-docs-test-doc-line_6 ()
-;;   (should (equal "draft-ietf-isis-03.txt"
-;;                  (test-with-buffer
-;;                   (progn (goto-char 1)
-;;                          (forward-line 5)
-;;                          (forward-char 8)
-;;                          (assert (char-equal ?e (char-after)))
-;;                          (ietf-docs-at-point))))))
-
-;; (ert-deftest ietf-docs-test-doc-line_7 ()
-;;   (should (equal "draft-ietf-isis-02.txt"
-;;                  (test-with-buffer
-;;                   (progn (goto-char 1)
-;;                          (forward-line 6)
-;;                          (forward-char 8)
-;;                          (assert (char-equal ?d (char-after)))
-;;                          (ietf-docs-at-point))))))
-
-;; (ert-deftest ietf-docs-test-doc-line_7 ()
-;;   (should (equal "draft-ietf-isis-02.txt"
-;;                  (test-with-buffer
-;;                   (progn (goto-char 1)
-;;                          (forward-line 6)
-;;                          (end-of-line)
-;;                          (backward-char 2)
-;;                          (assert (char-equal ?\s (char-after)))
-;;                          (ietf-docs-at-point))))))
-
-;;
-;; Emacs
-;;
-;; Local Variables:
-;; indent-tabs-mode: nil
-;; coding: utf-8
-;; End:
-;;
-
-;;; ox-rfc-test.el ends here
