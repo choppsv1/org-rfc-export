@@ -2,6 +2,8 @@
 
 * Org Mode RFC (~xml2rfc~) Exporter ~ox-rfc.el~
 
+CI TESTING: [[https://travis-ci.org/choppsv1/ietf-docs][https://travis-ci.org/choppsv1/ietf-docs.svg?branch=master]]
+
 This is an org mode export back-end to convert an Org mode formatted file into
 ~xml2rfc~ RFC format. Its direct output is XML that can be input to ~xml2rfc~ to
 further format the file into text, HTML or PDF formats. The code does make some

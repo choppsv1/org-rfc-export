@@ -26,7 +26,7 @@
   "Check that our feature loaded"
   (should (featurep 'ox-rfc)))
 
-(;; ert-deftest ietf-docs-test-cached ()
+;; (ert-deftest ietf-docs-test-cached ()
 ;;   :tags '(:causes-redisplay)
 ;;   (let* ((pathname (ietf-docs-fetch-to-cache "rfc12.txt" t))
 ;;          (messages-buffer (get-buffer-create "*Messages*"))

@@ -19,8 +19,9 @@
 
 # travis-lint no longer permits this value
 # language: emacs-lisp
+dist: xenial
 language: generic
-# sudo: false
+sudo: false
 
 ###
 ### defining the build matrix

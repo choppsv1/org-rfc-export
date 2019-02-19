@@ -7,15 +7,19 @@ EMACS_BATCH=$(EMACS_CLEAN) --batch
 TESTS=
 
 #CURL=curl --silent
-CURL=curl -fL
+CURL=curl -fL --silent
 WORK_DIR=$(shell pwd)
-PACKAGE_NAME=$(shell basename $(WORK_DIR))
+PACKAGE_NAME=ox-rfc
 AUTOLOADS_FILE=$(PACKAGE_NAME)-autoloads.el
 TRAVIS_FILE=.travis.yml
 TEST_DIR=ert-tests
 TEST_DEP_1=ert
-TEST_DEP_1_STABLE_URL=http://git.savannah.gnu.org/cgit/emacs.git/plain/lisp/emacs-lisp/ert.el?h=emacs-24.3
-TEST_DEP_1_LATEST_URL=http://git.savannah.gnu.org/cgit/emacs.git/plain/lisp/emacs-lisp/ert.el?h=master
+
+ifdef ERT_LATEST
+TEST_DEP_1_URL=http://git.savannah.gnu.org/cgit/emacs.git/plain/lisp/emacs-lisp/ert.el?h=master
+else
+TEST_DEP_1_URL=http://git.savannah.gnu.org/cgit/emacs.git/plain/lisp/emacs-lisp/ert.el?h=emacs-24.1
+endif
 
 .PHONY : build downloads downloads-latest autoloads test-autoloads test-travis \
          test test-interactive clean edit test-dep-1 test-dep-2 test-dep-3     \
@@ -32,11 +36,10 @@ test-dep-1 :
 	$(EMACS) $(EMACS_BATCH)  -L . -L .. -l $(TEST_DEP_1) || \
 	(echo "Can't load test dependency $(TEST_DEP_1).el, run 'make downloads' to fetch it" ; exit 1)
 
-downloads :
-	$(CURL) '$(TEST_DEP_1_STABLE_URL)' > $(TEST_DIR)/$(TEST_DEP_1).el
+$(TEST_DIR)/$(TEST_DEP_1).el:
+	$(CURL) '$(TEST_DEP_1_URL)' > $@
 
-downloads-latest :
-	$(CURL) '$(TEST_DEP_1_LATEST_URL)' > $(TEST_DIR)/$(TEST_DEP_1).el
+downloads: $(TEST_DIR)/$(TEST_DEP_1).el
 
 autoloads :
 	$(EMACS) $(EMACS_BATCH) --eval                       \
