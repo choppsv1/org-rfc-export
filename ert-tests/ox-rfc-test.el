@@ -22,9 +22,49 @@
 
 (require 'ox-rfc)
 
+
 (ert-deftest has-feature-01 nil
   "Check that our feature loaded"
   (should (featurep 'ox-rfc)))
+
+
+;; (defun org-export-new-reference (references)
+;; (defun org-det-new-ref (references)
+;;   "Return a unique reference with some determinism, among REFERENCES.
+;; REFERENCES is an alist whose values are in-use references, as
+;; numbers.  Returns a number, which is the internal representation
+;; of a reference.  See also `org-export-format-reference'."
+;;   ;; Generate random 7 digits hexadecimal numbers.  Collisions
+;;   ;; increase exponentially with the numbers of references.  However,
+;;   ;; the odds for encountering at least one collision with 1000 active
+;;   ;; references in the same document are roughly 0.2%, so this
+;;   ;; shouldn't be the bottleneck.
+;;   (let ((new 1))                        ;; Use a hint, this is O(N^2)
+;;     (while (rassq new references) (setq new (+ 1 new)))
+;;     new))
+
+(ert-deftest example-doc-xml-01 nil
+  "Check that we produce the expected XML"
+  (let ((tmpfile (make-temp-file "ert-ox-rfc"))
+        (tmpfile2 (make-temp-file "ert-ox-rfc"))
+        ;; This doesn't work :(
+        ;; (org-export-new-reference (lambda (refs) (org-det-new-ref refs)))
+        (rubs '("anchor=\"org[^\"]*\"" "target=\"org[^\"]*\""))
+        tidyxml)
+    (with-temp-buffer
+      (insert-file-contents "../example.org")
+      (setq tidyxml (ox-rfc-load-tidy-xml-as-string (ox-rfc-export-to-xml))))
+    (dolist (x rubs)
+      (setq tidyxml (replace-regexp-in-string x "" tidyxml)))
+    (with-temp-file tmpfile
+      (insert tidyxml))
+    (with-temp-file tmpfile2
+      (insert-file-contents "example-verify.xml")
+      (dolist (x rubs)
+        (replace-regexp x "" nil (point-min) (point-max))))
+    (should
+     (string= ""
+              (shell-command-to-string (format "diff %s %s" tmpfile2 tmpfile))))))
 
 ;; (ert-deftest ietf-docs-test-cached ()
 ;;   :tags '(:causes-redisplay)

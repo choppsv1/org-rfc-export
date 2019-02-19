@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet type="text/xsl" href="rfc2629.xslt"?>
+<?rfc toc="yes"?>
+<?rfc compact="no"?>
+<?rfc subcompact="no"?>
+<?rfc symrefs="yes" ?>
+<?rfc sortrefs="yes"?>
+<?rfc iprnotified="no"?>
+<?rfc strict="yes"?>
+<rfc ipr="trust200902" category="std" docName="draft-chopps-lsr-example-00" submissionType="IETF" consensus="true" tocInclude="true" version="3">
+  <front>
+    <title abbrev="Example RFC">Example RFC</title>
+    <author fullname="Author One">
+      <organization>Ex. Company</organization>
+      <address>
+        <email>aone@example.com</email>
+      </address>
+    </author>
+    <author fullname="Author Two">
+      <organization>Ex. Company</organization>
+      <address>
+        <email>atwo@example.com</email>
+      </address>
+    </author>
+    <date />
+    <abstract>
+      <t>This is the example RFC abstract.</t>
+    </abstract>
+  </front>
+  <middle>
+    <section title="Introduction" anchor="org456623f">
+      <t>This is an example introduction section. You might refer to 
+      <xref target="RFC7322" />which was adopted from 
+      <xref target="I-D.iab-styleguide" />to document RFC style.</t>
+      <section title="Terminology" anchor="org8248aa7">
+        <t>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in BCP 14, 
+        <xref target="RFC2119" />
+        <xref target="RFC8174" />when, and only when, they appear in all capitals, as shown here..</t>
+      </section>
+    </section>
+    <section title="First Section" anchor="org359b984">
+      <t>The first section of where technology being standardized is defined. While writing this section perhaps you might need to refer to a non-SDO document such as 
+      <xref target="StudyScarlet" />.</t>
+      <section title="Subsection of Normative Text" anchor="orgc136968">
+        <t>Here's a subsection of the 
+        <xref target="org359b984"></xref>.</t>
+      </section>
+    </section>
+    <section title="Second Section" anchor="org1ec3c0d">
+      <t>The second section of where technology being standardized is defined.</t>
+    </section>
+    <section title="IANA Considerations" anchor="org4eb7377">
+      <t>The optional section where IANA considerations are listed.</t>
+    </section>
+    <section title="Security Considerations" anchor="orgc2f9db9">
+      <t>The required section on security considerations.</t>
+    </section>
+  </middle>
+  <back>
+    <references title="Normative References">
+      <reference anchor='RFC2119' target='https://www.rfc-editor.org/info/rfc2119'>
+        <front>
+          <title>Key words for use in RFCs to Indicate Requirement Levels</title>
+          <author initials='S.' surname='Bradner' fullname='S. Bradner'>
+            <organization />
+          </author>
+          <date year='1997' month='March' />
+          <abstract>
+            <t>In many standards track documents several words are used to signify the requirements in the specification. These words are often capitalized. This document defines these words as they should be interpreted in IETF documents. This document specifies an Internet Best Current Practices for the Internet Community, and requests discussion and suggestions for improvements.</t>
+          </abstract>
+        </front>
+        <seriesInfo name='BCP' value='14' />
+        <seriesInfo name='RFC' value='2119' />
+        <seriesInfo name='DOI' value='10.17487/RFC2119' />
+      </reference>
+      <reference anchor='RFC8174' target='https://www.rfc-editor.org/info/rfc8174'>
+        <front>
+          <title>Ambiguity of Uppercase vs Lowercase in RFC 2119 Key Words</title>
+          <author initials='B.' surname='Leiba' fullname='B. Leiba'>
+            <organization />
+          </author>
+          <date year='2017' month='May' />
+          <abstract>
+            <t>RFC 2119 specifies common key words that may be used in protocol specifications. This document aims to reduce the ambiguity by clarifying that only UPPERCASE usage of the key words have the defined special meanings.</t>
+          </abstract>
+        </front>
+        <seriesInfo name='BCP' value='14' />
+        <seriesInfo name='RFC' value='8174' />
+        <seriesInfo name='DOI' value='10.17487/RFC8174' />
+      </reference>
+    </references>
+    <references title="Informative References">
+      <reference anchor="StudyScarlet">
+        <front>
+          <title>A Study In Scarlet</title>
+          <author fullname="Sir Arthur Conan Doyle" />
+          <date month="11" year="1887" />
+        </front>
+        <refcontent>Beeton's Christmas Annual, Ward Lock &amp; Co</refcontent>
+        <annotation></annotation>
+      </reference>
+      <reference anchor='RFC7322' target='https://www.rfc-editor.org/info/rfc7322'>
+        <front>
+          <title>RFC Style Guide</title>
+          <author initials='H.' surname='Flanagan' fullname='H. Flanagan'>
+            <organization />
+          </author>
+          <author initials='S.' surname='Ginoza' fullname='S. Ginoza'>
+            <organization />
+          </author>
+          <date year='2014' month='September' />
+          <abstract>
+            <t>This document describes the fundamental and unique style conventions and editorial policies currently in use for the RFC Series. It captures the RFC Editor's basic requirements and offers guidance regarding the style and structure of an RFC. Additional guidance is captured on a website that reflects the experimental nature of that guidance and prepares it for future inclusion in the RFC Style Guide. This document obsoletes RFC 2223, "Instructions to RFC Authors".</t>
+          </abstract>
+        </front>
+        <seriesInfo name='RFC' value='7322' />
+        <seriesInfo name='DOI' value='10.17487/RFC7322' />
+      </reference>
+      <reference anchor='I-D.iab-styleguide'>
+        <front>
+          <title>RFC Style Guide</title>
+          <author initials='H' surname='Flanagan' fullname='Heather Flanagan'>
+            <organization />
+          </author>
+          <date month='April' day='9' year='2014' />
+          <abstract>
+            <t>This document describes the fundamental and unique style conventions and editorial policies currently in use for the RFC Series. It captures the RFC Editor's basic requirements and offers guidance regarding the style and structure of an RFC. Additional guidance is captured on a website that reflects the experimental nature of that guidance and prepares it for future inclusion in the RFC Style guide. Guidance provided by this document will not be applied until published as an RFC. Please send your comments about the contents of this document to &lt;rfc-interest@rfc-editor.org&gt;.</t>
+          </abstract>
+        </front>
+        <seriesInfo name='Internet-Draft' value='draft-iab-styleguide-02' />
+        <format type='TXT' target='http://www.ietf.org/internet-drafts/draft-iab-styleguide-02.txt' />
+      </reference>
+    </references>
+    <section title="Some Example" anchor="org107c938">
+      <t>This is where appendix sections go.</t>
+    </section>
+    <section title="Acknowledgements" anchor="org6958b13">
+      <t>This is where you would add acknowledgements, such as: We would like to thank Christian Hopps help writing this document.</t>
+    </section>
+    <section title="Contributors" anchor="orgee69e46">
+      <t>The following people made significant contributions to this document.</t>
+      <artwork>
+<![CDATA[
+Christian Hopps
+LabN Consulting, L.L.C.
+
+Email: chopps@labn.net
+]]>
+      </artwork>
+    </section>
+  </back>
+</rfc>

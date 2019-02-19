@@ -19,7 +19,7 @@
 
 # travis-lint no longer permits this value
 # language: emacs-lisp
-dist: xenial
+# dist: xenial
 language: generic
 sudo: false
 

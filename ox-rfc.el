@@ -65,6 +65,20 @@
   :type 'string
   :group 'org-export-rfc)
 
+(defcustom ox-rfc-tidy-args "-q -wrap 10000 -indent -xml"
+  "The default arguments to pass to tidy for cleaning up XML"
+  :type 'string
+  :group 'org-export-rfc)
+
+(defcustom ox-rfc-tidy-cmd nil
+  "The name of the tidy binary if nil will lookup"
+  :type 'string
+  :group 'org-export-rfc)
+
+(defcustom ox-rfc-use-tidy nil
+  "If t use tidy to cleanup generated XML"
+  :type 'boolean
+  :group 'org-export-rfc)
 
 
 ;;; Define Back-End
@@ -156,11 +170,25 @@ then the cache is overwritten."
       pathname)
     pathname))
 
-(defun ox-rfc-load-file-as-string (pathname)
-  "Return a string containing file PATHNAME."
-  (with-temp-buffer
-    (insert-file-contents pathname)
-    (buffer-string)))
+(defun ox-rfc-get-tidy-cmd ()
+  "Get the tidy command string"
+  (cond
+   (ox-rfc-tidy-cmd)
+   (t (executable-find "tidy"))))
+
+(defun ox-rfc-load-tidy-xml-as-string (pathname)
+  "Pass PATHNAME through tidy and return a string"
+  (let ((tidycmd (format "%s %s %s" (ox-rfc-get-tidy-cmd) ox-rfc-tidy-args pathname)))
+    (message "cmd: %s" tidycmd)
+    (shell-command-to-string tidycmd)))
+
+(defun ox-rfc-load-file-as-string (pathname &optional tidy)
+  "Return a string containing file PATHNAME.
+If TIDY is non-nil then run the file through tidy first."
+  (if tidy (ox-rfc-load-file-as-string pathname)
+    (with-temp-buffer
+      (insert-file-contents pathname)
+      (buffer-string))))
 
 (defun ox-rfc-load-ref-file-as-string (pathname)
   "Return a string containing file PATHNAME for use as a reference."
