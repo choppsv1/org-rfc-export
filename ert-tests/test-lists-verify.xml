@@ -10,13 +10,16 @@
 <rfc ipr="trust200902" category="std" docName="draft-test-lists-00" submissionType="IETF" consensus="true" tocInclude="true" version="3">
   <front>
     <title abbrev="Test Lists RFC">Test Lists RFC</title>
-    <author fullname="nil" />
+    <author fullname="Author One">
+      <address>
+        <email>aone@example.com</email>
+      </address>
+    </author>
     <date />
   </front>
   <middle>
-    <t>+#EMAIL: aone@example.com</t>
-    <section title="Test Lists" anchor="orgb002867">
-      <section title="Bullet Lists" anchor="orgc4e00d0">
+    <section title="Test Lists">
+      <section title="Bullet Lists">
         <ul>
           <li>
             <t>List item 1</t>
@@ -39,7 +42,7 @@
           </li>
         </ul>
       </section>
-      <section title="Definition Lists" anchor="org1bc3b99">
+      <section title="Definition Lists">
         <dl>
           <dt>Term1</dt>
           <dd>
@@ -57,7 +60,14 @@
           <dd>
             <t>Definition of term 2.</t>
           </dd>
+          <li>
+            <t>List item A.</t>
+          </li>
+          <li>
+            <t>List item B.</t>
+          </li>
         </dl>
+        <t>Some text.</t>
       </section>
     </section>
   </middle>

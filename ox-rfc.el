@@ -35,7 +35,7 @@
 
 ;;; Code:
 
-(require 'ox-publish)
+(require 'ox)
 
 
 ;;; User-Configurable Variables
@@ -70,13 +70,13 @@
   :type 'string
   :group 'org-export-rfc)
 
-(defcustom ox-rfc-tidy-cmd nil
+(defcustom ox-rfc-tidy-cmd "tidy"
   "The name of the tidy binary if nil will lookup"
   :type 'string
   :group 'org-export-rfc)
 
-(defcustom ox-rfc-use-tidy nil
-  "If t use tidy to cleanup generated XML"
+(defcustom ox-rfc-try-tidy t
+  "If non-nil try and use tidy to cleanup generated XML"
   :type 'boolean
   :group 'org-export-rfc)
 
@@ -137,7 +137,10 @@
                   (ox-rfc-export-to-text t s v)
                 (org-open-file (ox-rfc-export-to-text nil s v)))))))
   :options-alist
-  '((:rfc-authors "RFC_AUTHORS" nil nil t)
+  '((:affiliation "AFFILIATION" nil nil t)
+    (:author "AUTHOR" nil nil t)
+    (:email "EMAIL" nil nil t)
+    (:rfc-authors "RFC_AUTHORS" nil nil t)
     (:rfc-category "RFC_CATEGORY" nil "std" t)
     (:rfc-consensus "RFC_CONSENSUS" nil "true" t)
     (:rfc-ipr "RFC_IPR" nil "trust200902" t)
@@ -170,17 +173,11 @@ then the cache is overwritten."
       pathname)
     pathname))
 
-(defun ox-rfc-get-tidy-cmd ()
-  "Get the tidy command string"
-  (cond
-   (ox-rfc-tidy-cmd)
-   (t (executable-find "tidy"))))
-
-(defun ox-rfc-load-tidy-xml-as-string (pathname)
-  "Pass PATHNAME through tidy and return a string"
-  (let ((tidycmd (format "%s %s %s" (ox-rfc-get-tidy-cmd) ox-rfc-tidy-args pathname)))
-    (message "cmd: %s" tidycmd)
-    (shell-command-to-string tidycmd)))
+(defun ox-rfc-get-tidy ()
+  "Return tidy command if we should use else nil."
+  (if (not ox-rfc-try-tidy)
+      nil
+    (executable-find ox-rfc-tidy-cmd)))
 
 (defun ox-rfc-load-file-as-string (pathname &optional tidy)
   "Return a string containing file PATHNAME.
@@ -209,25 +206,41 @@ If TIDY is non-nil then run the file through tidy first."
         (org-export-output-file-name (concat "-" verstr extension))
       (concat docname "-" verstr extension))))
 
-(defun ox-rfc-author-list-from-prop (pname &optional item)
+(defun ox-rfc-author-list-from-prop (info pname &optional item)
   "Return the XML for and author or list of authors.
 The author list is looked for in ITEM using property named PNAME."
-  (let ((author (if item
-                    (org-element-property pname item)
-                  (plist-get (org-export-get-environment 'rfc) pname)))
-        (lfmt (concat "<author fullname=\"%s\">\n"
-                      "  <organization>%s</organization>\n"
-                      "  <address><email>%s</email></address>\n"
-                      "</author>"))
-        (sfmt "<author fullname=\"%s\"/>"))
-    (if (string-prefix-p "(" author)
-        (mapconcat
-         (lambda (x) (if (not (listp x))
-                         (format sfmt x)
-                       (format lfmt (car x) (caddr x) (cadr x))))
-         (read author)
-         "\n")
-      (format sfmt author))))
+  (let ((author (if item (org-element-property pname item)
+                   (plist-get info pname)))
+        (sfmt "<author fullname=\"%s\">")
+        (etag "</author>")
+        (ofmt "<organization>%s</organization>")
+        (efmt "<address><email>%s</email></address>")
+        (shortfmt "<author fullname=\"%s\"/>"))
+    (if (stringp author)
+        (if (string-prefix-p "(" author)
+            (setq author (read author))
+          (setq author (list author))))
+    (if (and (not author) (not item))
+        (let ((affiliation (plist-get info :affiliation))
+              (email (plist-get info :email)))
+          (setq author (list
+                        (or (plist-get info :author) "NO-AUTHOR")))
+          (if affiliation
+              (setq author (append author (list affiliation))))
+          (if email
+              (setq author (append author (list email))))
+          (setq author (list author))))
+    (mapconcat (lambda (x) (if (not (listp x))
+                               (format shortfmt x)
+                             (let ((a (car x))
+                                   (e (cadr x))
+                                   (o (cadr (cdr x))))
+                               (concat (format sfmt a)
+                                       (if o (format ofmt o) "")
+                                       (if e (format efmt e) "")
+                                       etag))))
+               author
+               "\n")))
 
 (defun ox-rfc-render-v3 ()
   "Return t if rendering in xml2rfc version 3 format."
@@ -340,58 +353,15 @@ a communication channel."
 INFO is a plist used as a communication channel.  Links and table
 of contents can refer to headlines."
   (unless (org-element-property :footnote-section-p headline)
-    (or
-     ;; Global table of contents includes HEADLINE.
-     (and (plist-get info :with-toc)
-	  (memq headline
-		(org-export-collect-headlines info (plist-get info :with-toc))))
-     ;; A local table of contents includes HEADLINE.
-     (cl-some
-      (lambda (h)
-	(let ((section (car (org-element-contents h))))
-	  (and
-	   (eq 'section (org-element-type section))
-	   (org-element-map section 'keyword
-	     (lambda (keyword)
-	       (when (equal "TOC" (org-element-property :key keyword))
-		 (let ((case-fold-search t)
-		       (value (org-element-property :value keyword)))
-		   (and (string-match-p "\\<headlines\\>" value)
-			(let ((n (and
-				  (string-match "\\<[0-9]+\\>" value)
-				  (string-to-number (match-string 0 value))))
-			      (local? (string-match-p "\\<local\\>" value)))
-			  (memq headline
-				(org-export-collect-headlines
-				 info n (and local? keyword))))))))
-	     info t))))
-      (org-element-lineage headline))
-     ;; A link refers internally to HEADLINE.
-     (org-element-map (plist-get info :parse-tree) 'link
-       (lambda (link)
-	 (eq headline
-	     (pcase (org-element-property :type link)
-	       ((or "custom-id" "id") (org-export-resolve-id-link link info))
-	       ("fuzzy" (org-export-resolve-fuzzy-link link info))
-	       (_ nil))))
-       info t))))
-
-(defun ox-rfc--headline-title (style level title &optional anchor tags)
-  "Generate a headline title in the preferred RFC headline style.
-STYLE is the preferred style (`atx' or `setext').  LEVEL is the
-header level.  TITLE is the headline title.  ANCHOR is the HTML
-anchor tag for the section as a string.  TAGS are the tags set on
-the section."
-  (let ((anchor-lines (and anchor (concat anchor "\n\n"))))
-    ;; Use "Setext" style
-    (if (and (eq style 'setext) (< level 3))
-        (let* ((underline-char (if (= level 1) ?= ?-))
-               (underline (concat (make-string (length title) underline-char)
-				  "\n")))
-          (concat "\n" anchor-lines title tags "\n" underline "\n"))
-        ;; Use "Atx" style
-        (let ((level-mark (make-string level ?#)))
-          (concat "\n" anchor-lines level-mark " " title tags "\n\n")))))
+    ;; A link refers internally to HEADLINE.
+    (org-element-map (plist-get info :parse-tree) 'link
+      (lambda (link)
+	(eq headline
+	    (pcase (org-element-property :type link)
+	      ((or "custom-id" "id") (org-export-resolve-id-link link info))
+	      ("fuzzy" (org-export-resolve-fuzzy-link link info))
+	      (_ nil))))
+      info t)))
 
 ;;;; Italic
 
@@ -410,6 +380,7 @@ as a communication channel."
   "Transcode ITEM element into RFC format.
 CONTENTS is the item contents.  INFO is a plist used as
 a communication channel."
+  (progn
   (let* ((type (org-element-property :type (org-export-get-parent item)))
 	 (struct (org-element-property :structure item))
 	 (_bullet (if (not (eq type 'ordered)) "-"
@@ -424,11 +395,15 @@ a communication channel."
           (contents (org-trim contents)))
       (if (not (ox-rfc-render-v3))
           (cond
-           (tag (replace-regexp-in-string "<t>" (format "<t hangText=\"%s:\">" (org-export-data tag info)) contents))
-           (t (concat "<t>" (org-trim contents) "</t>")))
+           (tag
+            (replace-regexp-in-string "<t>" (format "<t hangText=\"%s:\">" (org-export-data tag info)) contents))
+           (t
+            (concat "<t>" (org-trim contents) "</t>")))
         (cond
-         (tag (format "<dt>%s</dt> <dd>%s</dd>" (org-export-data tag info) contents))
-         (t (format "<li>%s</li>" contents)))))))
+         (tag
+          (format "<dt>%s</dt> <dd>%s</dd>" (org-export-data tag info) contents))
+         (t
+          (format "<li>%s</li>" contents))))))))
 
 ;;;; Line Break
 
@@ -584,7 +559,7 @@ INFO is a plist used as a communication channel."
      (t
       ;; (message "PROP: %s %s" title (org-element-context headline))
       (let ((refann (org-trim (org-export-data (org-element-property :REF_ANNOTATION headline) info)))
-            (author (ox-rfc-author-list-from-prop :REF_AUTHOR headline))
+            (author (ox-rfc-author-list-from-prop info :REF_AUTHOR headline))
             (refcontent (org-trim (org-export-data (org-element-property :REF_CONTENT headline) info)))
             (refdate (org-export-data (org-element-property :REF_DATE headline) info))
             (reftitle (org-export-data (org-element-property :REF_TITLE headline) info)))
@@ -595,7 +570,7 @@ INFO is a plist used as a communication channel."
           (let* ((date (nthcdr 3 (parse-time-string refdate)))
                  (day (and (car date)))
                  (month (cadr date))
-                 (year (caddr date)))
+                 (year (cadr (cdr date))))
             (setq day (or (and day (format " day=\"%s\"" day)) ""))
             (setq month (or (and month (format " month=\"%s\"" month)) ""))
             (setq year (or (and year (format " year=\"%s\"" year)) ""))
@@ -648,6 +623,7 @@ holding export options."
   ;; Make sure CONTENTS is separated from table of contents and
   ;; footnotes with at least a blank line.
   ;; Table of contents.
+  (progn
   (let ((category (or (plist-get info :rfc-category) "std"))
         (consensus (or (plist-get info :rfc-consensus) "yes"))
         (docname (ox-rfc-export-output-file-name ""))
@@ -686,7 +662,7 @@ holding export options."
      ">
   <front>
     <title abbrev=\"" title "\">" title "</title>\n"
-  (ox-rfc-author-list-from-prop :rfc-authors)
+  (ox-rfc-author-list-from-prop info :rfc-authors)
   "  <date/>"
   (or (plist-get info :abstract) "")
   "  </front>"
@@ -696,7 +672,7 @@ holding export options."
   (unless (plist-get info :in-back)
     "</middle><back>")
   "  </back>
-</rfc>")))
+</rfc>"))))
 
 (defun ox-rfc-template (contents _info)
   "Return complete document string after RFC conversion.
@@ -855,8 +831,21 @@ Export is done in a buffer named \"*Org RFC Export*\", which will
 be displayed when `org-export-show-temporary-export-buffer' is
 non-nil."
   (interactive)
-  (org-export-to-buffer 'rfc "*Org RFC Export*"
-    async subtreep visible-only nil nil (lambda () (text-mode))))
+  (let ((setmode (lambda ()
+                   (let ((mode (or (assoc-default "whatmode.xml" auto-mode-alist 'string-match)
+                                         'text-mode)))
+                     (set-auto-mode-0 mode t))))
+        (tidycmd (ox-rfc-get-tidy)))
+    (if (not tidycmd)
+        (org-export-to-buffer 'rfc "*Org RFC Export*" async subtreep visible-only nil nil setmode)
+      (org-export-to-buffer 'rfc "*Org RFC Export*"
+        async subtreep visible-only nil nil
+        (lambda ()
+          (shell-command-on-region (point-min) (point-max)
+                                   (format "%s %s" tidycmd ox-rfc-tidy-args)
+                                   (current-buffer) t "*Org RFC Error*" t)
+          (deactivate-mark)
+          (funcall setmode))))))
 
 (defun ox-rfc-export-as-text (&optional async subtreep visible-only buffer outfile)
   "Export current buffer to a XML buffer.
@@ -919,8 +908,18 @@ contents of hidden elements.
 
 Return output file's name."
   (interactive)
-  (let ((outfile (ox-rfc-export-output-file-name ".xml")))
-    (org-export-to-file 'rfc outfile async subtreep visible-only)))
+  (let ((outfile (ox-rfc-export-output-file-name ".xml"))
+        (tidycmd (ox-rfc-get-tidy)))
+    (if (not tidycmd)
+        (org-export-to-file 'rfc outfile async subtreep visible-only)
+      (let ((tmpfile (make-temp-file (file-name-sans-extension (file-name-base outfile)) nil ".xml")))
+        (org-export-to-file 'rfc tmpfile async subtreep visible-only nil nil
+                            (lambda (file)
+                              (shell-command (format "%s %s -o %s %s" tidycmd ox-rfc-tidy-args outfile file))
+                              (message "Tidied into %s" outfile)
+                              outfile))))))
+
+
 
 (defun ox-rfc-export-to-x (ext cli-arg &optional async subtreep visible-only)
   "Export the current buffer to a file with the extension EXT.
@@ -947,9 +946,10 @@ Return output file's name."
         (outfile (ox-rfc-export-output-file-name ext)))
     (org-export-to-file
         'rfc xmlfile async subtreep visible-only nil nil
-        (lambda (_file) (shell-command
-                        (format "xml2rfc --quiet %s -o %s %s" cli-arg outfile xmlfile))
-          outfile))))
+        (lambda (_file)
+          (shell-command
+           (format "xml2rfc --quiet %s -o %s %s" cli-arg outfile xmlfile))))
+    outfile))
 
 
 ;;;###autoload
@@ -1027,16 +1027,17 @@ Return output file's name."
   (ox-rfc-export-to-x ".txt" "--text" async subtreep visible-only))
 
 
-;;;###autoload
-(defun ox-rfc-publish-to-xml (plist filename pub-dir)
-  "Publish an org file to RFC.
+;; For now let's leave out the publish stuff.
+;; ;;;###autoload
+;; (defun ox-rfc-publish-to-xml (plist filename pub-dir)
+;;   "Publish an org file to RFC.
 
-FILENAME is the filename of the Org file to be published.  PLIST
-is the property list for the given project.  PUB-DIR is the
-publishing directory.
+;; FILENAME is the filename of the Org file to be published.  PLIST
+;; is the property list for the given project.  PUB-DIR is the
+;; publishing directory.
 
-Return output file name."
-  (org-publish-org-to 'rfc filename ".xml" plist pub-dir))
+;; Return output file name."
+;;   (org-publish-org-to 'rfc filename ".xml" plist pub-dir))
 
 (provide 'ox-rfc)
 

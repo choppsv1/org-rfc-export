@@ -3,7 +3,7 @@
 #
 #+TITLE: Test Lists RFC
 #+AUTHOR: Author One
-+#EMAIL: aone@example.com
+#+EMAIL: aone@example.com
 #+RFC_NAME: draft-test-lists
 #+RFC_VERSION: 00
 #+OPTIONS: prop:nil title:t toc:t \n:nil ::t |:t ^:{} -:t *:t ':nil
@@ -23,3 +23,7 @@
    - List item 1 of Term1
    - List item 2 of Term1
  - Term2 :: Definition of term 2.
+
+ - List item A.
+ - List item B.
+Some text.

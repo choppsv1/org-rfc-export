@@ -50,7 +50,6 @@ A few variables need to always be set. They are listed here:
 
 #+begin_example
   ,#+AUTHOR:
-  ,#+EMAIL:
   ,#+TITLE:
   ,#+RFC_VERSION: 00
 #+end_example
@@ -61,7 +60,8 @@ digits with versions 0-9 given as 00-09).
 **** Optional export variables:
 
 #+begin_example
-  ,#+NAME:
+  ,#+AFFILIATION:
+  ,#+EMAIL:
   ,#+RFC_AUTHORS:
   ,#+RFC_CATEGORY: std
   ,#+RFC_CONSENSUS: true
