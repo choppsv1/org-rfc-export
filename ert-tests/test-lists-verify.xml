@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet type="text/xsl" href="rfc2629.xslt"?>
+<?rfc toc="yes"?>
+<?rfc compact="no"?>
+<?rfc subcompact="no"?>
+<?rfc symrefs="yes" ?>
+<?rfc sortrefs="yes"?>
+<?rfc iprnotified="no"?>
+<?rfc strict="yes"?>
+<rfc ipr="trust200902" category="std" docName="draft-test-lists-00" submissionType="IETF" consensus="true" tocInclude="true" version="3">
+  <front>
+    <title abbrev="Test Lists RFC">Test Lists RFC</title>
+    <author fullname="nil" />
+    <date />
+  </front>
+  <middle>
+    <t>+#EMAIL: aone@example.com</t>
+    <section title="Test Lists" anchor="orgb002867">
+      <section title="Bullet Lists" anchor="orgc4e00d0">
+        <ul>
+          <li>
+            <t>List item 1</t>
+            <ul>
+              <li>
+                <t>Item 1 sub-list item 1</t>
+              </li>
+              <li>
+                <t>Item 1 sub-list item 2</t>
+              </li>
+            </ul>
+          </li>
+          <li>
+            <t>List item 2</t>
+            <ul>
+              <li>
+                <t>Item 2 sub-list item 1</t>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </section>
+      <section title="Definition Lists" anchor="org1bc3b99">
+        <dl>
+          <dt>Term1</dt>
+          <dd>
+            <t>Definition of term 1.</t>
+            <ul>
+              <li>
+                <t>List item 1 of Term1</t>
+              </li>
+              <li>
+                <t>List item 2 of Term1</t>
+              </li>
+            </ul>
+          </dd>
+          <dt>Term2</dt>
+          <dd>
+            <t>Definition of term 2.</t>
+          </dd>
+        </dl>
+      </section>
+    </section>
+  </middle>
+  <back></back>
+</rfc>

@@ -1,0 +1,89 @@
+# -*- fill-column: 69; org-confirm-babel-evaluate: nil -*-
+#+STARTUP: align entitiespretty hidestars inlineimages latexpreview noindent showall
+#
+#+TITLE: Test Basic RFC
+#
+#+RFC_NAME: draft-test-basic
+#+RFC_AREA: routing
+#+RFC_WORKGROUP: lsr
+#+RFC_VERSION: 00
+#+RFC_AUTHORS: (("Author One" "aone@example.com" "Ex. Company") ("Author Two" "atwo@example.com" "Ex. Company"))
+#+RFC_XML_VERSION: 3
+#
+# Do: title, table-of-contents ::fixed-width-sections |tables
+# Do: ^:sup/sub with curly -:special-strings *:emphasis
+# Don't: prop:no-prop-drawers \n:preserve-linebreaks ':use-smart-quotes
+#+OPTIONS: prop:nil title:t toc:t \n:nil ::t |:t ^:{} -:t *:t ':nil
+
+#+begin_abstract
+This is the example RFC abstract.
+#+end_abstract
+
+* Introduction
+
+This is an example introduction section. You might refer to [[RFC7322]] which was
+adopted from [[I-D.iab-styleguide]] to document RFC style.
+
+** Terminology
+
+The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+"SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and
+"OPTIONAL" in this document are to be interpreted as described in BCP
+14, [[RFC2119]] [[RFC8174]] when, and only when, they appear in all
+capitals, as shown here..
+
+* First Section
+
+The first section of where technology being standardized is defined. While
+writing this section perhaps you might need to refer to a non-SDO document such
+as [[StudyScarlet]].
+
+** Subsection of Normative Text
+
+Here's a subsection of the [[First Section]].
+
+* Second Section
+
+The second section of where technology being standardized is defined.
+
+* IANA Considerations
+
+The optional section where IANA considerations are listed.
+
+* Security Considerations
+
+The required section on security considerations.
+
+* References
+** Normative References
+*** RFC2119
+*** RFC8174
+** Informative References
+*** StudyScarlet
+    :PROPERTIES:
+    :REF_TITLE: A Study In Scarlet
+    :REF_AUTHOR: Sir Arthur Conan Doyle
+    :REF_DATE: Nov 1887
+    :REF_CONTENT: Beeton's Christmas Annual, Ward Lock & Co
+    :END:
+*** RFC7322
+*** I-D.iab-styleguide
+
+** Some Example
+
+This is where appendix sections go.
+
+** Acknowledgements
+
+This is where you would add acknowledgements, such as: We would like to thank
+Christian Hopps help writing this document.
+
+** Contributors
+The following people made significant contributions to this document.
+
+#+begin_example
+   Christian Hopps
+   LabN Consulting, L.L.C.
+
+   Email: chopps@labn.net
+#+end_example

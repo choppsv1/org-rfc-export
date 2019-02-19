@@ -1,0 +1,44 @@
+### Adapted from: git@github.com:choppsv1/ietf-docs.git
+### Adapted from: git@github.com:rolandwalker/emacs-travis.git
+###
+### Notes
+###
+### The travis web interface may choke silently and fail to
+### update when there are issues with the .travis.yml file.
+###
+### The "travis-lint" command-line tool does not catch all
+### errors which may lead to silent failure.
+###
+### Shell-style comments in this file must have "#" as the
+### *first* character of the line.
+###
+
+###
+### language
+###
+
+# travis-lint no longer permits this value
+# language: emacs-lisp
+# dist: xenial
+language: generic
+sudo: false
+
+###
+### defining the build matrix
+###
+### ===>                                                       <===
+### ===> each variation in env/matrix will be built and tested <===
+### ===>                                                       <===
+###
+### variables under env/global are available to the build process
+### but don't cause the creation of a separate variation
+###
+
+# matrix:
+#   include:
+#     - env: EMACS=emacs23
+#     - env: EMACS=emacs24
+#       addons:
+#         apt:
+#            packages:
+#            - emacs24-nox

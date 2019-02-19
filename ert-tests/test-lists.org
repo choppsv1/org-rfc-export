@@ -1,0 +1,25 @@
+# -*- fill-column: 69; org-confirm-babel-evaluate: nil -*-
+#+STARTUP: align entitiespretty hidestars inlineimages latexpreview noindent showall
+#
+#+TITLE: Test Lists RFC
+#+AUTHOR: Author One
++#EMAIL: aone@example.com
+#+RFC_NAME: draft-test-lists
+#+RFC_VERSION: 00
+#+OPTIONS: prop:nil title:t toc:t \n:nil ::t |:t ^:{} -:t *:t ':nil
+
+* Test Lists
+** Bullet Lists
+
+ - List item 1
+   - Item 1 sub-list item 1
+   - Item 1 sub-list item 2
+ - List item 2
+   - Item 2 sub-list item 1
+
+** Definition Lists
+
+ - Term1 :: Definition of term 1.
+   - List item 1 of Term1
+   - List item 2 of Term1
+ - Term2 :: Definition of term 2.
