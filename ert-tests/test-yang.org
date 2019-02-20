@@ -1,0 +1,110 @@
+#+TITLE: Test YANG RFC
+#+AUTHOR: Christian Hopps
+#+EMAIL: chopps@devhopps.com
+#+AFFILIATION: DevHopps L.L.C.
+#+RFC_VERSION: 00
+#+RFC_NAME: draft-test-yang
+#
+# Do: title, table-of-contents ::fixed-width-sections |tables
+# Do: ^:sup/sub with curly -:special-strings *:emphasis
+# Don't: prop:no-prop-drawers \n:preserve-linebreaks ':use-smart-quotes
+#+OPTIONS: prop:nil title:t toc:t \n:nil ::t |:t ^:{} -:t *:t ':nil
+#+STARTUP: noalign entitiespretty hidestars noindent showall
+
+* Introduction
+
+This is an example of a yang module draft.
+
+The YANG data model described in this document conforms to the
+Network Management Datastore Architecture defined in [[RFC8342]].
+
+* Cool YANG Module
+
+This section would describe the "Cool YANG Module".
+
+** YANG Tree
+
+#+name: Cool Module YANG tree diagram.
+#+begin_src bash  :var file=cool-module :results output verbatim replace :wrap example :exports results
+pyang -f tree ${file}
+#+end_src
+
+#+RESULTS: Cool Module YANG tree diagram.
+#+begin_example
+module: cool-module
+  +--rw cool-container
+     +--rw cool-list* [name]
+        +--rw name    string
+#+end_example
+
+* YANG Module
+
+#+name: cool-module
+#+header: :file /tmp/cool-module.yang :results output code silent :dir
+#+begin_src yang :exports code
+    module cool-module {
+      namespace "urn:ietf:cool";
+      prefix cool;
+
+      organization
+        "IETF NETMOD Working Group (NETMOD)";
+      contact
+        "Christian Hopps <chopps@devhopps.com>";
+
+      // RFC Ed.: replace XXXX with actual RFC number and
+      // remove this note.
+
+      description
+        "This module defines a cool feature.
+
+         Copyright (c) 2018 IETF Trust and the persons identified as
+         authors of the code. All rights reserved.
+
+         Redistribution and use in source and binary forms, with or
+         without modification, is permitted pursuant to, and subject to
+         the license terms contained in, the Simplified BSD License set
+         forth in Section 4.c of the IETF Trust's Legal Provisions
+         Relating to IETF Documents
+         (https://trustee.ietf.org/license-info).
+
+         The key words 'MUST', 'MUST NOT', 'REQUIRED', 'SHALL', 'SHALL
+         NOT', 'SHOULD', 'SHOULD NOT', 'RECOMMENDED', 'NOT RECOMMENDED',
+         'MAY', and 'OPTIONAL' in this document are to be interpreted as
+         described in BCP 14 [RFC2119] [RFC8174] when, and only when,
+         they appear in all capitals, as shown here.
+
+         This version of this YANG module is part of RFC XXXX
+         (https://tools.ietf.org/html/rfcXXXX); see the RFC itself for
+         full legal notices.";
+
+      // RFC Ed.: replace XXXX with actual RFC number and
+      // remove this note.
+
+      revision 2019-02-17 {
+        description "Initial Revision";
+        reference "RFC XXXX: Cool YANG Module";
+      }
+      container cool-container {
+        description "A cool container.";
+        list cool-list {
+          key name;
+          description "A list of cool things";
+
+          leaf name {
+            type string;
+            description "A cool item name";
+          }
+        }
+      }
+    }
+#+end_src
+
+* References
+** Informative References
+*** RFC8342
+
+# Local Variables:
+# fill-column: 69
+# org-confirm-babel-evaluate: nil
+# org-babel-load-languages: ((shell . t) (yang . t))
+# End:

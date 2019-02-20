@@ -6,7 +6,7 @@
 ;; URL: https://github.com/choppsv1/ox-rfc-export
 ;; Keywords: org, rfc, wp, xml
 ;; Package-Version: 1
-;; Package-Requires: ((emacs "24"))
+;; Package-Requires: ((emacs "24.3") (org "8.3"))
 
 :; This program is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -152,6 +152,13 @@
 
 
 ;;; Utility Functions
+
+(defun org-babel-execute:yang (body params)
+  "Run a block with YANG XML through pyang.
+This function is called by `org-babel-execute-src-block'."
+  (let ((cmd (or (cdr (assoc :cmd params)) "pyang"))
+        (cmdline (or (cdr (assoc :cmdline params)) "--keep-comments -Werror -f yang")))
+    (org-babel-eval (concat cmd " " cmdline) body)))
 
 (defun ox-rfc-ref-fetch-to-cache (basename &optional reload)
   "Fetch the bibliography xml.
@@ -431,7 +438,7 @@ a communication channel."
 	(type (org-element-property :type link)))
     (cond
      ;; Link type is handled by a special function.
-     ((org-export-custom-protocol-maybe link contents 'rfc))
+     ((and (fboundp 'org-export-custom-protocol-maybe) (org-export-custom-protocol-maybe link contents 'rfc)))
      ((member type '("custom-id" "id" "fuzzy"))
       (let ((destination (if (string= type "fuzzy")
 			     (org-export-resolve-fuzzy-link link info)
