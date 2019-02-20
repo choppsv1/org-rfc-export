@@ -59,6 +59,7 @@ test : build test-dep-1 test-autoloads
 	(for test_lib in *-test.el; do                       \
 	    $(EMACS) $(EMACS_BATCH) -L . -L .. -l cl -l $(TEST_DEP_1) -l $$test_lib --eval \
 	    "(progn                                          \
+	      (setq org-confirm-babel-evaluate nil)          \
 	      (fset 'ert--print-backtrace 'ignore)           \
 	      (ert-run-tests-batch-and-exit '(and \"$(TESTS)\" (not (tag :interactive)))))" || exit 1; \
 	done)

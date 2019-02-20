@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet type="text/xsl" href="rfc2629.xslt"?>
+<?rfc toc="yes"?>
+<?rfc compact="no"?>
+<?rfc subcompact="no"?>
+<?rfc symrefs="yes" ?>
+<?rfc sortrefs="yes"?>
+<?rfc iprnotified="no"?>
+<?rfc strict="yes"?>
+<rfc ipr="trust200902" category="std" docName="test-yang-00" submissionType="IETF" consensus="true" tocInclude="true" version="3">
+  <front>
+    <title abbrev="Test YANG RFC">Test YANG RFC</title>
+    <author fullname="Christian Hopps">
+      <organization>chopps@devhopps.com</organization>
+      <address>
+        <email>DevHopps L.L.C.</email>
+      </address>
+    </author>
+    <date />
+  </front>
+  <middle>
+    <section title="Introduction">
+      <t>This is an example of a yang module draft.</t>
+      <t>The YANG data model described in this document conforms to the Network Management Datastore Architecture defined in 
+      <xref target="RFC8342" />.</t>
+    </section>
+    <section title="Cool YANG Module">
+      <t>This section would describe the "Cool YANG Module".</t>
+      <section title="YANG Tree">
+        <artwork>
+<![CDATA[
+module: cool-module
+  +--rw cool-container
+     +--rw cool-list* [name]
+        +--rw name    string
+]]>
+        </artwork>
+      </section>
+    </section>
+    <section title="YANG Module">
+      <figure>
+        <name>cool-module</name>
+        <sourcecode>
+<![CDATA[
+module cool-module {
+  namespace "urn:ietf:cool";
+  prefix cool;
+
+  organization
+    "IETF NETMOD Working Group (NETMOD)";
+  contact
+    "Christian Hopps <chopps@devhopps.com>";
+
+  // RFC Ed.: replace XXXX with actual RFC number and
+  // remove this note.
+
+  description
+    "This module defines a cool feature.
+
+     Copyright (c) 2018 IETF Trust and the persons identified as
+     authors of the code. All rights reserved.
+
+     Redistribution and use in source and binary forms, with or
+     without modification, is permitted pursuant to, and subject to
+     the license terms contained in, the Simplified BSD License set
+     forth in Section 4.c of the IETF Trust's Legal Provisions
+     Relating to IETF Documents
+     (https://trustee.ietf.org/license-info).
+
+     The key words 'MUST', 'MUST NOT', 'REQUIRED', 'SHALL', 'SHALL
+     NOT', 'SHOULD', 'SHOULD NOT', 'RECOMMENDED', 'NOT RECOMMENDED',
+     'MAY', and 'OPTIONAL' in this document are to be interpreted as
+     described in BCP 14 [RFC2119] [RFC8174] when, and only when,
+     they appear in all capitals, as shown here.
+
+     This version of this YANG module is part of RFC XXXX
+     (https://tools.ietf.org/html/rfcXXXX); see the RFC itself for
+     full legal notices.";
+
+  // RFC Ed.: replace XXXX with actual RFC number and
+  // remove this note.
+
+  revision 2019-02-17 {
+    description "Initial Revision";
+    reference "RFC XXXX: Cool YANG Module";
+  }
+  container cool-container {
+    description "A cool container.";
+    list cool-list {
+      key name;
+      description "A list of cool things";
+
+      leaf name {
+        type string;
+        description "A cool item name";
+      }
+    }
+  }
+}
+]]>
+        </sourcecode>
+      </figure>
+    </section>
+  </middle>
+  <back>
+    <references title="Informative References">
+      <reference anchor='RFC8342' target='https://www.rfc-editor.org/info/rfc8342'>
+        <front>
+          <title>Network Management Datastore Architecture (NMDA)</title>
+          <author initials='M.' surname='Bjorklund' fullname='M. Bjorklund'>
+            <organization />
+          </author>
+          <author initials='J.' surname='Schoenwaelder' fullname='J. Schoenwaelder'>
+            <organization />
+          </author>
+          <author initials='P.' surname='Shafer' fullname='P. Shafer'>
+            <organization />
+          </author>
+          <author initials='K.' surname='Watsen' fullname='K. Watsen'>
+            <organization />
+          </author>
+          <author initials='R.' surname='Wilton' fullname='R. Wilton'>
+            <organization />
+          </author>
+          <date year='2018' month='March' />
+          <abstract>
+            <t>Datastores are a fundamental concept binding the data models written in the YANG data modeling language to network management protocols such as the Network Configuration Protocol (NETCONF) and RESTCONF. This document defines an architectural framework for datastores based on the experience gained with the initial simpler model, addressing requirements that were not well supported in the initial model. This document updates RFC 7950.</t>
+          </abstract>
+        </front>
+        <seriesInfo name='RFC' value='8342' />
+        <seriesInfo name='DOI' value='10.17487/RFC8342' />
+      </reference>
+    </references>
+  </back>
+</rfc>

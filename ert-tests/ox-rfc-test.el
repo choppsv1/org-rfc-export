@@ -20,8 +20,8 @@
 ;; See the License for the specific language governing permissions and
 ;; limitations under the License.
 
+(require 'ob)
 (require 'ox-rfc)
-
 
 ;;
 ;; Utility
@@ -76,3 +76,11 @@
   "Check that we produce the expected XML"
   (test-generated "test-lists.org" nil)
   (test-generated "test-lists.org" t))
+
+(ert-deftest basic-xml-yang-01 nil
+  "Test lists XML generation"
+  "Check that we produce the expected XML"
+  (let ((org-confirm-babel-evaluate nil)
+        (org-export-use-babel t))
+    (setq org-babel-load-languages '((bash . t) (shell . t) (yang . t)))
+    (test-generated "test-yang.org" nil)))
