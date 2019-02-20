@@ -7,7 +7,7 @@
 <?rfc sortrefs="yes"?>
 <?rfc iprnotified="no"?>
 <?rfc strict="yes"?>
-<rfc ipr="trust200902" category="std" docName="test-yang-00" submissionType="IETF" consensus="true" tocInclude="true" version="3">
+<rfc ipr="trust200902" category="std" docName="draft-test-yang-00" submissionType="IETF" consensus="true" tocInclude="true" version="3">
   <front>
     <title abbrev="Test YANG RFC">Test YANG RFC</title>
     <author fullname="Christian Hopps">
