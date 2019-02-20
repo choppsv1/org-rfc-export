@@ -48,7 +48,7 @@ test: build test-autoloads
 
 clean:
 	@rm -rf $(ORG_DIR)
-	@rm -f $(AUTOLOADS_FILE) *.elc $(TEST_DIR)/draft-*.xml
+	@rm -f auto $(AUTOLOADS_FILE) *.elc $(TEST_DIR)/draft-*.xml
 
 docker:
 	docker build -t test .

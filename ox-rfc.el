@@ -6,7 +6,7 @@
 ;; URL: https://github.com/choppsv1/ox-rfc-export
 ;; Keywords: org, rfc, wp, xml
 ;; Package-Version: 1
-;; Package-Requires: ((emacs "24"))
+;; Package-Requires: ((emacs "24.3") (org "8.3"))
 
 :; This program is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
