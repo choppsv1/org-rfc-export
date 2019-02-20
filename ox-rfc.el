@@ -2,7 +2,7 @@
 
 ;; Copyright (C) 2019 Christian E. Hopps
 
-;; Author: Christian Hopps <chopps@gmail.com>
+;; Author: Christian Hopps <chopps@devhopps.com>
 ;; URL: https://github.com/choppsv1/ox-rfc-export
 ;; Keywords: org, rfc, wp, xml
 ;; Package-Version: 1

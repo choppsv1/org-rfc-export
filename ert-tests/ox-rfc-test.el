@@ -1,5 +1,5 @@
 ;;
-;; February 19 2019, Christian Hopps <chopps@gmail.com>
+;; February 19 2019, Christian Hopps <chopps@devhopps.com>
 ;;
 ;; Copyright (c) 2015 by Christian E. Hopps
 ;; All rights reserved.
