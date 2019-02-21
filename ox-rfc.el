@@ -65,7 +65,7 @@
   :type 'string
   :group 'org-export-rfc)
 
-(defcustom ox-rfc-tidy-args "-q -wrap 10000 -indent -xml"
+(defcustom ox-rfc-tidy-args "-q -wrap 0 -indent -xml"
   "The default arguments to pass to tidy for cleaning up XML"
   :type 'string
   :group 'org-export-rfc)
@@ -75,7 +75,7 @@
   :type 'string
   :group 'org-export-rfc)
 
-(defcustom ox-rfc-try-tidy t
+(defcustom ox-rfc-try-tidy nil
   "If non-nil try and use tidy to cleanup generated XML"
   :type 'boolean
   :group 'org-export-rfc)
