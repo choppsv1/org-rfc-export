@@ -39,7 +39,7 @@ module: cool-module
     </section>
     <section title="YANG Module">
       <figure>
-        <name>cool-module</name>
+        <name>A Cool Module</name>
         <sourcecode>
 <![CDATA[
 module cool-module {

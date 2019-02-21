@@ -168,8 +168,8 @@ simple be "RFC7991" which ~ox-rfc.el~ will translate.
 *** Figures and Artwork (Examples and Source code).
 
 ~ox-rfc.el~ maps example and source blocks to ~xml2rfc~ ~<artwork>~ elements.
-Additionally if a ~#+name:~ is given for the block then it the artwork will be
-placed inside a ~<figure>~ element with the ~#+name:~ value as the caption.
+Additionally if a ~#+CAPTION:~ is given for the block then it the artwork will be
+placed inside a ~<figure>~ element with the ~#+CAPTION:~ value as the caption.
 
 *** Blockquotes
 

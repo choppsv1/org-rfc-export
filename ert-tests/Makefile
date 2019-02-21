@@ -50,8 +50,8 @@ clean:
 	@rm -rf $(ORG_DIR)
 	@rm -f auto $(AUTOLOADS_FILE) *.elc $(TEST_DIR)/draft-*.xml
 
-docker:
-	docker build -t test .
+docker-build:
+	docker build -t org-rfc-test .
 
 docker-run:
-	docker run -v $(PWD):/work -it test
+	docker run -v $(PROJ_DIR):/work -it org-rfc-test

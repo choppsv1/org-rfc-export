@@ -1,5 +1,6 @@
 export PACKAGE_NAME := ox-rfc
 export PROJ_DIR := $(shell pwd)
+export
 
 all:
 
@@ -12,3 +13,9 @@ clean:
 
 install:
 
+
+docker-build:
+	$(MAKE) -C ert-tests docker-build
+
+docker-run:
+	docker run -v $(PROJ_DIR):/work -it org-rfc-test

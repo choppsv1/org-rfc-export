@@ -24,7 +24,7 @@ This section would describe the "Cool YANG Module".
 
 ** YANG Tree
 
-#+name: Cool Module YANG tree diagram.
+#+CAPTION: Cool Module YANG tree diagram.
 #+begin_src bash  :var file=cool-module :results output verbatim replace :wrap example :exports results
 pyang -f tree ${file}
 #+end_src
@@ -39,8 +39,9 @@ module: cool-module
 
 * YANG Module
 
+#+CAPTION: A Cool Module
 #+name: cool-module
-#+header: :file /tmp/cool-module.yang :results output code silent :dir
+#+header: :file /tmp/cool-module.yang :results output code silent
 #+begin_src yang :exports code
     module cool-module {
       namespace "urn:ietf:cool";

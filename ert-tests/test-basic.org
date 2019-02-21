@@ -7,7 +7,7 @@
 #+RFC_AREA: routing
 #+RFC_WORKGROUP: lsr
 #+RFC_VERSION: 00
-#+RFC_AUTHORS: (("Christian Hopps" "chopps@devhopps.com" "DevHopps, LLC") ("Author Two" "atwo@example.com" "Ex. Company"))
+#+RFC_AUTHORS: (("Christian Hopps" "chopps@labn.net" "LabN Consulting, L.L.C.") ("Author Two" "atwo@example.com" "Ex. Company"))
 #+RFC_XML_VERSION: 3
 #
 # Do: title, table-of-contents ::fixed-width-sections |tables
@@ -82,8 +82,8 @@ Christian Hopps help writing this document.
 The following people made significant contributions to this document.
 
 #+begin_example
-   Christian Hopps
-   DevHopps, L.L.C.
+   John Smith
+   Example Company
 
-   Email: chopps@devhopps.com
+   Email: jsmith@example.com
 #+end_example

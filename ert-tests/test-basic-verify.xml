@@ -10,10 +10,10 @@
 <rfc ipr="trust200902" category="std" docName="draft-test-basic-00" submissionType="IETF" consensus="true" tocInclude="true" version="3">
   <front>
     <title abbrev="Test Basic RFC">Test Basic RFC</title>
-    <author fullname="Author One">
-      <organization>Ex. Company</organization>
+    <author fullname="Christian Hopps">
+      <organization>LabN Consulting, L.L.C.</organization>
       <address>
-        <email>aone@example.com</email>
+        <email>chopps@labn.net</email>
       </address>
     </author>
     <author fullname="Author Two">
@@ -141,10 +141,10 @@
       <t>The following people made significant contributions to this document.</t>
       <artwork>
 <![CDATA[
-Christian Hopps
-LabN Consulting, L.L.C.
+John Smith
+Example Company
 
-Email: chopps@labn.net
+Email: jsmith@example.com
 ]]>
       </artwork>
     </section>

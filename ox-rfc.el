@@ -273,9 +273,9 @@ a communication channel."
 CONTENTS is nil.  INFO is a plist used as a communication
 channel."
 
-  (let* ((name (org-element-property :name example-block))
-         (nameattr (if name (format "<name>%s</name>" name) "")))
-    (if name
+  (let* ((caption (car (org-export-get-caption example-block)))
+         (nameattr (if caption (format "<name>%s</name>" caption) "")))
+    (if caption
         (concat (format "<figure>%s<artwork><![CDATA[\n" nameattr)
                 (org-export-format-code-default example-block info)
                 "]]></artwork></figure>")
@@ -310,10 +310,10 @@ holding contextual information."
   "Transcode SRC-BLOCK element into RFC format.
 CONTENTS is nil.  INFO is a plist used as a communication
 channel."
-  (let* ((name (org-element-property :name src-block))
-         (nameattr (if name (format "<name>%s</name>" name) ""))
-         (figopen (if name (format "<figure>%s" nameattr) ""))
-         (figclose (if name "</figure>" "")))
+  (let* ((caption (car (org-export-get-caption src-block)))
+         (nameattr (if caption (format "<name>%s</name>" caption) ""))
+         (figopen (if caption (format "<figure>%s" nameattr) ""))
+         (figclose (if caption "</figure>" "")))
     (if (ox-rfc-render-v3)
         ;; Do we always want figure? Or like export block only when there's a name?
         (concat figopen "<sourcecode><![CDATA[\n"
