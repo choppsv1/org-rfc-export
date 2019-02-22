@@ -317,8 +317,8 @@ channel."
          (v3 (ox-rfc-render-v3))
          (v2 (not v3))
          (nameattr (if (and v3 caption) (format "<name>%s</name>" caption) ""))
-         (figopen (if (or v2 caption) (format "<figure>%s" nameattr) ""))
-         (figclose (if (or v2 caption) "</figure>" ""))
+         (figopen (if (or v2 caption) (format "<t>\n<figure>%s\n" nameattr) "<t>\n"))
+         (figclose (if (or v2 caption) "</figure>\n</t>" "\n</t>"))
          (codetag (if (and is-src (ox-rfc-render-v3)) "sourcecode" "artwork")))
     (concat figopen
             (format "<%s>" codetag)
@@ -333,7 +333,8 @@ channel."
 CONTENTS is nil.  INFO is a plist used as a communication
 channel."
   (ox-rfc--artwork example-block
-                   (org-export-format-code-default example-block info)
+                   (let ((org-src-preserve-indentation t))
+                     (org-export-format-code-default example-block info))
                    info
                    nil))
 
@@ -364,7 +365,8 @@ holding contextual information."
 CONTENTS is nil.  INFO is a plist used as a communication
 channel."
   (ox-rfc--artwork src-block
-                   (org-export-format-code-default src-block info)
+                   (let ((org-src-preserve-indentation t))
+                     (org-export-format-code-default src-block info))
                    info
                    t))
 
