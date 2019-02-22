@@ -67,7 +67,9 @@ digits with versions 0-9 given as 00-09).
   ,#+RFC_CONSENSUS: true
   ,#+RFC_IPR: trust200902
   ,#+RFC_NAME:
+  ,#+RFC_OBSOLETES:
   ,#+RFC_STREAM: "IETF"
+  ,#+RFC_UPDATES:
   ,#+RFC_XML_VERSION: "3"
 #+end_example
 
@@ -79,7 +81,9 @@ digits with versions 0-9 given as 00-09).
 - RFC_IPR :: the ~ipr <rfc>~ attribute (default "trust200902").
 - RFC_NAME :: The base name of the internet draft, if not specified the Org file
               name is used.
+- RFC_OBSOLETES :: Comma separated list of RFCs this document obsoletes.
 - RFC_STREAM :: The ~submissionType <rfc>~ attribute (default "IETF").
+- RFC_UPDATES :: Comma separated list of RFCs this document updates.
 - RFC_XML_VERSION :: The ~version <rfc>~ attribute (default "3").
 
 The ~toc~ export setting for generating a table of contents is honored.

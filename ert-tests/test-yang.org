@@ -1,7 +1,7 @@
 #+TITLE: Test YANG RFC
 #+AUTHOR: Christian Hopps
-#+EMAIL: chopps@devhopps.com
-#+AFFILIATION: DevHopps L.L.C.
+#+EMAIL: chopps@labn.net
+#+AFFILIATION: LabN Consulting, L.L.C.
 #+RFC_VERSION: 00
 #+RFC_NAME: draft-test-yang
 #
@@ -50,7 +50,7 @@ module: cool-module
       organization
         "IETF NETMOD Working Group (NETMOD)";
       contact
-        "Christian Hopps <chopps@devhopps.com>";
+        "Christian Hopps <chopps@labn.net>";
 
       // RFC Ed.: replace XXXX with actual RFC number and
       // remove this note.

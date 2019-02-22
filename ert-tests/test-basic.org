@@ -2,12 +2,15 @@
 #+STARTUP: align entitiespretty hidestars inlineimages latexpreview noindent showall
 #
 #+TITLE: Test Basic RFC
-#
+#+AUTHOR: Christian E. Hopps
+#+EMAIL: chopps@labn.net
+#+AFFILIATION: LabN Consulting, L.L.C.
+
 #+RFC_NAME: draft-test-basic
 #+RFC_AREA: routing
 #+RFC_WORKGROUP: lsr
 #+RFC_VERSION: 00
-#+RFC_AUTHORS: (("Christian Hopps" "chopps@labn.net" "LabN Consulting, L.L.C.") ("Author Two" "atwo@example.com" "Ex. Company"))
+#+RFC_ADD_AUTHOR: ("Author Two" "atwo@example.com" "Ex. Company")
 #+RFC_XML_VERSION: 3
 #
 # Do: title, table-of-contents ::fixed-width-sections |tables

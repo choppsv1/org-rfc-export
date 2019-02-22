@@ -1,0 +1,26 @@
+# -*- fill-column: 69; org-confirm-babel-evaluate: nil -*-
+#+STARTUP: align entitiespretty hidestars inlineimages latexpreview noindent showall
+#
+#+TITLE: Test Table RFC
+#+AUTHOR: Author One
+#+EMAIL: aone@example.com
+#+RFC_NAME: draft-test-table
+#+RFC_VERSION: 00
+#+OPTIONS: prop:nil title:t toc:t \n:nil ::t |:t ^:{} -:t *:t ':nil
+
+* Test Table
+
+** No Caption
+
+| Column One | Column Two |
+|------------+------------|
+| R1C1 Value | R1C2 Value |
+| R2C1 Value | R2C2 Value |
+
+** Caption
+
+ #+CAPTION: A Table Caption
+| Column One | Column Two |
+|------------+------------|
+| R1C1 Value | R1C2 Value |
+| R2C1 Value | R2C2 Value |

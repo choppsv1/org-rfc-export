@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="rfc2629.xslt"?>
+<?rfc toc="yes"?>
+<?rfc compact="no"?>
+<?rfc subcompact="no"?>
+<?rfc symrefs="yes" ?>
+<?rfc sortrefs="yes"?>
+<?rfc iprnotified="no"?>
+<?rfc strict="yes"?>
+<rfc ipr="trust200902"
+     category="std"
+     docName="draft-test-table-00"     submissionType="IETF"    consensus="true"    tocInclude="true"    version="3">
+  <front>
+    <title abbrev="Test Table RFC">Test Table RFC</title>
+<author fullname="Author One"><address><email>aone@example.com</email></address></author>  <date/>  </front>  <middle>
+
+<section title="Test Table">
+<section title="No Caption">
+<table>
+
+<thead><tr><th>Column One</th><th>Column Two</th></tr>
+</thead>
+<tbody><tr><td>R1C1 Value</td><td>R1C2 Value</td></tr>
+<tr><td>R2C1 Value</td><td>R2C2 Value</td></tr>
+</tbody>
+</table>
+
+</section>
+
+<section title="Caption">
+<table>
+<name>A Table Caption</name>
+<thead><tr><th>Column One</th><th>Column Two</th></tr>
+</thead>
+<tbody><tr><td>R1C1 Value</td><td>R1C2 Value</td></tr>
+<tr><td>R2C1 Value</td><td>R2C2 Value</td></tr>
+</tbody>
+</table>
+
+</section>
+
+</section>
+</middle><back>  </back>
+</rfc>

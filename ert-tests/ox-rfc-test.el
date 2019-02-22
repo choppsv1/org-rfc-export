@@ -77,6 +77,12 @@
   (test-generated "test-lists.org" nil)
   (test-generated "test-lists.org" t))
 
+(ert-deftest basic-xml-table-01 nil
+  "Test lists XML generation"
+  "Check that we produce the expected XML"
+  (test-generated "test-table.org" nil)
+  (test-generated "test-table.org" t))
+
 (ert-deftest basic-xml-yang-01 nil
   "Test lists XML generation"
   "Check that we produce the expected XML"

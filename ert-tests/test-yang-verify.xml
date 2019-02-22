@@ -11,9 +11,9 @@
   <front>
     <title abbrev="Test YANG RFC">Test YANG RFC</title>
     <author fullname="Christian Hopps">
-      <organization>chopps@devhopps.com</organization>
+      <organization>LabN Consulting, L.L.C.</organization>
       <address>
-        <email>DevHopps L.L.C.</email>
+        <email>chopps@labn.net</email>
       </address>
     </author>
     <date />
@@ -49,7 +49,7 @@ module cool-module {
   organization
     "IETF NETMOD Working Group (NETMOD)";
   contact
-    "Christian Hopps <chopps@devhopps.com>";
+    "Christian Hopps <chopps@labn.net>";
 
   // RFC Ed.: replace XXXX with actual RFC number and
   // remove this note.
