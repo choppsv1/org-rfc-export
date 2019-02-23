@@ -146,6 +146,15 @@ as sub-sub-section headlines below one of those 2 sub-section headlines.
 ~ox-rfc.el~ automatically expands certain standard references namely headline
 names that start with: "I-D", "IEEE", or "RFC".
 
+Additionally if no standard reference is available then the bibliographic
+information may be specified as properties under the headline.
+
+Finally a ~:REF_STDXML~ property may be used to refer to the standard XML
+bibliogrpahic entry if one wishes to pick a different headline to refer to it
+(i.e., different reference text for use in the document).
+
+TODO: ~:REF_STDXML~ is currently broken.
+
 Here's a full example:
 
 #+caption: Example References Section.
@@ -155,6 +164,10 @@ Here's a full example:
   ,*** RFC2119
   ,** Informative Refereneces
   ,*** RFC7991
+  ,*** W3GGEO
+  :PROPERTIES:
+  :REF_STDXML: W3C-CR-geolocation-API-20100907
+  :END:
   ,*** StudyScarlet
   :PROPERTIES:
   :REF_TITLE: A Study In Scarlet
@@ -171,6 +184,7 @@ The Properties for creating a custom reference are as follows:
                 elisp format (e.g., ~("Author One" "Author Two")~)
 - REF_CONTENT :: The value for the ~<refcontent>~ xml2rfc element.
 - REF_DATE :: The value should be given in emacs ~parse-time-string~ format.
+- REF_STDXML :: The value should be the standard reference text (e.g., "RFC.0791").
 - REF_TITLE :: Title of cited work.
 
 ** Features

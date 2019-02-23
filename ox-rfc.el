@@ -386,8 +386,8 @@ channel."
          (v3 (ox-rfc-render-v3))
          (v2 (not v3))
          (nameattr (if (and v3 caption) (format "<name>%s</name>" caption) ""))
-         (figopen (if (or v2 caption) (format "<t>\n<figure>%s\n" nameattr) "<t>\n"))
-         (figclose (if (or v2 caption) "</figure>\n</t>" "\n</t>"))
+         (figopen (if (or v2 caption) (format "<figure>%s" nameattr) ""))
+         (figclose (if (or v2 caption) "</figure>" ""))
          (codetag (if (and is-src (ox-rfc-render-v3)) "sourcecode" "artwork")))
     (concat figopen
             (format "<%s>" codetag)
@@ -561,8 +561,12 @@ a communication channel."
                   (dpparent (org-export-get-parent-element dparent))
                   (ppname (org-element-property :raw-value dpparent)))
 	     (if (string= "References" ppname)
-                 (let ((xtarget (org-export-data (org-element-property :title destination) info)))
-                   (format "<xref target=\"%s\"/>" xtarget))
+                 (let ((xxtarget (org-element-property :REF_STDXML destination))
+                       (xtarget (org-export-data (org-element-property :title destination) info)))
+                   (if (not xxtarget)
+                       (format "<xref target=\"%s\"/>" xtarget)
+                     (setq xxtarget (org-export-data xxtarget info))
+                     (format "<xref target=\"%s\">%s</xref>" xxtarget xtarget)))
                ;; Need to normalize references to allow for non leading zeros
                (format
                 "<xref%s target=\"%s\">%s</xref>"
@@ -674,10 +678,13 @@ a communication channel."
 INFO is a plist used as a communication channel."
   (let ((title (org-export-data (org-element-property :title headline) info))
         (reftitle (org-element-property :REF_TITLE headline))
-        (refbib (org-element-property :REF_BIBXML headline)))
+        (refstd (org-element-property :REF_STDXML headline))
+        (refxml (org-element-property :REF_URLXML headline)))
     (cond
-     (refbib
-      (ox-rfc-load-ref-file-as-string (ox-rfc-url-ref-fetch-to-cache refbib)))
+     (refstd
+      (ox-rfc-load-ref-file-as-string (ox-rfc-std-ref-fetch-to-cache refstd)))
+     (refxml
+      (ox-rfc-load-ref-file-as-string (ox-rfc-url-ref-fetch-to-cache refxml)))
      ((not reftitle)
       (ox-rfc-load-ref-file-as-string (ox-rfc-std-ref-fetch-to-cache title)))
      (t
