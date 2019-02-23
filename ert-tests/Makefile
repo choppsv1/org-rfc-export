@@ -44,6 +44,7 @@ test-travis:
 	@if test -z "$$TRAVIS" && test -e $(TRAVIS_FILE); then travis-lint $(TRAVIS_FILE); fi
 
 test: build test-autoloads
+	$(EMACS) $(EMACS_BATCH) -L .. -l ert -l unit-test.el -f ert-run-tests-batch-and-exit
 	$(EMACS) $(EMACS_BATCH) -L .. -l ert -l ox-rfc-test.el -f ert-run-tests-batch-and-exit
 
 clean:

@@ -27,7 +27,8 @@
     <section title="Cool YANG Module">
       <t>This section would describe the "Cool YANG Module".</t>
       <section title="YANG Tree">
-        <artwork>
+        <t>
+          <artwork>
 <![CDATA[
 module: cool-module
   +--rw cool-container
@@ -35,10 +36,12 @@ module: cool-module
         +--rw name    string
 ]]>
         </artwork>
+      </t>
       </section>
     </section>
     <section title="YANG Module">
-      <figure>
+      <t>
+        <figure>
         <name>A Cool Module</name>
         <sourcecode>
 <![CDATA[
@@ -100,6 +103,7 @@ module cool-module {
 ]]>
         </sourcecode>
       </figure>
+      </t>
     </section>
   </middle>
   <back>

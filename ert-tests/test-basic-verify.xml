@@ -139,14 +139,16 @@
     </section>
     <section title="Contributors">
       <t>The following people made significant contributions to this document.</t>
+      <t>
       <artwork>
 <![CDATA[
-John Smith
-Example Company
+   John Smith
+   Example Company
 
-Email: jsmith@example.com
+   Email: jsmith@example.com
 ]]>
       </artwork>
+      </t>
     </section>
   </back>
 </rfc>

@@ -18,6 +18,27 @@ This software is seen as a good start, but there's plenty of room for
 improvements and adding more features. I'm certainly hoping that others will
 also help with contributions to improve the code.
 
+** Quick Install/Use with Makefile:
+
+MELPA integration is taking a while, in the meantime you can use a makefile rule
+to export your ORG as xml2rfc outputs
+
+#+begin_src makefile
+  ORG := example.org
+  BASE := $(shell sed -e '/^\#+RFC_NAME:/!d;s/\#+RFC_NAME: *\(.*\)/\1/' $(ORG))
+  VERSION := $(shell sed -e '/^\#+RFC_VERSION:/!d;s/\#+RFC_VERSION: *\([0-9]*\)/\1/' $(ORG))
+  all: $(BASE).xml $(BASE)-$(VERSION).txt
+  clean:
+          rm ${BASE}*.{xml,txt,html,pdf}
+  ox-rfc.el:
+          curl -fLO 'https://raw.githubusercontent.com/choppsv1/org-rfc-export/master/ox-rfc.el'
+  $(BASE).xml: $(ORG) ox-rfc.el
+          emacs -Q --batch --eval '(setq org-confirm-babel-evaluate nil)' -l ./ox-rfc.el $< -f ox-rfc-export-to-xml
+  %-$(VERSION).txt: %.xml
+          xml2rfc --text -o $@ $<
+#+end_src
+
+
 ** Formatting of this document.
 
 This document is formatted in Org mode. If you are viewing it normal ASCII then

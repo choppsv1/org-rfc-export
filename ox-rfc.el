@@ -36,6 +36,7 @@
 ;;; Code:
 
 (require 'ox)
+(require 'url-parse)
 ;; (require 'ox-ascii)
 
 
@@ -56,13 +57,33 @@
   :type 'string
   :group 'org-export-rfc)
 
+(defcustom ox-rfc-ref-3gpp-url-directory "http://xml2rfc.ietf.org/public/rfc/bibxml-3gpp/"
+  "The base URL to fetch IEEE references from."
+  :type 'string
+  :group 'org-export-rfc)
+
 (defcustom ox-rfc-ref-ieee-url-directory "http://xml2rfc.ietf.org/public/rfc/bibxml-ieee/"
+  "The base URL to fetch IEEE references from."
+  :type 'string
+  :group 'org-export-rfc)
+
+(defcustom ox-rfc-ref-misc-url-directory "http://xml2rfc.ietf.org/public/rfc/bibxml-misc/"
   "The base URL to fetch IEEE references from."
   :type 'string
   :group 'org-export-rfc)
 
 (defcustom ox-rfc-ref-rfc-url-directory  "http://www.rfc-editor.org/refs/bibxml/"
   "The base URL to fetch IETF RFCs references from."
+  :type 'string
+  :group 'org-export-rfc)
+
+(defcustom ox-rfc-ref-w3c-url-directory "http://xml2rfc.ietf.org/public/rfc/bibxml-w3c/"
+  "The base URL to fetch IEEE references from."
+  :type 'string
+  :group 'org-export-rfc)
+
+(defcustom ox-rfc-ref-xsf-url-directory "http://xml2rfc.ietf.org/public/rfc/bibxml-xsf/"
+  "The base URL to fetch IEEE references from."
   :type 'string
   :group 'org-export-rfc)
 
@@ -191,24 +212,66 @@ This function is called by `org-babel-execute-src-block'."
         (cmdline (or (cdr (assoc :cmdline params)) "--keep-comments -Werror -f yang")))
     (org-babel-eval (concat cmd " " cmdline) body)))
 
-(defun ox-rfc-ref-fetch-to-cache (basename &optional reload)
+(defun ox-rfc-url-ref-fetch-to-cache (url &optional reload)
+  (let* ((fname (file-name-nondirectory (url-filename (url-generic-parse-url url))))
+         (pathname (concat (file-name-as-directory ox-rfc-ref-cache-directory) fname)))
+    (unless (and (file-exists-p pathname) (not reload))
+      (make-directory ox-rfc-ref-cache-directory t)
+      (url-copy-file url pathname t))
+    pathname))
+
+(defun ox-rfc-std--root (ref)
+  "Return the root of the filename for REF."
+  (cond
+   ((and (string-prefix-p "RFC" ref) (not (string-prefix-p "RFC." ref)))
+    (concat "RFC." (substring ref 3)))
+   ((and (string-prefix-p "IEEE" ref) (not (string-prefix-p "IEEE." ref)))
+    (concat "IEEE." (substring ref 4)))
+   ((and (string-prefix-p "SDO-3GPP" ref) (not (string-prefix-p "SDO-3GPP." ref)))
+    (concat "SDO-3GPP." (substring ref 4)))
+   ((and (string-prefix-p "3GPP" ref) (not (string-prefix-p "3GPP." ref)))
+    (concat "3GPP." (substring ref 4)))
+   ((and (string-prefix-p "XSF-XEP" ref) (not (string-prefix-p "XSF-XEP-" ref)))
+    (concat "XSF-XEP-" (substring ref 7)))
+   ((string-prefix-p "XEP-" ref)
+    (concat "XSF-XEP-" (substring ref 4)))
+   ((string-prefix-p "XEP" ref)
+    (concat "XSF-XEP-" (substring ref 3)))
+   (t ref)))
+
+(defun ox-rfc-std--basename (ref)
+  "Return the basename of the filename for REF."
+  (concat "reference." (ox-rfc-std--root ref) ".xml"))
+
+(defun ox-rfc-std--url-dir (ref)
+  "Return the base filename for a URL to fetch REF."
+  (let* ((prefix (substring ref 0 3))
+         (x '(("RFC" . ox-rfc-ref-rfc-url-directory)
+              ("I-D" . ox-rfc-ref-draft-url-directory)
+              ("IEE" . ox-rfc-ref-ieee-url-directory)
+              ("W3C" . ox-rfc-ref-w3c-url-directory)
+              ("SDO" . ox-rfc-ref-3gpp-url-directory)
+              ("3GP" . ox-rfc-ref-3gpp-url-directory)
+              ("XEP" . ox-rfc-ref-xsf-url-directory)
+              ("XSF" . ox-rfc-ref-xsf-url-directory)
+              ))
+         (dirsym (or (cdr (assoc-string prefix x)) 'ox-rfc-ref-misc-url-directory)))
+    (file-name-as-directory (symbol-value dirsym))))
+
+(defun ox-rfc-std--url (ref)
+  (concat (ox-rfc-std--url-dir ref) (ox-rfc-std--basename ref)))
+
+(defun ox-rfc-std--cache-name (ref)
+  (concat (file-name-as-directory ox-rfc-ref-cache-directory) (ox-rfc-std--basename ref)))
+
+(defun ox-rfc-std-ref-fetch-to-cache (ref &optional reload)
   "Fetch the bibliography xml.
 The document is identified by BASENAME. If RELOAD is specified
 then the cache is overwritten."
-  (let* ((pathname (concat (file-name-as-directory ox-rfc-ref-cache-directory) "reference." basename ".xml"))
-         url)
+  (let* ((pathname (ox-rfc-std--cache-name ref)))
     (unless (and (file-exists-p pathname) (not reload))
       (make-directory ox-rfc-ref-cache-directory t)
-      (cond
-       ((string-prefix-p "RFC" basename)
-        (setq url (concat ox-rfc-ref-rfc-url-directory (concat "reference." basename ".xml"))))
-       ((string-prefix-p "I-D" basename)
-        (setq url (concat ox-rfc-ref-draft-url-directory (concat "reference." basename ".xml"))))
-       ((string-prefix-p "IEEE" basename)
-        (setq url (concat ox-rfc-ref-ieee-url-directory (concat "reference." basename ".xml"))))
-       (t (error (concat "Unknown reference prefix for: " basename))))
-      (url-copy-file url pathname t)
-      pathname)
+      (url-copy-file (ox-rfc-std--url ref) pathname t))
     pathname))
 
 (defun ox-rfc-get-tidy ()
@@ -277,7 +340,7 @@ If TIDY is non-nil then run the file through tidy first."
                (append author add-authors)
                "\n")))
 
-(defun ox-ref-author-list-from-prop (item)
+(defun ox-rfc-ref-author-list-from-prop (item)
   "Return the XML for and author or list of authors.
 The author list is looked for in ITEM using property named PNAME."
   (let ((author (org-element-property :REF_AUTHOR item))
@@ -308,7 +371,7 @@ a communication channel."
 
 ;;;; Example Block, Src Block and Export Block
 
-(defun ox-rfc--artwork (a-block contents info &optional is-src)
+(defun ox-rfc--artwork (a-block contents _info &optional is-src)
   "Transcode EXAMPLE-BLOCK element into RFC format.
 CONTENTS is nil.  INFO is a plist used as a communication
 channel."
@@ -603,20 +666,21 @@ a communication channel."
 (defun ox-rfc-reference (headline _contents info)
   "Transcode reference to HEADLINE into RFC format.
 INFO is a plist used as a communication channel."
-  (let ((title (org-export-data (org-element-property :title headline) info)))
+  (let ((title (org-export-data (org-element-property :title headline) info))
+        (reftitle (org-element-property :REF_TITLE headline))
+        (refbib (org-element-property :REF_BIBXML headline)))
     (cond
-     ((string-prefix-p "RFC" title t)
-      (let ((rfcref (format "%04d" (string-to-number (substring title 3)))))
-        (ox-rfc-load-ref-file-as-string (ox-rfc-ref-fetch-to-cache (concat "RFC." rfcref)))))
-     ((string-prefix-p "I-D." title t)
-      (ox-rfc-load-ref-file-as-string (ox-rfc-ref-fetch-to-cache title)))
+     (refbib
+      (ox-rfc-load-ref-file-as-string (ox-rfc-url-ref-fetch-to-cache refbib)))
+     ((not reftitle)
+      (ox-rfc-load-ref-file-as-string (ox-rfc-std-ref-fetch-to-cache title)))
      (t
       ;; (message "PROP: %s %s" title (org-element-context headline))
       (let ((refann (org-trim (org-export-data (org-element-property :REF_ANNOTATION headline) info)))
-            (author (ox-ref-author-list-from-prop headline))
+            (author (ox-rfc-ref-author-list-from-prop headline))
             (refcontent (org-trim (org-export-data (org-element-property :REF_CONTENT headline) info)))
-            (refdate (org-export-data (org-element-property :REF_DATE headline) info))
-            (reftitle (org-export-data (org-element-property :REF_TITLE headline) info)))
+            (reftitle (org-export-data reftitle info))
+            (refdate (org-export-data (org-element-property :REF_DATE headline) info)))
         (if (not reftitle)
             (setq reftitle title))
         (if (not refdate)
