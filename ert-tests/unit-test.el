@@ -15,33 +15,33 @@
   "Check that our feature loaded"
   (should (featurep 'ox-rfc)))
 
-(ert-deftest ref-names-01 nil
-  "Test basic XML generation"
-  (let ((good "reference.RFC.8122.xml"))
-    (should (string= good (ox-rfc-std--basename "RFC8122")))
-    (should (string= good (ox-rfc-std--basename "RFC.8122"))))
-
-  (let ((good "reference.IEEE.802.11.xml"))
-    (should (string= good (ox-rfc-std--basename "IEEE802.11")))
-    (should (string= good (ox-rfc-std--basename "IEEE.802.11"))))
-
-  ;; ...
-)
+(setq utvals '((("RFC0791" "RFC.0791") ;; "RFC791" "RFC.791" "RFC 791"
+                "http://www.rfc-editor.org/refs/bibxml/reference.RFC.0791.xml")
+               (("I-D.chopps-isis-bfd-tlv")
+                "http://xml2rfc.ietf.org/public/rfc/bibxml-ids/reference.I-D.chopps-isis-bfd-tlv.xml")
+               (("W3C.CR-geolocation-API-20100907")
+                "http://xml2rfc.ietf.org/public/rfc/bibxml-w3c/reference.W3C.CR-geolocation-API-20100907.xml")
+               (("XEP-0043" "XEP0043" "XSF.XEP0043" "XSF.XEP-0043") ;; "XEP43"
+                "http://www.xmpp.org/extensions/refs/reference.XSF.XEP-0043.xml")
+               (("3GPP.36.457" "SDO-3GPP.36.457")
+                "http://xml2rfc.ietf.org/public/rfc/bibxml-3gpp/reference.3GPP.36.457.xml")
+               (("IEEE802.1Q_2014" "IEEE.802.1Q_2014")
+               "http://xml2rfc.ietf.org/public/rfc/bibxml-ieee/reference.IEEE.802.1Q_2014.xml")
+               (("ISO.10589.1992")
+                "http://xml2rfc.ietf.org/public/rfc/bibxml-misc/reference.ISO.10589.1992.xml")))
 
 (ert-deftest ref-url-01 nil
-  "Test basic XML generation"
-  (let ((good "http://www.rfc-editor.org/refs/bibxml/reference.RFC.8122.xml"))
-    (should (string= good (ox-rfc-std--url "RFC8122")))
-    (should (string= good (ox-rfc-std--url "RFC.8122"))))
-
-  ;; ...
-  )
+  "Test URL for reference fetching."
+  (dolist (x utvals)
+    (let ((variants (car x))
+          (good (cadr x)))
+      (dolist (v variants)
+        (should (string= good (ox-rfc-std--url v)))))))
 
 (ert-deftest ref-cache-name-01 nil
-  "Test basic XML generation"
-  (let ((good (concat ox-rfc-ref-cache-directory "reference.RFC.8122.xml")))
-    (should (string= good (ox-rfc-std--cache-name "RFC8122")))
-    (should (string= good (ox-rfc-std--cache-name "RFC.8122"))))
-
-  ;; ...
-  )
+  "Test cache name for ref fetching."
+  (dolist (x utvals)
+    (let ((variants (car x))
+          (good (concat ox-rfc-ref-cache-directory (replace-regexp-in-string ".*/" "" (cadr x)))))
+      (dolist (v variants)
+        (should (string= good (ox-rfc-std--cache-name v)))))))

@@ -82,7 +82,7 @@
   :type 'string
   :group 'org-export-rfc)
 
-(defcustom ox-rfc-ref-xsf-url-directory "http://xml2rfc.ietf.org/public/rfc/bibxml-xsf/"
+(defcustom ox-rfc-ref-xsf-url-directory "http://www.xmpp.org/extensions/refs/"
   "The base URL to fetch IEEE references from."
   :type 'string
   :group 'org-export-rfc)
@@ -228,15 +228,21 @@ This function is called by `org-babel-execute-src-block'."
    ((and (string-prefix-p "IEEE" ref) (not (string-prefix-p "IEEE." ref)))
     (concat "IEEE." (substring ref 4)))
    ((and (string-prefix-p "SDO-3GPP" ref) (not (string-prefix-p "SDO-3GPP." ref)))
-    (concat "SDO-3GPP." (substring ref 4)))
+    (concat "3GPP." (substring ref 8)))
+   ((string-prefix-p "SDO-3GPP." ref)
+    (concat "3GPP." (substring ref 9)))
    ((and (string-prefix-p "3GPP" ref) (not (string-prefix-p "3GPP." ref)))
     (concat "3GPP." (substring ref 4)))
-   ((and (string-prefix-p "XSF-XEP" ref) (not (string-prefix-p "XSF-XEP-" ref)))
-    (concat "XSF-XEP-" (substring ref 7)))
+   ((and (string-prefix-p "XSF.XEP" ref) (not (string-prefix-p "XSF.XEP-" ref)))
+    (concat "XSF.XEP-" (substring ref 7)))
+   ((string-prefix-p "XSF-XEP-" ref)
+    (concat "XSF.XEP-" (substring ref 8)))
+   ((string-prefix-p "XSF-XEP" ref)
+    (concat "XSF.XEP-" (substring ref 7)))
    ((string-prefix-p "XEP-" ref)
-    (concat "XSF-XEP-" (substring ref 4)))
+    (concat "XSF.XEP-" (substring ref 4)))
    ((string-prefix-p "XEP" ref)
-    (concat "XSF-XEP-" (substring ref 3)))
+    (concat "XSF.XEP-" (substring ref 3)))
    (t ref)))
 
 (defun ox-rfc-std--basename (ref)
