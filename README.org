@@ -67,23 +67,19 @@ most sense to be placed at the top of the file:
 *** Required and option export variables
 **** Required export variables:
 
-A few variables need to always be set. They are listed here:
+A two variables always need to be set. They are listed here:
 
 #+begin_example
   ,#+AUTHOR:
   ,#+TITLE:
-  ,#+RFC_VERSION: 00
 #+end_example
-
-The ~RFC_VERSION~ is the standard Internet Draft version number (i.e., 2 base-10
-digits with versions 0-9 given as 00-09).
 
 **** Optional export variables:
 
 #+begin_example
   ,#+AFFILIATION:
   ,#+EMAIL:
-  ,#+RFC_AUTHORS:
+  ,#+RFC_ADD_AUTHOR:
   ,#+RFC_CATEGORY: std
   ,#+RFC_CONSENSUS: true
   ,#+RFC_IPR: trust200902
@@ -91,29 +87,33 @@ digits with versions 0-9 given as 00-09).
   ,#+RFC_OBSOLETES:
   ,#+RFC_STREAM: "IETF"
   ,#+RFC_UPDATES:
+  ,#+RFC_VERSION: 00
   ,#+RFC_XML_VERSION: "3"
 #+end_example
 
-- RFC_AUTHORS :: For multiple author documents. should be used and should be
-                 specified using a lisp list syntax:
-                 ~(("Ed Li" "el@foo.com" "Foo LLC") ("Joe Rix" "jr@bar.com" "Bar Co"))~).
+- AFFILIATION :: This is the affiliation for the first author.
+- EMAIL :: This is the email for the first author.
+- RFC_ADD_AUTHOR :: For multiple author documents. This option can be given
+                    multiple times. The format uses a lisp list syntax: ~("John
+                    Smith" "jsmith@example.com" "Example Company")~
 - RFC_CATEGORY :: the ~category <rfc>~ attribute (default "std").
 - RFC_CONSENSUS :: the ~consensus <rfc>~ attribute (default "true").
 - RFC_IPR :: the ~ipr <rfc>~ attribute (default "trust200902").
 - RFC_NAME :: The base name of the internet draft, if not specified the Org file
               name is used.
-- RFC_OBSOLETES :: Comma separated list of RFCs this document obsoletes.
+- RFC_OBSOLETES :: Comma separated list of RFC numbers this document obsoletes.
 - RFC_STREAM :: The ~submissionType <rfc>~ attribute (default "IETF").
-- RFC_UPDATES :: Comma separated list of RFCs this document updates.
+- RFC_UPDATES :: Comma separated list of RFC numbers this document updates.
+- RFC_VERSION :: The standard Internet Draft version number (i.e., 2 base-10
+                 digits with versions 0-9 given as 00-09). Default is "00".
 - RFC_XML_VERSION :: The ~version <rfc>~ attribute (default "3").
 
-The ~toc~ export setting for generating a table of contents is honored.
+*** "#+OPTIONS" export variables.
 
-In addition it's usually a good idea to disable automatic superscript and
-subscript processing (changing it to ={}= is suggested) otherwise words with
-embedded underscores ('_') will transcode to subscripts.
+There are a couple export variables worth pointing out and are listed in the
+following sub-sections.
 
-Here's what I use for the standard export options:
+Here's what I use for the standard export options settings:
 
 #+begin_example
   # Do: title, toc:table-of-contents ::fixed-width-sections |tables
@@ -121,6 +121,19 @@ Here's what I use for the standard export options:
   # Don't: prop:no-prop-drawers \n:preserve-linebreaks ':use-smart-quotes
   ,#+OPTIONS: prop:nil title:t toc:t \n:nil ::t |:t ^:{} -:t *:t ':nil
 #+end_example
+
+**** ~fnv~
+Exported filenames by default do not include the RFC_VERSION component. To
+include this in the file name set the ~fnv~ export option to =t= in the
+~#+OPTIONS~ settings.
+
+**** ~toc~
+The ~toc~ export setting for generating a table of contents is honored.
+
+**** ~^~
+In addition it's usually a good idea to disable automatic superscript and
+subscript processing (changing it to ={}= is suggested) otherwise words with
+embedded underscores ('_') will transcode to subscripts.
 
 *** Abstract
 

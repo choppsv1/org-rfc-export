@@ -44,18 +44,43 @@ env:
 
 before_install:
   - sudo apt-get -y install tidy
-  - sudo apt-get install -y emacs24 || true
-
-#  - curl -fsSkL https://gist.github.com/rejeep/ebcd57c3af83b049833b/raw > travis.sh && source ./travis.sh
-#  - evm install $EVM_EMACS --use --skip
+  # - sudo apt-get install -y emacs24 || true
+  - curl -fsSkL https://gist.github.com/rejeep/ebcd57c3af83b049833b/raw > travis.sh && source ./travis.sh
+  - evm install $EVM_EMACS --use --skip
 #  - cask
 
 script:
   - emacs --version
   - make test
 
-# matrix:
-#   include:
+matrix:
+  include:
+    - env:
+        - EVM_EMACS=emacs-24.3-travis
+        - ORG_RELEASE=8.3.6
+    - env:
+        - EVM_EMACS=emacs-24.3-travis
+        - ORG_RELEASE=9.0.10
+    - env:
+        - EVM_EMACS=emacs-24.3-travis
+        - ORG_RELEASE=9.1.14
+    - env:
+        - EVM_EMACS=emacs-25.1-travis
+        - ORG_RELEASE=8.3.6
+    - env:
+        - EVM_EMACS=emacs-25.1-travis
+        - ORG_RELEASE=9.0.10
+    - env:
+        - EVM_EMACS=emacs-25.1-travis
+        - ORG_RELEASE=9.1.14
+    # - env:
+    #     - EVM_EMACS=emacs-26.1-travis
+    #     - ORG_RELEASE=9.1.14
+    # - env:
+    #     - EVM_EMACS=emacs-26.1-travis
+    #     - ORG_RELEASE=9.2.1
+
+
 #     - env: EMACS=emacs23
 #     - env: EMACS=emacs24
 #       addons:
