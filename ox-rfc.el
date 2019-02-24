@@ -47,6 +47,11 @@
   :tag "Org Export RFC"
   :group 'org-export)
 
+(defcustom ox-rfc-file-name-version nil
+  "If non-nil generated files include the I-D version number suffix"
+  :type 'boolean
+  :group 'org-export-rfc)
+
 (defcustom ox-rfc-ref-cache-directory (expand-file-name (concat temporary-file-directory ".ox-rfc-ref-cache/"))
   "Local directory to store downloaded IETF references. Created if necessary."
   :type 'directory
@@ -167,6 +172,7 @@
   '((:affiliation "AFFILIATION" nil nil t)
     (:author "AUTHOR" nil nil t)
     (:email "EMAIL" nil nil t)
+    (:rfc-file-name-version nil "fnv" ox-rfc-file-name-version t)
     (:rfc-add-author "RFC_ADD_AUTHOR" nil nil newline)
     (:rfc-category "RFC_CATEGORY" nil "std" t)
     (:rfc-consensus "RFC_CONSENSUS" nil "true" t)
@@ -175,7 +181,7 @@
     (:rfc-obsoletes "RFC_OBSOLETES" nil nil space)
     (:rfc-stream "RFC_STREAM" nil "IETF" t)
     (:rfc-updates "RFC_UPDATES" nil nil space)
-    (:rfc-version "RFC_VERSION" nil nil t)
+    (:rfc-version "RFC_VERSION" nil "00" t)
     (:rfc-xml-version "RFC_XML_VERSION" nil nil t)
     ;; ;; We define these to allow us to use org-ascii-table for XML version 2 formatting.
     ;; (:ascii-global-margin nil nil org-ascii-global-margin)
@@ -303,15 +309,18 @@ If TIDY is non-nil then run the file through tidy first."
   "Get the internet draft name using the buffer's filename."
   (file-name-sans-extension (file-name-nondirectory (buffer-file-name (buffer-base-buffer)))))
 
-(defun ox-rfc-export-output-file-name (extension)
-  "Get the I-D document name adding the given EXTENSION."
+(defun ox-rfc-export-output-file-name (extension &optional incver)
+  "Get the I-D document name adding the given EXTENSION.
+If INCVER is t then override the options export environment setting."
   (let ((docname (plist-get (org-export-get-environment 'rfc) :rfc-name))
-        (verstr (plist-get (org-export-get-environment 'rfc) :rfc-version)))
-    (if (not verstr)
-        (error "#+RFC_VERSION: must be provided for export"))
+        (verstr (plist-get (org-export-get-environment 'rfc) :rfc-version))
+        (usever (or incver (plist-get (org-export-get-environment 'rfc) :rfc-file-name-version))))
+    (if usever
+        (setq extension (concat "-" verstr extension)))
     (if (not docname)
-        (org-export-output-file-name (concat "-" verstr extension))
-      (concat docname "-" verstr extension))))
+        (org-export-output-file-name extension)
+      (concat docname extension))))
+
 
 (defun ox-rfc-author-list (info)
   "Return the XML for author or list of authors."
@@ -350,6 +359,7 @@ If TIDY is non-nil then run the file through tidy first."
   "Return the XML for and author or list of authors.
 The author list is looked for in ITEM using property named PNAME."
   (let ((author (org-element-property :REF_AUTHOR item))
+        ;;(organization (org-element-property :REF_ORGANIZATION item))
         (shortfmt "<author fullname=\"%s\"/>"))
     (if (stringp author)
         (if (string-prefix-p "(" author)
@@ -757,7 +767,7 @@ holding export options."
   (progn
   (let ((category (or (plist-get info :rfc-category) "std"))
         (consensus (or (plist-get info :rfc-consensus) "yes"))
-        (docname (ox-rfc-export-output-file-name ""))
+        (docname (ox-rfc-export-output-file-name "" t))
         (ipr (or (plist-get info :rfc-ipr) "trust200902"))
         (obsoletes (plist-get info :rfc-obsoletes))
         (stream (or (plist-get info :rfc-stream) "IETF"))
