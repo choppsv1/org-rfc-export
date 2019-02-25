@@ -41,9 +41,13 @@ The first section of where technology being standardized is defined. While
 writing this section perhaps you might need to refer to a non-SDO document such
 as [[StudyScarlet]].
 
-** Subsection of Normative Text
+** Subsection of First Section
 
 Here's a subsection of the [[First Section]].
+
+** Subsection of First Section
+
+Here's a subsection of the [[First Section]] with embedded XML.
 
 * Second Section
 

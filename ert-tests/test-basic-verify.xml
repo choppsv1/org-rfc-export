@@ -41,9 +41,13 @@
     <section title="First Section" anchor="org7a4f08a">
       <t>The first section of where technology being standardized is defined. While writing this section perhaps you might need to refer to a non-SDO document such as 
       <xref target="StudyScarlet" />.</t>
-      <section title="Subsection of Normative Text">
+      <section title="Subsection of First Section">
         <t>Here's a subsection of the 
         <xref target="org7a4f08a"></xref>.</t>
+      </section>
+      <section title="Subsection of First Section">
+        <t>Here's a subsection of the
+        <xref target="org7a4f08a"></xref>with embedded XML.</t>
       </section>
     </section>
     <section title="Second Section">
@@ -93,11 +97,10 @@
       <reference anchor="StudyScarlet">
         <front>
           <title>A Study In Scarlet</title>
-          <author fullname="Sir Arthur Conan Doyle" />
+          <author fullname='Sir Arthur Conan Doyle'><organization/></author>
           <date month="11" year="1887" />
         </front>
         <refcontent>Beeton's Christmas Annual, Ward Lock &amp; Co</refcontent>
-        <annotation></annotation>
       </reference>
       <reference anchor='RFC7322' target='https://www.rfc-editor.org/info/rfc7322'>
         <front>

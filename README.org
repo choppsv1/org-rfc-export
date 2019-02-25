@@ -67,10 +67,12 @@ most sense to be placed at the top of the file:
 *** Required and option export variables
 **** Required export variables:
 
-A two variables always need to be set. They are listed here:
+Two of three variables always need to be set. They are listed below. One of
+~:AUTHOR~ or ~:EDITOR~ must be set and ~:TITLE~ must be set.
 
 #+begin_example
   ,#+AUTHOR:
+  ,#+EDITOR:
   ,#+TITLE:
 #+end_example
 
@@ -198,6 +200,8 @@ The Properties for creating a custom reference are as follows:
 - REF_CONTENT :: The value for the ~<refcontent>~ xml2rfc element.
 - REF_DATE :: The value should be given in emacs ~parse-time-string~ format.
 - REF_STDXML :: The value should be the standard reference text (e.g., "RFC.0791").
+- REF_ORG :: The organization responsible for the document.
+- REF_TARGET :: A URL to the referenced document if available.
 - REF_TITLE :: Title of cited work.
 
 ** Features

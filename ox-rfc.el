@@ -119,6 +119,7 @@
   '((bold . ox-rfc-bold)
     (code . ox-rfc-verbatim)
     ;; (entity . ox-rfc-entity) ; What's this.
+    (dynamic-block . ox-rfc-dynamic-block)
     (example-block . ox-rfc-example-block)
     (export-block . ox-rfc-export-block)
     (fixed-width . ox-rfc-example-block)
@@ -171,6 +172,7 @@
   :options-alist
   '((:affiliation "AFFILIATION" nil nil t)
     (:author "AUTHOR" nil nil t)
+    (:editor "EDITOR" nil nil t)
     (:email "EMAIL" nil nil t)
     (:rfc-file-name-version nil "fnv" ox-rfc-file-name-version t)
     (:rfc-add-author "RFC_ADD_AUTHOR" nil nil newline)
@@ -325,18 +327,21 @@ If INCVER is t then override the options export environment setting."
 (defun ox-rfc-author-list (info)
   "Return the XML for author or list of authors."
   (let* ((author (plist-get info :author))
+         (editor (plist-get info :editor))
          (add-authors-prop (plist-get info :rfc-add-author))
          (add-authors (mapcar (lambda (e) (if (string-prefix-p "(" e)
                                              (read e)
                                            (list e)))
                              (if add-authors-prop (split-string add-authors-prop "\n+") '())))
-         (sfmt "<author fullname=\"%s\">")
+         (sfmt (if editor "<author role=\"editor\" fullname=\"%s\">"
+                 "<author fullname=\"%s\">"))
          (etag "</author>")
          (ofmt "<organization>%s</organization>")
          (efmt "<address><email>%s</email></address>")
-         (shortfmt "<author fullname=\"%s\"/>"))
-    (setq author (if author
-                     (let ((author (list author))
+         (shortfmt (if editor "<author role=\"editor\" fullname=\"%s\"/>"
+                       "<author fullname=\"%s\"/>")))
+    (setq author (if (or editor author)
+                     (let ((author (list (or editor author)))
                            (affiliation (plist-get info :affiliation))
                            (email (plist-get info :email)))
                        (if email (setq author (append author (list email))))
@@ -358,14 +363,21 @@ If INCVER is t then override the options export environment setting."
 (defun ox-rfc-ref-author-list-from-prop (item)
   "Return the XML for and author or list of authors.
 The author list is looked for in ITEM using property named PNAME."
-  (let ((author (org-element-property :REF_AUTHOR item))
-        ;;(organization (org-element-property :REF_ORGANIZATION item))
-        (shortfmt "<author fullname=\"%s\"/>"))
-    (if (stringp author)
-        (if (string-prefix-p "(" author)
-            (setq author (read author))
-          (setq author (list author))))
-    (mapconcat (lambda (x) (format shortfmt x)) author "\n")))
+  (let* ((editor (org-element-property :REF_EDITOR item))
+         (author (or editor (org-element-property :REF_AUTHOR item)))
+         (role (if editor " role='editor'" ""))
+         (organization (org-element-property :REF_ORG item))
+         (fmt "<author fullname='%s'%s>%s</author>"))
+    (if organization
+        (setq organization (format "<organization>%s</organization>" organization))
+      (setq organization "<organization/>"))
+    (if author (progn
+                 (if (string-prefix-p "(" author)
+                     (setq author (read author))
+                   (setq author (list author)))
+                 (mapconcat (lambda (x) (format fmt x role organization)) author "\n"))
+      (format "<author>%s</author>" organization))))
+
 
 (defun ox-rfc-render-v3 ()
   "Return t if rendering in xml2rfc version 3 format."
@@ -407,6 +419,18 @@ channel."
             (format "</%s>" codetag)
             figclose)))
 
+(defun ox-rfc-dynamic-block (dynamic-block contents info)
+  "Transcode a DYNAMIC-BLOCK element from Org to RFC.
+CONTENTS holds the contents of the block.  INFO is a plist
+holding contextual information."
+  (let ((block-type (org-element-property :type dynamic-block))
+        (value (org-element-property :value dynamic-block)))
+    (message "XXX DVALUE: \"%s\" DBLOCK: \"%s\" DCONTENTS: \"%s\"" value dynamic-block contents)
+    (cond
+     ((string= (downcase block-type) "xml")
+      (org-trim value))
+     (t (org-trim contents)))))
+
 (defun ox-rfc-example-block (example-block _contents info)
   "Transcode EXAMPLE-BLOCK element into RFC format.
 CONTENTS is nil.  INFO is a plist used as a communication
@@ -427,7 +451,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 
 
 (defun ox-rfc-special-block (special-block contents info)
-  "Transcode a SPECIAL-BLOCK element from Org to LaTeX.
+  "Transcode a SPECIAL-BLOCK element from Org to RFC.
 CONTENTS holds the contents of the block.  INFO is a plist
 holding contextual information."
   (let ((block-type (org-element-property :type special-block)))
@@ -435,8 +459,9 @@ holding contextual information."
      ((string= (downcase block-type) "abstract")
       (plist-put info :abstract (format "<abstract>%s</abstract>" (org-trim contents)))
       "")
-     ;; ((string= (downcase block-type) "xml")
-     ;;  (org-remove-indentation (org-element-property :value special-block)))
+     ((string= (downcase block-type) "xml")
+      (message "XXX S-XML-BLOCK: \"%s\" S-XML-CONTENTS: \"%s\"" special-block contents)
+      (org-remove-indentation (org-export-data special-block info)))
      (t (org-trim contents)))))
 
 (defun ox-rfc-src-block (src-block _contents info)
@@ -688,8 +713,10 @@ a communication channel."
 INFO is a plist used as a communication channel."
   (let ((title (org-export-data (org-element-property :title headline) info))
         (reftitle (org-element-property :REF_TITLE headline))
+        (reftarget (org-element-property :REF_TARGET headline))
         (refstd (org-element-property :REF_STDXML headline))
         (refxml (org-element-property :REF_URLXML headline)))
+    (setq reftarget (if reftarget (format " target='%s'" reftarget) ""))
     (cond
      (refstd
       (ox-rfc-load-ref-file-as-string (ox-rfc-std-ref-fetch-to-cache refstd)))
@@ -699,10 +726,10 @@ INFO is a plist used as a communication channel."
       (ox-rfc-load-ref-file-as-string (ox-rfc-std-ref-fetch-to-cache title)))
      (t
       ;; (message "PROP: %s %s" title (org-element-context headline))
-      (let ((refann (org-trim (org-export-data (org-element-property :REF_ANNOTATION headline) info)))
+      (let ((refann (org-string-nw-p (org-export-data (org-element-property :REF_ANNOTATION headline) info)))
             (author (ox-rfc-ref-author-list-from-prop headline))
-            (refcontent (org-trim (org-export-data (org-element-property :REF_CONTENT headline) info)))
-            (reftitle (org-export-data reftitle info))
+            (refcontent (org-string-nw-p (org-export-data (org-element-property :REF_CONTENT headline) info)))
+            (reftitle (org-string-nw-p (org-export-data reftitle info)))
             (refdate (org-export-data (org-element-property :REF_DATE headline) info)))
         (if (not reftitle)
             (setq reftitle title))
@@ -718,13 +745,15 @@ INFO is a plist used as a communication channel."
             (setq refdate (format "<date%s%s%s/>" day month year))))
         (if (not refcontent)
             (setq refcontent "")
-          (setq refcontent (format "<refcontent>%s</refcontent>" refcontent)))
+          (setq refcontent (format "<refcontent>%s</refcontent>" (org-trim refcontent))))
         (if (not refann)
             (setq refann "")
           (setq refann (format "<annotation>%s</annotation>" refann)))
         (if (ox-rfc-render-v3)
-            (format "<reference anchor=\"%s\"><front><title>%s</title>%s%s</front>%s%s</reference>" title reftitle author refdate refcontent refann)
-          (format "<reference anchor=\"%s\"><front><title>%s</title>%s%s</front>%s</reference>" title reftitle author refdate refann)))))))
+            (format "<reference anchor=\"%s\"%s>\n<front>\n<title>%s</title>\n%s\n%s\n</front>%s%s\n</reference>"
+                    title reftarget reftitle author refdate refcontent refann)
+          (format "<reference anchor=\"%s\"%s>\n<front>\n<title>%s</title>\n%s\n%s\n</front>%s\n</reference>"
+                  title reftarget reftitle author refdate refann)))))))
 
 ;;;; Section
 
