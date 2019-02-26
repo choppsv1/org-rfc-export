@@ -400,7 +400,9 @@ The author list is looked for in ITEM using property named PNAME."
   "Transcode BOLD object into XML format.
 CONTENTS is the text within bold markup.  INFO is a plist used as
 a communication channel."
-  (format "<em>%s</em>" contents))
+  (if (ox-rfc-render-v3)
+      (format "<strong>%s</strong>" contents)
+    (format "<spanx style='strong'>%s</spanx>" contents)))
 
 
 ;;;; Example Block, Src Block and Export Block
@@ -531,7 +533,7 @@ CONTENTS is the text within italic markup.  INFO is a plist used
 as a communication channel."
   (if (ox-rfc-render-v3)
       (format "<em>%s</em>" contents)
-    contents))
+    (format "<spanx style='emph'>%s</spanx>" contents)))
 
 ;;;; Item
 
@@ -998,7 +1000,7 @@ channel."
   (let ((value (org-element-property :value verbatim)))
     (if (ox-rfc-render-v3)
         (format "<tt>%s</tt>" value)
-      (format "<spanx>%s</spanx>" value))))
+      (format "<spanx style='verb'>%s</spanx>" value))))
 
 
 ;;; Interactive function
