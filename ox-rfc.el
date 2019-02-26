@@ -324,6 +324,14 @@ If INCVER is t then override the options export environment setting."
       (concat docname extension))))
 
 
+(defun ox-rfc-author-attrib (fullname)
+  "Return the initials of the author's FULLNAME."
+  (let* ((elts (split-string fullname)))
+    (format "initials='%s' surname='%s' fullname='%s'"
+            (concat (mapconcat (lambda (x) (substring x 0 1)) (butlast elts) ".") ".")
+            (car (last elts))
+            fullname)))
+
 (defun ox-rfc-author-list (info)
   "Return the XML for author or list of authors."
   (let* ((author (plist-get info :author))
@@ -333,13 +341,11 @@ If INCVER is t then override the options export environment setting."
                                              (read e)
                                            (list e)))
                              (if add-authors-prop (split-string add-authors-prop "\n+") '())))
-         (sfmt (if editor "<author role=\"editor\" fullname=\"%s\">"
-                 "<author fullname=\"%s\">"))
+         (sfmt (if editor "<author role='editor' %s>" "<author %s>"))
          (etag "</author>")
          (ofmt "<organization>%s</organization>")
          (efmt "<address><email>%s</email></address>")
-         (shortfmt (if editor "<author role=\"editor\" fullname=\"%s\"/>"
-                       "<author fullname=\"%s\"/>")))
+         (afmt (if editor "<author role=\"editor\" %s>" "<author %s>")))
     (setq author (if (or editor author)
                      (let ((author (list (or editor author)))
                            (affiliation (plist-get info :affiliation))
@@ -349,11 +355,11 @@ If INCVER is t then override the options export environment setting."
                        (list author))
                    '()))
     (mapconcat (lambda (x) (if (not (listp x))
-                               (format shortfmt x)
+                               (format shortfmt (ox-rfc-author-attrib x))
                              (let ((a (car x))
                                    (e (cadr x))
                                    (o (cadr (cdr x))))
-                               (concat (format sfmt a)
+                               (concat (format afmt (ox-rfc-author-attrib a))
                                        (if o (format ofmt o) "")
                                        (if e (format efmt e) "")
                                        etag))))
@@ -365,9 +371,9 @@ If INCVER is t then override the options export environment setting."
 The author list is looked for in ITEM using property named PNAME."
   (let* ((editor (org-element-property :REF_EDITOR item))
          (author (or editor (org-element-property :REF_AUTHOR item)))
-         (role (if editor " role='editor'" ""))
          (organization (org-element-property :REF_ORG item))
-         (fmt "<author fullname='%s'%s>%s</author>"))
+         (fmt (if editor "<author role='editor' %s>%s</author>"
+                "<author %s>%s</author>")))
     (if organization
         (setq organization (format "<organization>%s</organization>" organization))
       (setq organization "<organization/>"))
@@ -375,7 +381,7 @@ The author list is looked for in ITEM using property named PNAME."
                  (if (string-prefix-p "(" author)
                      (setq author (read author))
                    (setq author (list author)))
-                 (mapconcat (lambda (x) (format fmt x role organization)) author "\n"))
+                 (mapconcat (lambda (x) (format fmt (ox-rfc-author-attrib x) organization)) author "\n"))
       (format "<author>%s</author>" organization))))
 
 
