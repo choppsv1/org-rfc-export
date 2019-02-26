@@ -69,7 +69,7 @@ The required section on security considerations.
 *** StudyScarlet
     :PROPERTIES:
     :REF_TITLE: A Study In Scarlet
-    :REF_AUTHOR: Sir Arthur Conan Doyle
+    :REF_AUTHOR: Arthur Conan Doyle
     :REF_DATE: Nov 1887
     :REF_CONTENT: Beeton's Christmas Annual, Ward Lock & Co
     :END:

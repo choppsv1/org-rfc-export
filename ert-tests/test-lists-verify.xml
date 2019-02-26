@@ -10,7 +10,7 @@
 <rfc ipr="trust200902" category="std" docName="draft-test-lists-00" submissionType="IETF" consensus="true" tocInclude="true" version="3">
   <front>
     <title abbrev="Test Lists RFC">Test Lists RFC</title>
-    <author fullname="Author One">
+    <author initials='A.' surname='One' fullname='Author One'>
       <address>
         <email>aone@example.com</email>
       </address>

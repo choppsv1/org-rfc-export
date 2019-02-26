@@ -12,7 +12,7 @@
      docName="draft-test-table-00"     submissionType="IETF"    consensus="true"    tocInclude="true"    version="3">
   <front>
     <title abbrev="Test Table RFC">Test Table RFC</title>
-<author fullname="Author One"><address><email>aone@example.com</email></address></author>  <date/>  </front>  <middle>
+<author initials='A.' surname='One' fullname='Author One'><address><email>aone@example.com</email></address></author>  <date/>  </front>  <middle>
 
 <section title="Test Table">
 <section title="No Caption">

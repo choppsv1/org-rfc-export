@@ -10,7 +10,7 @@
 <rfc ipr="trust200902" category="std" docName="draft-test-yang-00" submissionType="IETF" consensus="true" tocInclude="true" version="3">
   <front>
     <title abbrev="Test YANG RFC">Test YANG RFC</title>
-    <author fullname="Christian Hopps">
+    <author initials='C.' surname='Hopps' fullname='Christian Hopps'>
       <organization>LabN Consulting, L.L.C.</organization>
       <address>
         <email>chopps@labn.net</email>

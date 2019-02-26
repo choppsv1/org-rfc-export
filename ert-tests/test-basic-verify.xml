@@ -10,13 +10,13 @@
 <rfc ipr="trust200902" category="std" docName="draft-test-basic-00" submissionType="IETF" consensus="true" tocInclude="true" version="3">
   <front>
     <title abbrev="Test Basic RFC">Test Basic RFC</title>
-    <author fullname="Christian E. Hopps">
+    <author initials='C.E.' surname='Hopps' fullname='Christian E. Hopps'>
       <organization>LabN Consulting, L.L.C.</organization>
       <address>
         <email>chopps@labn.net</email>
       </address>
     </author>
-    <author fullname="Author Two">
+    <author initials='A.' surname='Two' fullname='Author Two'>
       <organization>Ex. Company</organization>
       <address>
         <email>atwo@example.com</email>
@@ -97,7 +97,7 @@
       <reference anchor="StudyScarlet">
         <front>
           <title>A Study In Scarlet</title>
-          <author fullname='Sir Arthur Conan Doyle'><organization/></author>
+          <author initials='A.C.' surname='Doyle' fullname='Arthur Conan Doyle'><organization/></author>
           <date month="11" year="1887" />
         </front>
         <refcontent>Beeton's Christmas Annual, Ward Lock &amp; Co</refcontent>
