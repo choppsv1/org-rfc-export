@@ -37,7 +37,6 @@
 
 (require 'ox)
 (require 'url-parse)
-(require 'subr-x)
 ;; (require 'ox-ascii)
 
 
@@ -218,7 +217,6 @@ This function is called by `org-babel-execute-src-block'."
 (defun ox-rfc--replace-yang-module-revision (body)
   "Get yang module name from body"
   (save-match-data
-                              "\\<revision[ \t]+\\(1900-01-01\\)"
     (replace-regexp-in-string "\\<revision[ \t]+\\(1900-01-01\\)"
                               (format-time-string "%Y-%m-%d") body nil nil 1)))
 
@@ -227,14 +225,14 @@ This function is called by `org-babel-execute-src-block'."
   (save-match-data
     (if (not (string-match "\\<module[ \t]+\\([^{]*\\)[\n\t ]*{" body))
         nil
-      (string-trim (match-string 1 body)))))
+      (org-trim (match-string 1 body)))))
 
 (defun ox-rfc--get-yang-module-revision (body)
   "Get yang module name from body"
   (save-match-data
     (if (not (string-match "\\<revision[ \t]+\\([0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\}\\)[\n\t ]*" body))
         nil
-      (string-trim (match-string 1 body)))))
+      (org-trim (match-string 1 body)))))
 
 (defun org-babel-execute:yang (body params)
   "Run a block with YANG XML through pyang.
