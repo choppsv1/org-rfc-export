@@ -42,6 +42,7 @@ module: cool-module
         <name>A Cool Module</name>
         <sourcecode>
 <![CDATA[
+<CODE BEGINS> file "cool-module@2019-02-17.yang"
 module cool-module {
   namespace "urn:ietf:cool";
   prefix cool;
@@ -97,6 +98,7 @@ module cool-module {
     }
   }
 }
+<CODE ENDS>
 ]]>
         </sourcecode>
       </figure>

@@ -37,6 +37,7 @@
 
 (require 'ox)
 (require 'url-parse)
+(require 'subr-x)
 ;; (require 'ox-ascii)
 
 
@@ -213,12 +214,34 @@ This function is called by `org-babel-execute-src-block'."
 This function is called by `org-babel-execute-src-block'."
   body)
 
+
+(defun ox-rfc--replace-yang-module-revision (body)
+  "Get yang module name from body"
+  (save-match-data
+                              "\\<revision[ \t]+\\(1900-01-01\\)"
+    (replace-regexp-in-string "\\<revision[ \t]+\\(1900-01-01\\)"
+                              (format-time-string "%Y-%m-%d") body nil nil 1)))
+
+(defun ox-rfc--get-yang-module-file-name (body)
+  "Get yang module name from body"
+  (save-match-data
+    (if (not (string-match "\\<module[ \t]+\\([^{]*\\)[\n\t ]*{" body))
+        nil
+      (string-trim (match-string 1 body)))))
+
+(defun ox-rfc--get-yang-module-revision (body)
+  "Get yang module name from body"
+  (save-match-data
+    (if (not (string-match "\\<revision[ \t]+\\([0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\}\\)[\n\t ]*" body))
+        nil
+      (string-trim (match-string 1 body)))))
+
 (defun org-babel-execute:yang (body params)
   "Run a block with YANG XML through pyang.
 This function is called by `org-babel-execute-src-block'."
   (let ((cmd (or (cdr (assoc :cmd params)) "pyang"))
         (cmdline (or (cdr (assoc :cmdline params)) "--keep-comments -Werror -f yang")))
-    (org-babel-eval (concat cmd " " cmdline) body)))
+    (ox-rfc--replace-yang-module-revision (org-babel-eval (concat cmd " " cmdline) body))))
 
 (defun ox-rfc-url-ref-fetch-to-cache (url &optional reload)
   (let* ((fname (file-name-nondirectory (url-filename (url-generic-parse-url url))))
@@ -409,7 +432,7 @@ a communication channel."
 
 (defun ox-rfc--artwork (a-block contents _info &optional is-src)
   "Transcode EXAMPLE-BLOCK element into RFC format.
-CONTENTS is nil.  INFO is a plist used as a communication
+CONTENTS is nil.  _INFO is a plist used as a communication
 channel."
 
   (let* ((caption (car (org-export-get-caption a-block)))
@@ -418,22 +441,38 @@ channel."
          (nameattr (if (and v3 caption) (format "<name>%s</name>" caption) ""))
          (figopen (if (or v2 caption) (format "<figure>%s" nameattr) ""))
          (figclose (if (or v2 caption) "</figure>" ""))
-         (codetag (if (and is-src (ox-rfc-render-v3)) "sourcecode" "artwork")))
+         (codetag (if (and is-src (ox-rfc-render-v3)) "sourcecode" "artwork"))
+         ;; Check for yang to special handle
+         (language (or (org-element-property :language a-block) "unknown"))
+         (codestart "")
+         (codeend ""))
+
+    (if (string= language "yang")
+        (let ((module-name (ox-rfc--get-yang-module-file-name contents))
+              revision)
+          (if module-name
+              (setq contents (ox-rfc--replace-yang-module-revision contents)
+                    revision (ox-rfc--get-yang-module-revision contents)))
+          (if (and revision module-name)
+              (setq codeend "<CODE ENDS>\n"
+                    codestart (format "<CODE BEGINS> file \"%s@%s.yang\"\n" module-name revision)))))
     (concat figopen
             (format "<%s>" codetag)
             "<![CDATA[\n"
+            codestart
             contents
+            codeend
             "]]>"
             (format "</%s>" codetag)
             figclose)))
 
-(defun ox-rfc-dynamic-block (dynamic-block contents info)
+(defun ox-rfc-dynamic-block (dynamic-block contents _info)
   "Transcode a DYNAMIC-BLOCK element from Org to RFC.
-CONTENTS holds the contents of the block.  INFO is a plist
+CONTENTS holds the contents of the block.  _INFO is a plist
 holding contextual information."
   (let ((block-type (org-element-property :type dynamic-block))
         (value (org-element-property :value dynamic-block)))
-    (message "XXX DVALUE: \"%s\" DBLOCK: \"%s\" DCONTENTS: \"%s\"" value dynamic-block contents)
+    ;; (message "XXX DVALUE: \"%s\" DBLOCK: \"%s\" DCONTENTS: \"%s\"" value dynamic-block contents)
     (cond
      ((string= (downcase block-type) "xml")
       (org-trim value))
