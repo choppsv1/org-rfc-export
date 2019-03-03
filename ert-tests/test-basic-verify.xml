@@ -65,7 +65,7 @@ as <xref target="StudyScarlet"/>.</t>
 
 </middle>
 <back>
-<references anchor="sec-normative-references" title="Normative References">
+<references title="Normative References">
 
 
 <reference  anchor='RFC2119' target='https://www.rfc-editor.org/info/rfc2119'>
@@ -93,7 +93,7 @@ as <xref target="StudyScarlet"/>.</t>
 <seriesInfo name='DOI' value='10.17487/RFC8174'/>
 </reference>
 </references>
-<references anchor="sec-informative-references" title="Informative References">
+<references title="Informative References">
 <reference anchor="StudyScarlet">
 <front>
 <title>A Study In Scarlet</title>

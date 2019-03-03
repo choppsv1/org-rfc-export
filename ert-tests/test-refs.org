@@ -21,17 +21,17 @@ This is the example RFC abstract.
 
 Here we use each type of reference.
 
-# First a list of references in [[Normative References]].
+First a list of references in [[Normative References]].
 
-- Ref: [[RFC2119]]
+- [[RFC2119]]
 
-# Next a list of references in [[Informative References]].
+Next a list of references in [[Informative References]].
 
-- Ref: [[ISO10589]]
-- Ref: [[StudyScarlet]]
-- Ref: [[I-D.iab-styleguide]]
-- Ref: [[RenamedRef5308]]
-- Ref: See this section [[Introduction]].
+- [[ISO10589]]
+- [[StudyScarlet]]
+- [[I-D.iab-styleguide]]
+- [[RenamedRef5308]]
+- See this section [[Introduction]].
 
 * Normative References
 ** RFC2119

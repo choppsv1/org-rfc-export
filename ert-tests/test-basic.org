@@ -11,7 +11,7 @@
 #+RFC_WORKGROUP: lsr
 #+RFC_VERSION: 00
 #+RFC_ADD_AUTHOR: ("Author Two" "atwo@example.com" "Ex. Company")
-#+RFC_XML_VERSION: 2
+#+RFC_XML_VERSION: 3
 #
 # Do: title, table-of-contents ::fixed-width-sections |tables
 # Do: ^:sup/sub with curly -:special-strings *:emphasis

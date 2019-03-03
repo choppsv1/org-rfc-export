@@ -18,9 +18,13 @@
 <section title="Introduction" anchor="sec-introduction">
 <t>Here we use each type of reference.</t>
 
+<t>First a list of references in <xref target="sec-normative-references"></xref>.</t>
+
 <ul>
 <li><t><xref target="RFC2119"/></t></li>
 </ul>
+
+<t>Next a list of references in <xref target="sec-informative-references"></xref>.</t>
 
 <ul>
 <li><t><xref target="ISO10589"/></t></li>

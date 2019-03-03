@@ -34,13 +34,6 @@ module: cool-module
         +--rw name    string
 ]]></artwork>
 
-<artwork><![CDATA[
-module: cool-module
-  +--rw cool-container
-     +--rw cool-list* [name]
-        +--rw name    string
-]]></artwork>
-
 </section>
 
 </section>
@@ -110,7 +103,7 @@ module cool-module {
 
 </middle>
 <back>
-<references anchor="sec-informative-references" title="Informative References">
+<references title="Informative References">
 
 
 <reference  anchor='RFC8342' target='https://www.rfc-editor.org/info/rfc8342'>
