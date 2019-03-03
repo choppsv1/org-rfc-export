@@ -70,8 +70,11 @@
 
 (ert-deftest xml-basic-01 nil
   "Test basic XML generation"
-  (test-generated "test-basic.org" t nil)
   (test-generated "test-basic.org" nil nil))
+
+(ert-deftest xml-basic-tidy-01 nil
+  "Test basic XML generation"
+  (test-generated "test-basic.org" t nil))
 
 ;; (ert-deftest xml-basic-v2-01 nil
 ;;   "Test basic XML generation"
@@ -81,7 +84,11 @@
 (ert-deftest xml-lists-01 nil
   "Test lists XML generation"
   "Check that we produce the expected XML"
-  (test-generated "test-lists.org" nil)
+  (test-generated "test-lists.org" nil))
+
+(ert-deftest xml-lists-tidy-01 nil
+  "Test lists XML generation"
+  "Check that we produce the expected XML"
   (test-generated "test-lists.org" t))
 
 ;; (ert-deftest xml-lists-v2-01 nil
@@ -93,7 +100,11 @@
 (ert-deftest xml-refs-01 nil
   "Test References XML generation"
   "Check that we produce the expected XML"
-  (test-generated "test-refs.org" nil)
+  (test-generated "test-refs.org" nil))
+
+(ert-deftest xml-refs-tidy-01 nil
+  "Test References XML generation"
+  "Check that we produce the expected XML"
   (test-generated "test-refs.org" t))
 
 ;; (ert-deftest xml-lists-v2-01 nil
@@ -105,7 +116,11 @@
 (ert-deftest xml-table-01 nil
   "Test Table XML generation"
   "Check that we produce the expected XML"
-  (test-generated "test-table.org" nil)
+  (test-generated "test-table.org" nil))
+
+(ert-deftest xml-table-tidy-01 nil
+  "Test Table XML generation"
+  "Check that we produce the expected XML"
   (test-generated "test-table.org" t))
 
 ;; (ert-deftest xml-table-v2-01 nil
