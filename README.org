@@ -1,8 +1,8 @@
 #+OPTIONS: prop:nil title:t toc:nil \n:nil ::t |:t ^:{} -:t *:t ':t
-
 * Org Mode RFC (~xml2rfc~) Exporter ~ox-rfc.el~
 
-Master: [[https://travis-ci.org/choppsv1/org-rfc-export][https://travis-ci.org/choppsv1/org-rfc-export.svg?branch=master]]
+Build (master): [[https://travis-ci.org/choppsv1/org-rfc-export][https://travis-ci.org/choppsv1/org-rfc-export.svg?branch=master]]
+MELPA: [[https://melpa.org/#/ox-rfc][https://melpa.org/packages/ox-rfc-badge.svg]]
 
 This is an org mode export back-end to convert an Org mode formatted file into
 ~xml2rfc~ RFC format. Its direct output is XML that can be input to ~xml2rfc~ to
@@ -20,24 +20,37 @@ also help with contributions to improve the code.
 
 ** Quick Install/Use with Makefile:
 
-MELPA integration is taking a while, in the meantime you can use a makefile rule
-to export your ORG as xml2rfc outputs
+~ox-rfc~ is available in =MELPA= (https://melpa.org/#/ox-rfc) so if you using
+emacs packages you can simply install ~ox-rfc~ using your package setup, e.g.,
+
+
+#+begin_src emacs-lisp
+  (package-install 'ox-rfc)
+#+end_src
+
+If you do not use emacs packages (or emacs generally) you can still use a
+=Makefile= rule to download the package. The Makefile below does this as well as
+exporting your ORG file XML and building xml2rfc outputs (HTML, PDF, TXT files).
 
 #+begin_src makefile
   ORG := example.org
   BASE := $(shell sed -e '/^\#+RFC_NAME:/!d;s/\#+RFC_NAME: *\(.*\)/\1/' $(ORG))
   VERSION := $(shell sed -e '/^\#+RFC_VERSION:/!d;s/\#+RFC_VERSION: *\([0-9]*\)/\1/' $(ORG))
-  all: $(BASE).xml $(BASE)-$(VERSION).txt
+  VBASE := $(BASE)-$(VERSION)
+  all: $(BASE).xml $(VBASE).txt
   clean:
-          rm ${BASE}*.{xml,txt,html,pdf}
-  ox-rfc.el:
-          curl -fLO 'https://raw.githubusercontent.com/choppsv1/org-rfc-export/master/ox-rfc.el'
+          rm -f $(BASE).xml $(VBASE).{txt,html,pdf}
   $(BASE).xml: $(ORG) ox-rfc.el
           emacs -Q --batch --eval '(setq org-confirm-babel-evaluate nil)' -l ./ox-rfc.el $< -f ox-rfc-export-to-xml
   %-$(VERSION).txt: %.xml
           xml2rfc --text -o $@ $<
+  %-$(VERSION).html: %.xml
+          xml2rfc --html -o $@ $<
+  %-$(VERSION).pdf: %.xml
+          xml2rfc --pdf -o $@ $<
+  ox-rfc.el:
+          curl -fLO 'https://raw.githubusercontent.com/choppsv1/org-rfc-export/master/ox-rfc.el'
 #+end_src
-
 
 ** Formatting of this document.
 
@@ -254,3 +267,10 @@ numbering formats.
 Tables are translated to ~<thead>~, ~<tbody>~, ~<tr>~, ~<td>~ table elements if
 ~xml2rfc~ version 3 (the default), otherwise they are quoted in ~<artwork>~ for
 ~xml2rfc~ version 2 format.
+
+#+TEXINFO_FILENAME: ox-rfc.info
+#+TEXINFO_HEADER: @syncodeindex pg cp
+#+TEXINFO_DIR_CATEGORY: Org Mode: (org)
+#+TEXINFO_DIR_TITLE: RFC Export
+#+TEXINFO_DIR_DESC: Exporting to IETF RFC XML format.
+#+TEXINFO_PRINTED_TITLE: IETF RFC XML Export
