@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="rfc2629.xslt"?>
+<?rfc toc="yes"?>
+<?rfc compact="no"?>
+<?rfc subcompact="no"?>
+<?rfc symrefs="yes" ?>
+<?rfc sortrefs="yes"?>
+<?rfc iprnotified="no"?>
+<?rfc strict="yes"?>
+<rfc ipr="trust200902"
+     category="std"
+     docName="draft-test-refs-00"     submissionType="IETF"
+    consensus="true"    tocInclude="true"    version="3">
+  <front>
+    <title abbrev="Test References">Test References</title>
+<author initials='C.' surname='Hopps' fullname='Christian Hopps'><address><email>chopps@chopps.org</email></address></author>  <date/><abstract><t>This is the example RFC abstract.</t></abstract>  </front>  <middle>
+
+<section title="Introduction" anchor="sec-introduction">
+<t>Here we use each type of reference.</t>
+
+<ul>
+<li><t><xref target="RFC2119"/></t></li>
+</ul>
+
+<ul>
+<li><t><xref target="ISO10589"/></t></li>
+<li><t><xref target="StudyScarlet"/></t></li>
+<li><t><xref target="I-D.iab-styleguide"/></t></li>
+<li><t><xref target="RenamedRef5308"/></t></li>
+<li><t>See this section <xref target="sec-introduction"></xref>.</t></li>
+</ul>
+
+</section>
+
+</middle>
+<back>
+<references anchor="sec-normative-references" title="Normative References">
+
+
+<reference  anchor='RFC2119' target='https://www.rfc-editor.org/info/rfc2119'>
+<front>
+<title>Key words for use in RFCs to Indicate Requirement Levels</title>
+<author initials='S.' surname='Bradner' fullname='S. Bradner'><organization /></author>
+<date year='1997' month='March' />
+<abstract><t>In many standards track documents several words are used to signify the requirements in the specification.  These words are often capitalized. This document defines these words as they should be interpreted in IETF documents.  This document specifies an Internet Best Current Practices for the Internet Community, and requests discussion and suggestions for improvements.</t></abstract>
+</front>
+<seriesInfo name='BCP' value='14'/>
+<seriesInfo name='RFC' value='2119'/>
+<seriesInfo name='DOI' value='10.17487/RFC2119'/>
+</reference>
+</references>
+<references anchor="sec-informative-references" title="Informative References">
+
+
+<reference anchor="ISO10589">
+<front>
+<title>Intermediate system to intermediate system intra-domain-routing routine information exchange protocol for use in conjunction with the protocol for providing the connectionless-mode Network Service (ISO 8473)</title>
+<author>
+<organization>International Organization for Standardization</organization>
+</author>
+<date month="" year="1992" />
+</front>
+
+<seriesInfo name="ISO" value="Standard 10589" />
+
+</reference>
+<reference anchor="StudyScarlet">
+<front>
+<title>A Study In Scarlet</title>
+<author initials='A.C.' surname='Doyle' fullname='Arthur Conan Doyle'><organization/></author>
+<date month="11" year="1887"/>
+</front><refcontent>Beeton's Christmas Annual, Ward Lock &amp; Co</refcontent>
+</reference>
+
+
+<reference anchor='I-D.iab-styleguide'>
+<front>
+<title>RFC Style Guide</title>
+
+<author initials='H' surname='Flanagan' fullname='Heather Flanagan'>
+    <organization />
+</author>
+
+<date month='April' day='9' year='2014' />
+
+<abstract><t>This document describes the fundamental and unique style conventions and editorial policies currently in use for the RFC Series.  It captures the RFC Editor's basic requirements and offers guidance regarding the style and structure of an RFC.  Additional guidance is captured on a website that reflects the experimental nature of that guidance and prepares it for future inclusion in the RFC Style guide.  Guidance provided by this document will not be applied until published as an RFC.  Please send your comments about the contents of this document to &lt;rfc-interest@rfc-editor.org>.</t></abstract>
+
+</front>
+
+<seriesInfo name='Internet-Draft' value='draft-iab-styleguide-02' />
+<format type='TXT'
+        target='http://www.ietf.org/internet-drafts/draft-iab-styleguide-02.txt' />
+</reference>
+
+
+<reference  anchor="RenamedRef5308" target='https://www.rfc-editor.org/info/rfc5308'>
+<front>
+<title>Routing IPv6 with IS-IS</title>
+<author initials='C.' surname='Hopps' fullname='C. Hopps'><organization /></author>
+<date year='2008' month='October' />
+<abstract><t>This document specifies a method for exchanging IPv6 routing information using the IS-IS routing protocol.  The described method utilizes two new TLVs: a reachability TLV and an interface address TLV to distribute the necessary IPv6 information throughout a routing domain.  Using this method, one can route IPv6 along with IPv4 and OSI using a single intra-domain routing protocol.  [STANDARDS-TRACK]</t></abstract>
+</front>
+<seriesInfo name='RFC' value='5308'/>
+<seriesInfo name='DOI' value='10.17487/RFC5308'/>
+</reference>
+</references>
+  </back>
+</rfc>

@@ -1,0 +1,54 @@
+# -*- fill-column: 69; org-confirm-babel-evaluate: nil -*-
+#+STARTUP: align entitiespretty hidestars inlineimages latexpreview noindent showall
+#
+#+TITLE: Test References
+#+AUTHOR: Christian Hopps
+#+EMAIL: chopps@chopps.org
+
+#+RFC_NAME: draft-test-refs
+#+RFC_VERSION: 00
+# Do: title, table-of-contents ::fixed-width-sections |tables
+# Do: ^:sup/sub with curly -:special-strings *:emphasis
+# Don't: prop:no-prop-drawers \n:preserve-linebreaks ':use-smart-quotes
+#+OPTIONS: prop:nil title:t toc:t \n:nil ::t |:t ^:{} -:t *:t ':nil
+#+RFC_XML_VERSION: 3
+
+#+begin_abstract
+This is the example RFC abstract.
+#+end_abstract
+
+* Introduction
+
+Here we use each type of reference.
+
+# First a list of references in [[Normative References]].
+
+- Ref: [[RFC2119]]
+
+# Next a list of references in [[Informative References]].
+
+- Ref: [[ISO10589]]
+- Ref: [[StudyScarlet]]
+- Ref: [[I-D.iab-styleguide]]
+- Ref: [[RenamedRef5308]]
+- Ref: See this section [[Introduction]].
+
+* Normative References
+** RFC2119
+* Informative References
+** ISO10589
+   :PROPERTIES:
+   :REF_URLXML: http://xml2rfc.ietf.org/public/rfc/bibxml-misc/reference.ISO.10589.1992.xml
+   :END:
+** StudyScarlet
+    :PROPERTIES:
+    :REF_TITLE: A Study In Scarlet
+    :REF_AUTHOR: Arthur Conan Doyle
+    :REF_DATE: Nov 1887
+    :REF_CONTENT: Beeton's Christmas Annual, Ward Lock & Co
+    :END:
+** I-D.iab-styleguide
+** RenamedRef5308
+   :PROPERTIES:
+   :REF_STDXML: RFC5308
+   :END:
