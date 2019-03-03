@@ -1,0 +1,7 @@
+#+INCLUDE: README.org
+#+TEXINFO_FILENAME: ox-rfc.info
+#+TEXINFO_HEADER: @syncodeindex pg cp
+#+TEXINFO_DIR_CATEGORY: Emacs
+#+TEXINFO_DIR_TITLE: Org RFC Export
+#+TEXINFO_DIR_DESC: Exporting Org to IETF RFC XML format.
+#+TEXINFO_PRINTED_TITLE: IETF RFC XML Export

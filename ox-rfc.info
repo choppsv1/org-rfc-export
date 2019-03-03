@@ -1,0 +1,450 @@
+This is ox-rfc.info, produced by makeinfo version 6.5 from ox-rfc.texi.
+
+INFO-DIR-SECTION Emacs
+START-INFO-DIR-ENTRY
+* Org RFC Export.       Exporting Org to IETF RFC XML format.
+END-INFO-DIR-ENTRY
+
+
+File: ox-rfc.info,  Node: Top,  Next: Org Mode RFC (xml2rfc) Exporter ox-rfcel,  Up: (dir)
+
+* Menu:
+
+* Org Mode RFC (‘xml2rfc’) Exporter ‘ox-rfc.el’: Org Mode RFC (xml2rfc) Exporter ox-rfcel.
+
+— The Detailed Node Listing —
+
+Org Mode RFC (‘xml2rfc’) Exporter ‘ox-rfc.el’
+
+* Quick Install/Use with Makefile:: Quick Install/Use with Makefile.
+* Formatting of this document.: Formatting of this document.
+* Required Document Structure::
+* Features::
+
+Required Document Structure
+
+* Required and option export variables::
+* “#+OPTIONS” export variables.: ``#+OPTIONS'' export variables.
+* Abstract::
+* Headlines::
+* Normative and Informative References::
+
+Features
+
+* Character Formatting::
+* Citations and Links.: Citations and Links.
+* Figures and Artwork (Examples and Source code).: Figures and Artwork (Examples and Source code).
+* Blockquotes::
+* Lists::
+* Tables::
+
+
+
+File: ox-rfc.info,  Node: Org Mode RFC (xml2rfc) Exporter ox-rfcel,  Prev: Top,  Up: Top
+
+1 Org Mode RFC (‘xml2rfc’) Exporter ‘ox-rfc.el’
+***********************************************
+
+Build (master):
+https://travis-ci.org/choppsv1/org-rfc-export.svg?branch=master
+(https://travis-ci.org/choppsv1/org-rfc-export) MELPA:
+https://melpa.org/packages/ox-rfc-badge.svg (https://melpa.org/#/ox-rfc)
+
+   This is an org mode export back-end to convert an Org mode formatted
+file into ‘xml2rfc’ RFC format.  Its direct output is XML that can be
+input to ‘xml2rfc’ to further format the file into text, HTML or PDF
+formats.  The code does make some assumptions about the organization of
+the Org mode file in order to properly produce and correct RFC formatted
+and organized file.  Both ‘xml2rfc’ format version 2 and version 3 are
+supported.
+
+   Exporting directly to text, HTML and PDF is supported by
+automatically running ‘xml2rfc’ on the exported XML; however, this
+document does not including details on setting up ‘xml2rfc’ (‘pip
+install xml2rfc’ usually works though!)
+
+   This software is seen as a good start, but there’s some room for
+improvements and adding more features.  I’m certainly hoping that others
+will also help with contributions to improve the code.
+
+* Menu:
+
+* Quick Install/Use with Makefile:: Quick Install/Use with Makefile.
+* Formatting of this document.: Formatting of this document.
+* Required Document Structure::
+* Features::
+
+
+File: ox-rfc.info,  Node: Quick Install/Use with Makefile,  Next: Formatting of this document,  Up: Org Mode RFC (xml2rfc) Exporter ox-rfcel
+
+1.1 Quick Install/Use with Makefile:
+====================================
+
+‘ox-rfc’ is available in ‘MELPA’ (<https://melpa.org/#/ox-rfc>) so if
+you using emacs packages you can simply install ‘ox-rfc’ using your
+package setup, e.g.,
+
+     (package-install 'ox-rfc)
+
+   If you do not use emacs packages (or emacs generally) you can still
+use a ‘Makefile’ rule to download the package.  The Makefile below does
+this as well as exporting your ORG file XML and building xml2rfc outputs
+(HTML, PDF, TXT files).
+
+     ORG := example.org
+     BASE := $(shell sed -e '/^\#+RFC_NAME:/!d;s/\#+RFC_NAME: *\(.*\)/\1/' $(ORG))
+     VERSION := $(shell sed -e '/^\#+RFC_VERSION:/!d;s/\#+RFC_VERSION: *\([0-9]*\)/\1/' $(ORG))
+     VBASE := $(BASE)-$(VERSION)
+     all: $(BASE).xml $(VBASE).txt
+     clean:
+             rm -f $(BASE).xml $(VBASE).{txt,html,pdf}
+     $(BASE).xml: $(ORG) ox-rfc.el
+             emacs -Q --batch --eval '(setq org-confirm-babel-evaluate nil)' -l ./ox-rfc.el $< -f ox-rfc-export-to-xml
+     %-$(VERSION).txt: %.xml
+             xml2rfc --text -o $@ $<
+     %-$(VERSION).html: %.xml
+             xml2rfc --html -o $@ $<
+     %-$(VERSION).pdf: %.xml
+             xml2rfc --pdf -o $@ $<
+     ox-rfc.el:
+             curl -fLO 'https://raw.githubusercontent.com/choppsv1/org-rfc-export/master/ox-rfc.el'
+
+
+File: ox-rfc.info,  Node: Formatting of this document,  Next: Required Document Structure,  Prev: Quick Install/Use with Makefile,  Up: Org Mode RFC (xml2rfc) Exporter ox-rfcel
+
+1.2 Formatting of this document.
+================================
+
+This document is formatted in Org mode.  If you are viewing it normal
+ASCII then remember that “=” and “~” characters are used for
+highlighting literal text (e.g., verbatim or code) and should not be
+included if being used in an example.
+
+
+File: ox-rfc.info,  Node: Required Document Structure,  Next: Features,  Prev: Formatting of this document,  Up: Org Mode RFC (xml2rfc) Exporter ox-rfcel
+
+1.3 Required Document Structure
+===============================
+
+The following is the expected structure of the Org mode RFC file:
+
+   • Headlined Sections
+   • Headline “References”
+        • Headline “Normative References”
+        • Headline “Informative References”
+   • Appendix Sections.
+
+   Additionally the following may appear anywhere; however, the first
+two make he most sense to be placed at the top of the file:
+
+   • Required and optional export variable settings.
+   • Abstract export block
+   • Example, Quote and Source blocks.
+   • Lists
+   • Tables
+
+* Menu:
+
+* Required and option export variables::
+* “#+OPTIONS” export variables.: ``#+OPTIONS'' export variables.
+* Abstract::
+* Headlines::
+* Normative and Informative References::
+
+
+File: ox-rfc.info,  Node: Required and option export variables,  Next: ``#+OPTIONS'' export variables,  Up: Required Document Structure
+
+1.3.1 Required and option export variables
+------------------------------------------
+
+  1. Required export variables:
+
+     Two of three variables always need to be set.  They are listed
+     below.  One of ‘:AUTHOR’ or ‘:EDITOR’ must be set and ‘:TITLE’ must
+     be set.
+
+          #+AUTHOR:
+          #+EDITOR:
+          #+TITLE:
+
+  2. Optional export variables:
+
+          #+AFFILIATION:
+          #+EMAIL:
+          #+RFC_ADD_AUTHOR:
+          #+RFC_CATEGORY: std
+          #+RFC_CONSENSUS: true
+          #+RFC_IPR: trust200902
+          #+RFC_NAME:
+          #+RFC_OBSOLETES:
+          #+RFC_STREAM: "IETF"
+          #+RFC_UPDATES:
+          #+RFC_VERSION: 00
+          #+RFC_XML_VERSION: "3"
+
+     AFFILIATION
+          This is the affiliation for the first author.
+     EMAIL
+          This is the email for the first author.
+     RFC_ADD_AUTHOR
+          For multiple author documents.  This option can be given
+          multiple times.  The format uses a lisp list syntax: ‘("John
+          Smith" "jsmith@example.com" "Example Company")’
+     RFC_CATEGORY
+          the ‘category <rfc>’ attribute (default “std”).
+     RFC_CONSENSUS
+          the ‘consensus <rfc>’ attribute (default “true”).
+     RFC_IPR
+          the ‘ipr <rfc>’ attribute (default “trust200902”).
+     RFC_NAME
+          The base name of the internet draft, if not specified the Org
+          file name is used.
+     RFC_OBSOLETES
+          Comma separated list of RFC numbers this document obsoletes.
+     RFC_STREAM
+          The ‘submissionType <rfc>’ attribute (default “IETF”).
+     RFC_UPDATES
+          Comma separated list of RFC numbers this document updates.
+     RFC_VERSION
+          The standard Internet Draft version number (i.e., 2 base-10
+          digits with versions 0-9 given as 00-09).  Default is “00”.
+     RFC_XML_VERSION
+          The ‘version <rfc>’ attribute (default “3”).
+
+
+File: ox-rfc.info,  Node: ``#+OPTIONS'' export variables,  Next: Abstract,  Prev: Required and option export variables,  Up: Required Document Structure
+
+1.3.2 “#+OPTIONS” export variables.
+-----------------------------------
+
+There are a couple export variables worth pointing out and are listed in
+the following sub-sections.
+
+   Here’s what I use for the standard export options settings:
+
+     # Do: title, toc:table-of-contents ::fixed-width-sections |tables
+     # Do: ^:sup/sub with curly -:special-strings *:emphasis
+     # Don't: prop:no-prop-drawers \n:preserve-linebreaks ':use-smart-quotes
+     #+OPTIONS: prop:nil title:t toc:t \n:nil ::t |:t ^:{} -:t *:t ':nil
+
+  1. ‘fnv’
+
+     Exported filenames by default do not include the RFC_VERSION
+     component.  To include this in the file name set the ‘fnv’ export
+     option to ‘t’ in the ‘#+OPTIONS’ settings.
+
+  2. ‘toc’
+
+     The ‘toc’ export setting for generating a table of contents is
+     honored.
+
+  3. ‘^’
+
+     In addition it’s usually a good idea to disable automatic
+     superscript and subscript processing (changing it to ‘{}’ is
+     suggested) otherwise words with embedded underscores (’_’) will
+     transcode to subscripts.
+
+
+File: ox-rfc.info,  Node: Abstract,  Next: Headlines,  Prev: ``#+OPTIONS'' export variables,  Up: Required Document Structure
+
+1.3.3 Abstract
+--------------
+
+A special export block must be used to specify and abstract it looks
+like so:
+
+     #+beging_abstract
+     This is the abstract of a document.
+     #+end_abstract
+
+
+File: ox-rfc.info,  Node: Headlines,  Next: Normative and Informative References,  Prev: Abstract,  Up: Required Document Structure
+
+1.3.4 Headlines
+---------------
+
+Normal Org mode headlined sections map to RFC sections.  Headlines prior
+to the “References” section are normal sections and headlines after
+“References” are appendices.
+
+
+File: ox-rfc.info,  Node: Normative and Informative References,  Prev: Headlines,  Up: Required Document Structure
+
+1.3.5 Normative and Informative References
+------------------------------------------
+
+Reference sections are titled either “Normative References” or
+“Informative References”.  ‘ox-rfc.el’ then expects the actual
+references as sub-section headlines below one of those 2 section
+headlines.  ‘ox-rfc.el’ automatically expands certain standard
+references namely headline names that start with: “3GPP”, “I-D”, “IEEE”,
+“RFC”, “W3C”.
+
+   A ‘:REF_STDXML’ property may be used to refer to the standard XML
+bibliogrpahic entry if one wishes to pick a different headline to refer
+to it (i.e., different reference text for use in the document).
+
+   One can also specify a URL to fetch the reference XML from using a
+‘:REF_URLXML’ property.
+
+   Finally, If no standard (or fetch-able XML) reference is available
+then the bibliographic information may be specified as properties under
+the headline.
+
+   Here’s an example:
+
+     * Normative Refereneces
+     ** RFC2119
+     * Informative Refereneces
+     ** RFC7991
+     ** W3GGEO
+     :PROPERTIES:
+     :REF_STDXML: W3C-CR-geolocation-API-20100907
+     :END:
+     ** StudyScarlet
+     :PROPERTIES:
+     :REF_TITLE: A Study In Scarlet
+     :REF_AUTHOR: Sir Arthur Conan Doyle
+     :REF_DATE: Nov 1887
+     :REF_CONTENT: Beeton's Christmas Annual, Ward Lock & Co
+     :END:
+
+   The Properties for creating a custom reference are as follows:
+
+REF_ANNOTATION
+     A value for the ‘<annotation>’ xml2rfc element.
+REF_AUTHOR
+     Author.  If multiple authors need to be specify use an list in
+     elisp format (e.g., ‘("Author One" "Author Two")’)
+REF_EDITOR
+     Same as ‘:REF_AUTHOR:’ but has role set as editor.
+REF_CONTENT
+     The value for the ‘<refcontent>’ xml2rfc element.
+REF_DATE
+     The value should be given in emacs ‘parse-time-string’ format.
+REF_STDXML
+     Used to rename the headline, the value should be the standard
+     reference base (e.g., “RFC0791”).
+REF_ORG
+     The organization responsible for the document.
+REF_TARGET
+     A URL to the referenced document if available.
+REF_TITLE
+     Title of cited work.
+REF_URLXML
+     A URL to fetch the reference XML from.
+
+
+File: ox-rfc.info,  Node: Features,  Prev: Required Document Structure,  Up: Org Mode RFC (xml2rfc) Exporter ox-rfcel
+
+1.4 Features
+============
+
+* Menu:
+
+* Character Formatting::
+* Citations and Links.: Citations and Links.
+* Figures and Artwork (Examples and Source code).: Figures and Artwork (Examples and Source code).
+* Blockquotes::
+* Lists::
+* Tables::
+
+
+File: ox-rfc.info,  Node: Character Formatting,  Next: Citations and Links,  Up: Features
+
+1.4.1 Character Formatting
+--------------------------
+
+In XML version 3 fromat, *Bold*, _italic_, ‘verbatim’ and ‘code’ styles
+are mapped to the ‘xml2rfc’ elements ‘<strong>’, ‘<em>’, ‘<tt>’ and
+‘<tt>’ respectively.
+
+   In XML version 2 fromat, *Bold*, _italic_, ‘verbatim’ and ‘code’
+styles are mapped to the ‘xml2rfc’ elements ‘<spanx style='strong'>’,
+‘<spanx style='emph'>’, ‘<spanx style='verb'>’ and ‘<spanx
+style='verb'>’ respectively.
+
+
+File: ox-rfc.info,  Node: Citations and Links,  Next: Figures and Artwork (Examples and Source code),  Prev: Character Formatting,  Up: Features
+
+1.4.2 Citations and Links.
+--------------------------
+
+Internal and external references are supported (TODO: test external).
+For internal links one can reference any anchor or section including the
+sub-sub-section headlines under in the “References” headline.  So e.g.,
+a reference to RFC7991 would be given using ‘[[RFC7991]]’ Org mode
+reference format and then a sub-sub-section headline under “Informative
+References” would simple be “RFC7991” which ‘ox-rfc.el’ will translate.
+
+
+File: ox-rfc.info,  Node: Figures and Artwork (Examples and Source code),  Next: Blockquotes,  Prev: Citations and Links,  Up: Features
+
+1.4.3 Figures and Artwork (Examples and Source code).
+-----------------------------------------------------
+
+‘ox-rfc.el’ maps example and source blocks to ‘xml2rfc’ ‘<artwork>’
+elements.  Additionally if a ‘#+CAPTION:’ is given for the block then it
+the artwork will be placed inside a ‘<figure>’ element with the
+‘#+CAPTION:’ value as the caption.
+
+
+File: ox-rfc.info,  Node: Blockquotes,  Next: Lists,  Prev: Figures and Artwork (Examples and Source code),  Up: Features
+
+1.4.4 Blockquotes
+-----------------
+
+‘#+begin_quote’ blocks are supported by ‘xml2rfc’ version 3 format
+‘<blockquote>’.
+
+   For ‘xml2rfc’ version 2 quotes are wrapped in ‘<artwork>’
+
+
+File: ox-rfc.info,  Node: Lists,  Next: Tables,  Prev: Blockquotes,  Up: Features
+
+1.4.5 Lists
+-----------
+
+Lists are transformed correctly.  Numbered, unnumbered and definition
+lists all being supported.  Definition lists are better supported in
+‘xml2rfc’ version 3 format using ‘<dl>’ lists rather than more generic
+‘hanging’ style list format of ‘xml2rfc’ version 2 format.
+
+
+File: ox-rfc.info,  Node: Tables,  Prev: Lists,  Up: Features
+
+1.4.6 Tables
+------------
+
+Tables are translated to ‘<thead>’, ‘<tbody>’, ‘<tr>’, and ‘<td>’ if
+‘xml2rfc’ version 3 format, and to ‘<texttable>’, ‘<ttcol>’ and ‘<c> for
+~xml2rfc’ version 2 format.
+
+
+
+Tag Table:
+Node: Top199
+Node: Org Mode RFC (xml2rfc) Exporter ox-rfcel1094
+Node: Quick Install/Use with Makefile2583
+Node: Formatting of this document4058
+Node: Required Document Structure4552
+Node: Required and option export variables5497
+Node: ``#+OPTIONS'' export variables7583
+Node: Abstract8837
+Node: Headlines9161
+Node: Normative and Informative References9508
+Node: Features11819
+Node: Character Formatting12183
+Node: Citations and Links12776
+Node: Figures and Artwork (Examples and Source code)13426
+Node: Blockquotes13939
+Node: Lists14267
+Node: Tables14663
+
+End Tag Table
+
+
+Local Variables:
+coding: utf-8
+End:

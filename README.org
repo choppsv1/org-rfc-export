@@ -267,10 +267,3 @@ of ~xml2rfc~ version 2 format.
 Tables are translated to ~<thead>~, ~<tbody>~, ~<tr>~, and ~<td>~ if ~xml2rfc~
 version 3 format, and to ~<texttable>~, ~<ttcol>~ and ~<c> for ~xml2rfc~ version
 2 format.
-
-#+TEXINFO_FILENAME: ox-rfc.info
-#+TEXINFO_HEADER: @syncodeindex pg cp
-#+TEXINFO_DIR_CATEGORY: Org Mode: (org)
-#+TEXINFO_DIR_TITLE: RFC Export
-#+TEXINFO_DIR_DESC: Exporting to IETF RFC XML format.
-#+TEXINFO_PRINTED_TITLE: IETF RFC XML Export

@@ -3,10 +3,12 @@
 ;; Copyright (C) 2019 Christian E. Hopps
 
 ;; Author: Christian Hopps <chopps@devhopps.com>
-;; URL: https://github.com/choppsv1/ox-rfc-export
-;; Keywords: org, rfc, wp, xml
+;; URL: https://github.com/choppsv1/org-rfc-export
 ;; Package-Version: 1
 ;; Package-Requires: ((emacs "24.3") (org "8.3"))
+;; Keywords: org, rfc, wp, xml
+
+;;; License
 
 :; This program is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -30,7 +32,7 @@
 ;; (https://github.com/choppsv1/org-rfc-export/blob/master/README.org)
 ;; for basic documentation on use.
 
-;;; Credits:
+;;;; Credits:
 
 ;; Started with ox-md.el by Nicolas Goaziou as a template also used code from
 ;; ox-html.el by Carsten Dominik and Jambunathan K.
