@@ -8,15 +8,16 @@ This is an org mode export back-end to convert an Org mode formatted file into
 ~xml2rfc~ RFC format. Its direct output is XML that can be input to ~xml2rfc~ to
 further format the file into text, HTML or PDF formats. The code does make some
 assumptions about the organization of the Org mode file in order to properly
-produce and correct RFC formatted and organized file.
+produce and correct RFC formatted and organized file. Both ~xml2rfc~ format
+version 2 and version 3 are supported.
 
 Exporting directly to text, HTML and PDF is supported by automatically running
 ~xml2rfc~ on the exported XML; however, this document does not including details
 on setting up ~xml2rfc~ (=pip install xml2rfc= usually works though!)
 
-This software is seen as a good start, but there's plenty of room for
-improvements and adding more features. I'm certainly hoping that others will
-also help with contributions to improve the code.
+This software is seen as a good start, but there's some room for improvements
+and adding more features. I'm certainly hoping that others will also help with
+contributions to improve the code.
 
 ** Quick Install/Use with Makefile:
 
@@ -223,10 +224,14 @@ The Properties for creating a custom reference are as follows:
 ** Features
 
 *** Character Formatting
-NOTE: XML2RFC version 3 format only.
 
-*Bold*, /italic/, =verbatim= and ~code~ styles are mapped to the ~xml2rfc~ elements
-~<strong>~, ~<em>~, ~<tt>~ and ~<tt>~ respectively.
+In XML version 3 fromat, *Bold*, /italic/, =verbatim= and ~code~ styles are
+mapped to the ~xml2rfc~ elements ~<strong>~, ~<em>~, ~<tt>~ and ~<tt>~
+respectively.
+
+In XML version 2 fromat, *Bold*, /italic/, =verbatim= and ~code~ styles are
+mapped to the ~xml2rfc~ elements ~<spanx style='strong'>~, ~<spanx
+style='emph'>~, ~<spanx style='verb'>~ and ~<spanx style='verb'>~ respectively.
 
 *** Citations and Links.
 
@@ -245,12 +250,10 @@ placed inside a ~<figure>~ element with the ~#+CAPTION:~ value as the caption.
 
 *** Blockquotes
 
-NOTE: XML2RFC version 3 format only.
-
 ~#+begin_quote~ blocks are supported by ~xml2rfc~ version 3 format
 ~<blockquote>~.
 
-TODO: ~xml2rfc~ version 2 support needs to be supported using ~<artwork>~
+For ~xml2rfc~ version 2 quotes are wrapped in ~<artwork>~
 
 *** Lists
 
@@ -259,14 +262,11 @@ being supported. Definition lists are better supported in ~xml2rfc~ version 3
 format using ~<dl>~ lists rather than more generic ~hanging~ style list format
 of ~xml2rfc~ version 2 format.
 
-TODO: Some work could be done here to better support bullet styles and more
-numbering formats.
-
 *** Tables
 
-Tables are translated to ~<thead>~, ~<tbody>~, ~<tr>~, ~<td>~ table elements if
-~xml2rfc~ version 3 (the default), otherwise they are quoted in ~<artwork>~ for
-~xml2rfc~ version 2 format.
+Tables are translated to ~<thead>~, ~<tbody>~, ~<tr>~, and ~<td>~ if ~xml2rfc~
+version 3 format, and to ~<texttable>~, ~<ttcol>~ and ~<c> for ~xml2rfc~ version
+2 format.
 
 #+TEXINFO_FILENAME: ox-rfc.info
 #+TEXINFO_HEADER: @syncodeindex pg cp
