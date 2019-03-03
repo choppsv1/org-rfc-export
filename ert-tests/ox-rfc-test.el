@@ -97,10 +97,10 @@
 ;;   (test-generated "test-lists.org" nil t)
 ;;   (test-generated "test-lists.org" t t))
 
-;; (ert-deftest xml-refs-01 nil
-;;   "Test References XML generation"
-;;   "Check that we produce the expected XML"
-;;   (test-generated "test-refs.org" nil))
+(ert-deftest xml-refs-01 nil
+  "Test References XML generation"
+  "Check that we produce the expected XML"
+  (test-generated "test-refs.org" nil))
 
 ;; (ert-deftest xml-refs-tidy-01 nil
 ;;   "Test References XML generation"
