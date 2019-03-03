@@ -213,6 +213,9 @@ This function is called by `org-babel-execute-src-block'."
 This function is called by `org-babel-execute-src-block'."
   body)
 
+(defun ox-rfc--headline-to-anchor (headline)
+  "Given HEADLINE return value suitable for an anchor"
+  (concat "sec-" (replace-regexp-in-string "[ \t]+" "-" (downcase headline))))
 
 (defun ox-rfc--replace-yang-module-revision (body)
   "Get yang module name from body"
@@ -531,18 +534,19 @@ a communication channel."
       (let ((anchor (or (and (ox-rfc--headline-referred-p headline info)
 		             (format " anchor=\"%s\""
 			             (or (org-element-property :CUSTOM_ID headline)
-			                 (org-export-get-reference headline info))))
-                        "")))
+                                         (ox-rfc--headline-to-anchor title)
+                                         ;; (org-export-get-reference headline info)
+                                         )))
+                        ""))
+            (backtext ""))
         (cond
-         ((string= "References" title) (plist-put info :in-back t)
-          (concat "</middle>\n<back>\n" contents))
-         ((string= "Normative References" title)
-          (format "<references title=\"%s\">\n%s</references>\n" title contents))
-         ((string= "Informative References" title)
-          (format "<references title=\"%s\">\n%s</references>\n" title contents))
-         ((string= "Normative References" ptitle)
-          (ox-rfc-reference headline contents info))
-         ((string= "Informative References" ptitle)
+         ((member title '("Normative References" "Informative References"))
+          (unless (plist-get info :in-back)
+            (setq backtext "</middle>\n<back>\n")
+            (plist-put info :in-back t))
+          (format "%s<references%s title=\"%s\">\n%s</references>\n"
+                  backtext anchor title contents))
+         ((member ptitle '("Normative References" "Informative References"))
           (ox-rfc-reference headline contents info))
          (t (format "<section title=\"%s\"%s>\n%s\n</section>\n" title anchor
                  contents)))))))
@@ -596,8 +600,7 @@ a communication channel."
           (cond
            (tag
             (replace-regexp-in-string "<t>" (format "<t hangText=\"%s:\">" (org-export-data tag info)) contents))
-           (t
-            (concat "<t>" (org-trim contents) "</t>")))
+           (t (org-trim contents)))
         (cond
          (tag
           (format "<dt>%s</dt> <dd>%s</dd>" (org-export-data tag info) contents))
@@ -637,16 +640,15 @@ a communication channel."
 			   (org-export-resolve-id-link link info))))
 	(pcase (org-element-type destination)
 	  (`headline
-	   (let* ((dparent (org-export-get-parent-element destination))
-                  (dpparent (org-export-get-parent-element dparent))
-                  (ppname (org-element-property :raw-value dpparent)))
-	     (if (string= "References" ppname)
-                 (let ((xxtarget (org-element-property :REF_STDXML destination))
-                       (xtarget (org-export-data (org-element-property :title destination) info)))
-                   (if (not xxtarget)
-                       (format "<xref target=\"%s\"/>" xtarget)
-                     (setq xxtarget (org-export-data xxtarget info))
-                     (format "<xref target=\"%s\">%s</xref>" xxtarget xtarget)))
+	   (let* ((dtitle (org-export-data (org-element-property :title destination) info))
+                  (dparent (org-export-get-parent-element destination))
+                  (pname (org-element-property :raw-value dparent)))
+             (cond
+              ;; XXX there's actually no anchor for this.
+              ((member pname '("Informative References" "Normative References"))
+               ;; A reference to one of the reference sections
+               (format "<xref target=\"%s\"/>" dtitle))
+              (t
                ;; Need to normalize references to allow for non leading zeros
                (format
                 "<xref%s target=\"%s\">%s</xref>"
@@ -654,11 +656,11 @@ a communication channel."
 	        (if (org-string-nw-p contents) " format=\"counter\"" "")
 	        ;; Reference.
 	        (or (org-element-property :CUSTOM_ID destination)
-		    (org-export-get-reference destination info))
-	        ;; Description.
+                    (ox-rfc--headline-to-anchor dtitle))
+                    ;; (org-export-get-reference destination info))
+                ;; Description.
 	        (cond ((org-string-nw-p contents))
-		      (t ""))
-                ))))
+		      (t "")))))))
 	  (_
 	   (let ((description
 		  (or (org-string-nw-p contents)
@@ -682,7 +684,6 @@ a communication channel."
 		 (t raw-path))))
 	  (if (not contents) (format "<eref target=\"%s\"/>" path)
 	    (format "<eref target=\"%s\">%s</eref>" path contents)))))))
-
 
 ;;;; Node Property (XXX what's this used for?)
 
@@ -764,9 +765,13 @@ INFO is a plist used as a communication channel."
     (setq reftarget (if reftarget (format " target='%s'" reftarget) ""))
     (cond
      (refstd
-      (ox-rfc-load-ref-file-as-string (ox-rfc-std-ref-fetch-to-cache refstd)))
+      (replace-regexp-in-string "anchor=['\"]\\([^'\"]+\\)['\"]"
+                                (format "anchor=\"%s\"" title)
+                                (ox-rfc-load-ref-file-as-string (ox-rfc-std-ref-fetch-to-cache refstd))))
      (refxml
-      (ox-rfc-load-ref-file-as-string (ox-rfc-url-ref-fetch-to-cache refxml)))
+      (replace-regexp-in-string "anchor=['\"]\\([^'\"]+\\)['\"]"
+                                (format "anchor=\"%s\"" title)
+                                (ox-rfc-load-ref-file-as-string (ox-rfc-url-ref-fetch-to-cache refxml))))
      ((not reftitle)
       (ox-rfc-load-ref-file-as-string (ox-rfc-std-ref-fetch-to-cache title)))
      (t

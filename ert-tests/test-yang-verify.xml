@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type="text/xsl" href="rfc2629.xslt"?>
 <?rfc toc="yes"?>
 <?rfc compact="no"?>
@@ -7,41 +7,46 @@
 <?rfc sortrefs="yes"?>
 <?rfc iprnotified="no"?>
 <?rfc strict="yes"?>
-<rfc ipr="trust200902" category="std" docName="draft-test-yang-00" submissionType="IETF" consensus="true" tocInclude="true" version="3">
+<rfc ipr="trust200902"
+     category="std"
+     docName="draft-test-yang-00"     submissionType="IETF"
+    consensus="true"    tocInclude="true"    version="3">
   <front>
     <title abbrev="Test YANG RFC">Test YANG RFC</title>
-    <author initials='C.' surname='Hopps' fullname='Christian Hopps'>
-      <organization>LabN Consulting, L.L.C.</organization>
-      <address>
-        <email>chopps@labn.net</email>
-      </address>
-    </author>
-    <date />
-  </front>
-  <middle>
-    <section title="Introduction">
-      <t>This is an example of a yang module draft.</t>
-      <t>The YANG data model described in this document conforms to the Network Management Datastore Architecture defined in 
-      <xref target="RFC8342" />.</t>
-    </section>
-    <section title="Cool YANG Module">
-      <t>This section would describe the "Cool YANG Module".</t>
-      <section title="YANG Tree">
-          <artwork>
-<![CDATA[
+<author initials='C.' surname='Hopps' fullname='Christian Hopps'><organization>LabN Consulting, L.L.C.</organization><address><email>chopps@labn.net</email></address></author>  <date/>  </front>  <middle>
+
+<section title="Introduction">
+<t>This is an example of a yang module draft.</t>
+
+<t>The YANG data model described in this document conforms to the
+Network Management Datastore Architecture defined in <xref target="RFC8342"/>.</t>
+
+</section>
+
+<section title="Cool YANG Module">
+<t>This section would describe the "Cool YANG Module".</t>
+
+<section title="YANG Tree">
+<artwork><![CDATA[
 module: cool-module
   +--rw cool-container
      +--rw cool-list* [name]
         +--rw name    string
-]]>
-        </artwork>
-      </section>
-    </section>
-    <section title="YANG Module">
-        <figure>
-        <name>A Cool Module</name>
-        <sourcecode>
-<![CDATA[
+]]></artwork>
+
+<artwork><![CDATA[
+module: cool-module
+  +--rw cool-container
+     +--rw cool-list* [name]
+        +--rw name    string
+]]></artwork>
+
+</section>
+
+</section>
+
+<section title="YANG Module">
+<figure><name>A Cool Module</name><sourcecode><![CDATA[
 <CODE BEGINS> file "cool-module@2019-02-17.yang"
 module cool-module {
   namespace "urn:ietf:cool";
@@ -99,39 +104,29 @@ module cool-module {
   }
 }
 <CODE ENDS>
-]]>
-        </sourcecode>
-      </figure>
-    </section>
-  </middle>
-  <back>
-    <references title="Informative References">
-      <reference anchor='RFC8342' target='https://www.rfc-editor.org/info/rfc8342'>
-        <front>
-          <title>Network Management Datastore Architecture (NMDA)</title>
-          <author initials='M.' surname='Bjorklund' fullname='M. Bjorklund'>
-            <organization />
-          </author>
-          <author initials='J.' surname='Schoenwaelder' fullname='J. Schoenwaelder'>
-            <organization />
-          </author>
-          <author initials='P.' surname='Shafer' fullname='P. Shafer'>
-            <organization />
-          </author>
-          <author initials='K.' surname='Watsen' fullname='K. Watsen'>
-            <organization />
-          </author>
-          <author initials='R.' surname='Wilton' fullname='R. Wilton'>
-            <organization />
-          </author>
-          <date year='2018' month='March' />
-          <abstract>
-            <t>Datastores are a fundamental concept binding the data models written in the YANG data modeling language to network management protocols such as the Network Configuration Protocol (NETCONF) and RESTCONF. This document defines an architectural framework for datastores based on the experience gained with the initial simpler model, addressing requirements that were not well supported in the initial model. This document updates RFC 7950.</t>
-          </abstract>
-        </front>
-        <seriesInfo name='RFC' value='8342' />
-        <seriesInfo name='DOI' value='10.17487/RFC8342' />
-      </reference>
-    </references>
+]]></sourcecode></figure>
+
+</section>
+
+</middle>
+<back>
+<references anchor="sec-informative-references" title="Informative References">
+
+
+<reference  anchor='RFC8342' target='https://www.rfc-editor.org/info/rfc8342'>
+<front>
+<title>Network Management Datastore Architecture (NMDA)</title>
+<author initials='M.' surname='Bjorklund' fullname='M. Bjorklund'><organization /></author>
+<author initials='J.' surname='Schoenwaelder' fullname='J. Schoenwaelder'><organization /></author>
+<author initials='P.' surname='Shafer' fullname='P. Shafer'><organization /></author>
+<author initials='K.' surname='Watsen' fullname='K. Watsen'><organization /></author>
+<author initials='R.' surname='Wilton' fullname='R. Wilton'><organization /></author>
+<date year='2018' month='March' />
+<abstract><t>Datastores are a fundamental concept binding the data models written in the YANG data modeling language to network management protocols such as the Network Configuration Protocol (NETCONF) and RESTCONF. This document defines an architectural framework for datastores based on the experience gained with the initial simpler model, addressing requirements that were not well supported in the initial model.  This document updates RFC 7950.</t></abstract>
+</front>
+<seriesInfo name='RFC' value='8342'/>
+<seriesInfo name='DOI' value='10.17487/RFC8342'/>
+</reference>
+</references>
   </back>
 </rfc>

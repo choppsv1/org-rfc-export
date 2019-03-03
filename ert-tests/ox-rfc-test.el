@@ -41,6 +41,7 @@
         (rubs '("anchor=\"org[^\"]*\"" "target=\"org[^\"]*\""))
         tidyxml
         (verify-name (concat (file-name-base infile) "-verify.xml"))
+        (org-export-babel-evaluate t)
         )
     (if v2 (setq verify-name (concat (file-name-base infile) "-verify-v2.xml"))
       (setq verify-name (concat (file-name-base infile) "-verify.xml")))
@@ -88,8 +89,20 @@
 ;;   (test-generated "test-lists.org" nil t)
 ;;   (test-generated "test-lists.org" t t))
 
+(ert-deftest xml-refs-01 nil
+  "Test References XML generation"
+  "Check that we produce the expected XML"
+  (test-generated "test-refs.org" nil)
+  (test-generated "test-refs.org" t))
+
+;; (ert-deftest xml-lists-v2-01 nil
+;;   "Test lists XML generation"
+;;   "Check that we produce the expected XML"
+;;   (test-generated "test-lists.org" nil t)
+;;   (test-generated "test-lists.org" t t))
+
 (ert-deftest xml-table-01 nil
-  "Test lists XML generation"
+  "Test Table XML generation"
   "Check that we produce the expected XML"
   (test-generated "test-table.org" nil)
   (test-generated "test-table.org" t))
@@ -101,7 +114,7 @@
 ;;   (test-generated "test-table.org" t t))
 
 (ert-deftest xml-yang-01 nil
-  "Test lists XML generation"
+  "Test YANG XML generation"
   "Check that we produce the expected XML"
   (let ((org-confirm-babel-evaluate nil)
         (org-export-use-babel t))

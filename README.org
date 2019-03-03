@@ -153,37 +153,37 @@ Normal Org mode headlined sections map to RFC sections. Headlines prior to the
 "References" section are normal sections and headlines after "References" are
 appendices.
 
-*** References
+*** Normative and Informative References
 
-The "References" headline expects 1 or 2 sub-sections titled "Normative
-References" and/or "Informative References". It then expects the actual references
-as sub-sub-section headlines below one of those 2 sub-section headlines.
-~ox-rfc.el~ automatically expands certain standard references namely headline
-names that start with: "I-D", "IEEE", or "RFC".
+Reference sections are titled either "Normative References" or "Informative
+References". ~ox-rfc.el~ then expects the actual references as sub-section
+headlines below one of those 2 section headlines. ~ox-rfc.el~ automatically
+expands certain standard references namely headline names that start with:
+"3GPP", "I-D", "IEEE", "RFC", "W3C".
 
-Additionally if no standard reference is available then the bibliographic
-information may be specified as properties under the headline.
-
-Finally a ~:REF_STDXML~ property may be used to refer to the standard XML
+A ~:REF_STDXML~ property may be used to refer to the standard XML
 bibliogrpahic entry if one wishes to pick a different headline to refer to it
 (i.e., different reference text for use in the document).
 
-TODO: ~:REF_STDXML~ is currently broken.
+One can also specify a URL to fetch the reference XML from using a ~:REF_URLXML~
+property.
 
-Here's a full example:
+Finally, If no standard (or fetch-able XML) reference is available then the
+bibliographic information may be specified as properties under the headline.
 
-#+caption: Example References Section.
+Here's an example:
+
+#+caption: Example References Sections.
 #+begin_example
-  ,* Refereneces
-  ,** Normative Refereneces
-  ,*** RFC2119
-  ,** Informative Refereneces
-  ,*** RFC7991
-  ,*** W3GGEO
+  ,* Normative Refereneces
+  ,** RFC2119
+  ,* Informative Refereneces
+  ,** RFC7991
+  ,** W3GGEO
   :PROPERTIES:
   :REF_STDXML: W3C-CR-geolocation-API-20100907
   :END:
-  ,*** StudyScarlet
+  ,** StudyScarlet
   :PROPERTIES:
   :REF_TITLE: A Study In Scarlet
   :REF_AUTHOR: Sir Arthur Conan Doyle
@@ -197,12 +197,15 @@ The Properties for creating a custom reference are as follows:
 - REF_ANNOTATION :: A value for the ~<annotation>~ xml2rfc element.
 - REF_AUTHOR :: Author. If multiple authors need to be specify use an list in
                 elisp format (e.g., ~("Author One" "Author Two")~)
+- REF_EDITOR :: Same as ~:REF_AUTHOR:~ but has role set as editor.
 - REF_CONTENT :: The value for the ~<refcontent>~ xml2rfc element.
 - REF_DATE :: The value should be given in emacs ~parse-time-string~ format.
-- REF_STDXML :: The value should be the standard reference text (e.g., "RFC.0791").
+- REF_STDXML :: Used to rename the headline, the value should be the standard
+                reference base (e.g., "RFC0791").
 - REF_ORG :: The organization responsible for the document.
 - REF_TARGET :: A URL to the referenced document if available.
 - REF_TITLE :: Title of cited work.
+- REF_URLXML :: A URL to fetch the reference XML from.
 
 ** Features
 

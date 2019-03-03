@@ -9,7 +9,8 @@
 <?rfc strict="yes"?>
 <rfc ipr="trust200902"
      category="std"
-     docName="draft-test-table-00"     submissionType="IETF"    consensus="true"    tocInclude="true"    version="3">
+     docName="draft-test-table-00"     submissionType="IETF"
+    consensus="true"    tocInclude="true"    version="3">
   <front>
     <title abbrev="Test Table RFC">Test Table RFC</title>
 <author initials='A.' surname='One' fullname='Author One'><address><email>aone@example.com</email></address></author>  <date/>  </front>  <middle>
