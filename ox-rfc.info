@@ -21,8 +21,6 @@ File: ox-rfc.info,  Node: Top,  Next: Org Mode RFC XML Exporter,  Up: (dir)
 Org Mode RFC XML Exporter
 *************************
 
-This manual is for the Org Mode RFC XML export back-end.
-
 * Menu:
 
 * Org Mode RFC XML Exporter::
@@ -930,24 +928,24 @@ Index
 
 Tag Table:
 Node: Top719
-Node: Org Mode RFC XML Exporter1658
-Node: Quick Install/Use with Makefile3123
-Node: Formatting of this document4583
-Node: Required Document Structure5062
-Node: Required and option export variables5992
-Node: ``#+OPTIONS'' export variables8078
-Node: Abstract9332
-Node: Headlines9656
-Node: Normative and Informative References10003
-Node: Features12314
-Node: Character Formatting12663
-Node: Citations and Links13256
-Node: Figures and Artwork (Examples and Source code)13906
-Node: Blockquotes14419
-Node: Lists14747
-Node: Tables15143
-Node: GNU Free Documentation License15438
-Node: Index40801
+Node: Org Mode RFC XML Exporter1600
+Node: Quick Install/Use with Makefile3065
+Node: Formatting of this document4525
+Node: Required Document Structure5004
+Node: Required and option export variables5934
+Node: ``#+OPTIONS'' export variables8020
+Node: Abstract9274
+Node: Headlines9598
+Node: Normative and Informative References9945
+Node: Features12256
+Node: Character Formatting12605
+Node: Citations and Links13198
+Node: Figures and Artwork (Examples and Source code)13848
+Node: Blockquotes14361
+Node: Lists14689
+Node: Tables15085
+Node: GNU Free Documentation License15380
+Node: Index40743
 
 End Tag Table
 
