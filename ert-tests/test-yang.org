@@ -25,8 +25,8 @@ This section would describe the "Cool YANG Module".
 ** YANG Tree
 
 #+CAPTION: Cool Module YANG tree diagram.
-#+begin_src bash  :var file=cool-module :results output verbatim replace :wrap example :exports results
-pyang -f tree ${file}
+#+begin_src shell  :var file=cool-module :results output verbatim replace :wrap example :exports results
+pyang -f tree $file
 #+end_src
 
 * YANG Module
@@ -98,5 +98,5 @@ pyang -f tree ${file}
 # Local Variables:
 # fill-column: 69
 # org-confirm-babel-evaluate: nil
-# org-babel-load-languages: ((shell . t) (yang . t))
+# org-babel-load-languages: ((bash . t) (shell . t) (yang . t))
 # End:
