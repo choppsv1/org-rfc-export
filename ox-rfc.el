@@ -215,7 +215,7 @@ This function is called by `org-babel-execute-src-block'."
 
 (defun ox-rfc--headline-to-anchor (headline)
   "Given HEADLINE return value suitable for an anchor"
-  (concat "sec-" (replace-regexp-in-string "[ \t]+" "-" (downcase headline))))
+  (concat "sec-" (replace-regexp-in-string "[^[:alnum:]]+" "-" (downcase headline))))
 
 (defun ox-rfc--replace-yang-module-revision (body)
   "Get yang module name from body"
@@ -599,11 +599,12 @@ a communication channel."
       (if (not (ox-rfc-render-v3))
           (cond
            (tag
-            (replace-regexp-in-string "<t>" (format "<t hangText=\"%s:\">" (org-export-data tag info)) contents))
+            (replace-regexp-in-string "<t>" (format "<t hangText=\"%s:\"><vspace/>"
+                                                    (org-export-data tag info)) contents))
            (t (org-trim contents)))
         (cond
          (tag
-          (format "<dt>%s</dt> <dd>%s</dd>" (org-export-data tag info) contents))
+          (format "<dt>%s</dt><dd>%s</dd>" (org-export-data tag info) contents))
          (t
           (format "<li>%s</li>" contents))))))))
 
@@ -711,19 +712,23 @@ a communication channel."
   "Transcode PLAIN-LIST element into RFC format.
 CONTENTS is the plain-list contents.  INFO is a plist used as
 a communication channel."
-  (if (ox-rfc-render-v3)
-      (let* ((type (pcase (org-element-property :type plain-list)
-	             (`ordered "ol")
-	             (`unordered "ul")
-	             (`descriptive "dl")
-	             (other (error "Unknown HTML list type: %s" other)))))
-        (format "<%s>\n%s</%s>" type contents type))
-    (let* ((style (pcase (org-element-property :type plain-list)
-	           (`ordered "numbers")
-	           (`unordered "symbols")
-	           (`descriptive "hanging")
-	           (other (error "Unknown HTML list type: %s" other)))))
-      (format "<t><list style=\"%s\">\n%s</list></t>" style contents))))
+  (let ((ltype (org-element-property :type plain-list)))
+    (if (ox-rfc-render-v3)
+        (let* ((type (pcase ltype
+	               (`ordered "ol")
+	               (`unordered "ul")
+	               (`descriptive "dl")
+	               (other (error "Unknown HTML list type: %s" other)))))
+          (if (eq ltype `descriptive)
+              ;; (format "<dl hanging=\"false\">\n%s</dl>" contents)
+              (format "<dl>\n%s</dl>" contents)
+            (format "<%s>\n%s</%s>" type contents type)))
+      (let* ((style (pcase ltype
+	              (`ordered "numbers")
+	              (`unordered "symbols")
+	              (`descriptive "hanging")
+	              (other (error "Unknown HTML list type: %s" other)))))
+        (format "<t><list style=\"%s\">\n%s</list></t>" style contents)))))
 
 
 ;;;; Plain Text
