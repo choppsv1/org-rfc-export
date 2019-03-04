@@ -1,5 +1,6 @@
-#+OPTIONS: prop:nil title:t toc:nil \n:nil ::t |:t ^:{} -:t *:t ':t
-* Org Mode RFC (~xml2rfc~) Exporter ~ox-rfc.el~
+#+OPTIONS: ':t toc:t author:t email:t
+
+* Org Mode RFC XML Exporter
 
 Build (master): [[https://travis-ci.org/choppsv1/org-rfc-export][https://travis-ci.org/choppsv1/org-rfc-export.svg?branch=master]]
 MELPA: [[https://melpa.org/#/ox-rfc][https://melpa.org/packages/ox-rfc-badge.svg]]
