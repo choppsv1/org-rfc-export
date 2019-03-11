@@ -41,7 +41,7 @@
 
 (require 'ox)
 (require 'url-parse)
-;; (require 'ox-ascii)
+(require 'ox-ascii)
 
 
 ;;; User-Configurable Variables
@@ -122,6 +122,7 @@
 (org-export-define-backend 'rfc
   '((bold . ox-rfc-bold)
     (code . ox-rfc-verbatim)
+    (center-block . ox-rfc-center-block)
     ;; (entity . ox-rfc-entity) ; What's this.
     (dynamic-block . ox-rfc-dynamic-block)
     (example-block . ox-rfc-example-block)
@@ -180,6 +181,7 @@
     (:email "EMAIL" nil nil t)
     (:rfc-file-name-version nil "fnv" ox-rfc-file-name-version t)
     (:rfc-add-author "RFC_ADD_AUTHOR" nil nil newline)
+    (:rfc-ascii-table "RFC_ASCII_TABLE" nil nil t)
     (:rfc-category "RFC_CATEGORY" nil "std" t)
     (:rfc-consensus "RFC_CONSENSUS" nil "true" t)
     (:rfc-ipr "RFC_IPR" nil "trust200902" t)
@@ -189,16 +191,17 @@
     (:rfc-updates "RFC_UPDATES" nil nil space)
     (:rfc-version "RFC_VERSION" nil "00" t)
     (:rfc-xml-version "RFC_XML_VERSION" nil nil t)
-    ;; ;; We define these to allow us to use org-ascii-table for XML version 2 formatting.
-    ;; (:ascii-global-margin nil nil org-ascii-global-margin)
-    ;; (:ascii-quote-margin nil nil org-ascii-quote-margin)
-    ;; (:ascii-inner-margin nil nil org-ascii-inner-margin)
-    ;; (:ascii-list-margin nil nil org-ascii-list-margin)
-    ;; (:ascii-table-keep-all-vertical-lines
-    ;;  nil nil org-ascii-table-keep-all-vertical-lines)
-    ;; (:ascii-table-use-ascii-art nil nil org-ascii-table-use-ascii-art)
-    ;; (:ascii-table-widen-columns nil nil org-ascii-table-widen-columns)
-    ;; (:ascii-text-width nil nil org-ascii-text-width)
+    ;; We define these to allow us to use org-ascii-table
+    ;; for XML version 2 multi-header-row 2 formatting.
+    (:ascii-global-margin nil nil org-ascii-global-margin)
+    (:ascii-quote-margin nil nil org-ascii-quote-margin)
+    (:ascii-inner-margin nil nil org-ascii-inner-margin)
+    (:ascii-list-margin nil nil org-ascii-list-margin)
+    (:ascii-table-keep-all-vertical-lines
+     nil nil org-ascii-table-keep-all-vertical-lines)
+    (:ascii-table-use-ascii-art nil nil org-ascii-table-use-ascii-art)
+    (:ascii-table-widen-columns nil nil org-ascii-table-widen-columns)
+    (:ascii-text-width nil nil org-ascii-text-width)
     ))
 
 
@@ -216,6 +219,12 @@ This function is called by `org-babel-execute-src-block'."
   "Run a block with YANG XML through pyang.
 This function is called by `org-babel-execute-src-block'."
   body)
+
+(defun ox-rfc--get-justification (element)
+  "Return expected justification for ELEMENT's contents.
+Return value is a symbol among `left', `center', `right' and
+`full'."
+  (org-ascii--current-justification element))
 
 (defun ox-rfc--headline-to-anchor (headline)
   "Given HEADLINE return value suitable for an anchor"
@@ -433,6 +442,13 @@ a communication channel."
     (format "<spanx style='strong'>%s</spanx>" contents)))
 
 
+(defun ox-rfc-center-block (_center-block contents _info)
+  "Transcode a CENTER-BLOCK object into XML format.
+CONTENTS is the text to center.  INFO is a plist used as
+a communication channel."
+  ;; Done if we handle it already.
+  contents)
+
 ;;;; Example Block, Src Block and Export Block
 
 (defun ox-rfc--artwork (a-block contents _info &optional is-src)
@@ -443,8 +459,9 @@ channel."
   (let* ((caption (car (org-export-get-caption a-block)))
          (v3 (ox-rfc-render-v3))
          (v2 (not v3))
+         (titleattr (if (and v2 caption) (format " title=\"%s\" anchor=\"%s\"" caption (ox-rfc--headline-to-anchor caption)) ""))
          (nameattr (if (and v3 caption) (format "<name>%s</name>" caption) ""))
-         (figopen (if (or v2 caption) (format "<figure>%s" nameattr) ""))
+         (figopen (if (or v2 caption) (format "<figure%s>%s" titleattr nameattr) ""))
          (figclose (if (or v2 caption) "</figure>" ""))
          (codetag (if (and is-src (ox-rfc-render-v3)) "sourcecode" "artwork"))
          ;; Check for yang to special handle
@@ -511,10 +528,11 @@ holding contextual information."
      ((string= (downcase block-type) "abstract")
       (plist-put info :abstract (format "<abstract>%s</abstract>" (org-trim contents)))
       "")
+     ((string= (downcase block-type) "noexport") "")
      ((string= (downcase block-type) "xml")
       (message "XXX S-XML-BLOCK: \"%s\" S-XML-CONTENTS: \"%s\"" special-block contents)
       (org-remove-indentation (org-export-data special-block info)))
-     (t (org-trim contents)))))
+     (t contents))))
 
 (defun ox-rfc-src-block (src-block _contents info)
   "Transcode SRC-BLOCK element into RFC format.
@@ -820,7 +838,9 @@ INFO is a plist used as a communication channel."
   "Transcode SECTION element into RFC format.
 CONTENTS is the section contents.  INFO is a plist used as
 a communication channel."
-  contents)
+  (if (not contents)
+      ""
+    contents))
 
 ;;;; Subscript
 
@@ -919,12 +939,16 @@ as a communication channel."
   "Transcode a TABLE element from Org to RFC format.
 CONTENTS is the contents of the table.  INFO is a plist holding
 contextual information."
-  (if (eq (org-element-property :type table) 'table.el)
-      ;; "table.el" table.  Convert it using appropriate tools.
-      (ox-rfc-table--table.el-table table info)
-    ;; (if (not (ox-rfc-render-v3))
-    ;; (org-ascii-table table contents info)
-      ;; Standard table.
+  (cond
+   ((eq (org-element-property :type table) 'table.el)
+    ;; "table.el" table.  Convert it using appropriate tools.
+    (ox-rfc--artwork table (ox-rfc-table--table.el-table table info) info))
+   ((plist-get (org-export-get-environment 'rfc) :rfc-ascii-table)
+    (ox-rfc--artwork table
+                     (cl-letf (((symbol-function 'org-export-get-caption) (lambda (_x &optional _y))))
+                       (org-ascii-table table contents info))
+                     info))
+   (t
     (let* ((caption (org-export-get-caption table))
              ;; May want to support in future.
              ;; (number (org-export-get-ordinal
@@ -943,7 +967,7 @@ contextual information."
 	        (if (not caption) ""
 		  (format " title=\"%s\"" (org-export-data caption info)))
 	        contents))
-        )))
+        ))))
 
 (defun ox-rfc-table-first-row-data-cells (table info)
   "Transcode the first row of TABLE.
@@ -979,68 +1003,69 @@ INFO is a plist used as a communication channel."
 CONTENTS is the contents of the table.  INFO is a plist holding
 contextual information."
   (let ((v3 (ox-rfc-render-v3)))
-    ;; (if (not (ox-rfc-render-v3))
-    ;;     (org-ascii-table-row table-row contents info)
-    (when (eq (org-element-property :type table-row) 'standard)
-      (let* ((group (org-export-table-row-group table-row info))
-	     ;; (number (org-export-table-row-number table-row info))
-	     (start-group-p
-	      (org-export-table-row-starts-rowgroup-p table-row info))
-	     (end-group-p
-	      (org-export-table-row-ends-rowgroup-p table-row info))
-	     ;; (topp (and (equal start-group-p '(top))
-	     ;;            (equal end-group-p '(below top))))
-	     ;; (bottomp (and (equal start-group-p '(above))
-	     ;;    	   (equal end-group-p '(bottom above))))
-             (row-open-tag (if v3 "<tr>" ""))
-             (row-close-tag (if v3 "</tr>" ""))
-	     (group-tags
-	      (cond
-	       ;; Row belongs to second or subsequent groups.
-	       ((not (= 1 group)) (if v3 '("<tbody>" . "\n</tbody>") '("" . "")))
-	       ;; Row is from first group.  Table has >=1 groups.
-	       ((org-export-table-has-header-p
-	         (org-export-get-parent-table table-row) info)
-	        (if v3 '("<thead>" . "\n</thead>") '("" . "")))
-	       ;; Row is from first and only group.
-	       (t (if v3 '("<tbody>" . "\n</tbody>") '("" . ""))))))
-        (concat (and start-group-p (car group-tags))
-	        (concat row-open-tag contents row-close-tag)
-	        (and end-group-p (cdr group-tags)))))))
+
+    (if (plist-get (org-export-get-environment 'rfc) :rfc-ascii-table)
+        (org-ascii-table-row table-row contents info)
+      (when (eq (org-element-property :type table-row) 'standard)
+        (let* ((group (org-export-table-row-group table-row info))
+	       ;; (number (org-export-table-row-number table-row info))
+	       (start-group-p
+	        (org-export-table-row-starts-rowgroup-p table-row info))
+	       (end-group-p
+	        (org-export-table-row-ends-rowgroup-p table-row info))
+	       ;; (topp (and (equal start-group-p '(top))
+	       ;;            (equal end-group-p '(below top))))
+	       ;; (bottomp (and (equal start-group-p '(above))
+	       ;;    	   (equal end-group-p '(bottom above))))
+               (row-open-tag (if v3 "<tr>" ""))
+               (row-close-tag (if v3 "</tr>" ""))
+	       (group-tags
+	        (cond
+	         ;; Row belongs to second or subsequent groups.
+	         ((not (= 1 group)) (if v3 '("<tbody>" . "\n</tbody>") '("" . "")))
+	         ;; Row is from first group.  Table has >=1 groups.
+	         ((org-export-table-has-header-p
+	           (org-export-get-parent-table table-row) info)
+	          (if v3 '("<thead>" . "\n</thead>") '("" . "")))
+	         ;; Row is from first and only group.
+	         (t (if v3 '("<tbody>" . "\n</tbody>") '("" . ""))))))
+          (concat (and start-group-p (car group-tags))
+	          (concat row-open-tag contents row-close-tag)
+	          (and end-group-p (cdr group-tags))))))))
 
 (defun ox-rfc-table-cell (table-cell contents info)
   "Transcode a TABLE-CELL element from Org to RFC format.
 CONTENTS is the contents of the table.  INFO is a plist holding
 contextual information."
-  ;; (if (not (ox-rfc-render-v3))
-  ;;     (org-ascii-table-cell table-cell contents info)
-  (let* ((v3 (ox-rfc-render-v3))
-         (table-row (org-export-get-parent table-cell))
-	 (table (org-export-get-parent-table table-cell))
-	 (cell-attrs ""))
-    (when (or (not contents) (string= "" (org-trim contents)))
-      (setq contents "&#xa0;"))
-    (cond
-     ((and (org-export-table-has-header-p table info)
-	   (= 1 (org-export-table-row-group table-row info)))
-      (if v3
-          (let ((header-tags '("<th%s>" . "</th>")))
+  (if (plist-get (org-export-get-environment 'rfc) :rfc-ascii-table)
+      (org-ascii-table-cell table-cell contents info)
+    (let* ((v3 (ox-rfc-render-v3))
+           (table-row (org-export-get-parent table-cell))
+	   (table (org-export-get-parent-table table-cell))
+	   (cell-attrs ""))
+      (when (or (not contents) (string= "" (org-trim contents)))
+        (setq contents "&#xa0;"))
+      (cond
+       ((and (org-export-table-has-header-p table info)
+	     (= 1 (org-export-table-row-group table-row info)))
+        (if v3
+            (let ((header-tags '("<th%s>" . "</th>")))
+	      (concat (format (car header-tags) cell-attrs)
+		      contents
+		      (cdr header-tags)))
+          (let ((header-tags '("<ttcol%s>" . "</ttcol>")))
 	    (concat (format (car header-tags) cell-attrs)
 		    contents
-		    (cdr header-tags)))
-        (let ((header-tags '("<ttcol%s>" . "</ttcol>")))
-	  (concat (format (car header-tags) cell-attrs)
-		  contents
-		  (cdr header-tags)))))
-     (t (if v3
-            (let ((data-tags '("<td%s>" . "</td>")))
-	      (concat (format (car data-tags) cell-attrs)
-		      contents
-		      (cdr data-tags)))
-          (let ((data-tags '("<c%s>" . "</c>")))
-            (concat (format (car data-tags) cell-attrs)
-	            contents
-	            (cdr data-tags))))))))
+		    (cdr header-tags)))))
+       (t (if v3
+              (let ((data-tags '("<td%s>" . "</td>")))
+	        (concat (format (car data-tags) cell-attrs)
+		        contents
+		        (cdr data-tags)))
+            (let ((data-tags '("<c%s>" . "</c>")))
+              (concat (format (car data-tags) cell-attrs)
+	              contents
+	              (cdr data-tags)))))))))
 
 ;;;; Verbatim
 
