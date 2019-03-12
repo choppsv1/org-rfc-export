@@ -143,11 +143,10 @@ File: ox-rfc.info,  Node: Required Document Structure,  Next: Features,  Prev: F
 
 The following is the expected structure of the Org mode RFC file:
 
-   • Headlined Sections
-   • Headline “References”
-        • Headline “Normative References”
-        • Headline “Informative References”
-   • Appendix Sections.
+   • Headline Sections
+   • Headline “Normative References”
+   • Headline “Informative References”
+   • Headline (Appendix) Sections.
 
    Additionally the following may appear anywhere; however, the first
 two make he most sense to be placed at the top of the file:
@@ -320,7 +319,7 @@ the headline.
      ** StudyScarlet
      :PROPERTIES:
      :REF_TITLE: A Study In Scarlet
-     :REF_AUTHOR: Sir Arthur Conan Doyle
+     :REF_AUTHOR: Arthur Conan Doyle
      :REF_DATE: Nov 1887
      :REF_CONTENT: Beeton's Christmas Annual, Ward Lock & Co
      :END:
@@ -932,20 +931,20 @@ Node: Org Mode RFC XML Exporter1600
 Node: Quick Install/Use with Makefile3065
 Node: Formatting of this document4525
 Node: Required Document Structure5004
-Node: Required and option export variables5934
-Node: ``#+OPTIONS'' export variables8020
-Node: Abstract9274
-Node: Headlines9598
-Node: Normative and Informative References9945
-Node: Features12256
-Node: Character Formatting12605
-Node: Citations and Links13198
-Node: Figures and Artwork (Examples and Source code)13848
-Node: Blockquotes14361
-Node: Lists14689
-Node: Tables15085
-Node: GNU Free Documentation License15380
-Node: Index40743
+Node: Required and option export variables5901
+Node: ``#+OPTIONS'' export variables7987
+Node: Abstract9241
+Node: Headlines9565
+Node: Normative and Informative References9912
+Node: Features12219
+Node: Character Formatting12568
+Node: Citations and Links13161
+Node: Figures and Artwork (Examples and Source code)13811
+Node: Blockquotes14324
+Node: Lists14652
+Node: Tables15048
+Node: GNU Free Documentation License15343
+Node: Index40706
 
 End Tag Table
 

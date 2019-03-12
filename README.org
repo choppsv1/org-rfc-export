@@ -64,11 +64,10 @@ remember that "=" and "~" characters are used for highlighting literal text
 
 The following is the expected structure of the Org mode RFC file:
 
-- Headlined Sections
-- Headline "References"
-  - Headline "Normative References"
-  - Headline "Informative References"
-- Appendix Sections.
+- Headline Sections
+- Headline "Normative References"
+- Headline "Informative References"
+- Headline (Appendix) Sections.
 
 Additionally the following may appear anywhere; however, the first two make he
 most sense to be placed at the top of the file:
@@ -201,7 +200,7 @@ Here's an example:
   ,** StudyScarlet
   :PROPERTIES:
   :REF_TITLE: A Study In Scarlet
-  :REF_AUTHOR: Sir Arthur Conan Doyle
+  :REF_AUTHOR: Arthur Conan Doyle
   :REF_DATE: Nov 1887
   :REF_CONTENT: Beeton's Christmas Annual, Ward Lock & Co
   :END:
