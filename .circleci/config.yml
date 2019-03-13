@@ -18,49 +18,49 @@ references:
 # This sort of sucks, I want the names in the test
 # so I can't actually use the parameter stuff
 jobs:
-  emacs24-org8.3:
+  emacs24-org83:
     environment:
       ORG_RELEASE=8.3.6
     <<: *main_test
-  emacs24-org9.0:
+  emacs24-org90:
     environment:
       ORG_RELEASE=9.0.10
     <<: *main_test
-  emacs24-org9.1:
+  emacs24-org91:
     environment:
       ORG_RELEASE=9.1.14
     <<: *main_test
-  emacs24-org9.2:
+  emacs24-org92:
     environment:
       ORG_RELEASE=9.2.2
     <<: *main_test
 
-  emacs25-org8.3:
+  emacs25-org83:
     environment:
       ORG_RELEASE=8.3.6
     <<: *main_test
-  emacs25-org9.0:
+  emacs25-org90:
     environment:
       ORG_RELEASE=9.0.10
     <<: *main_test
-  emacs25-org9.1:
+  emacs25-org91:
     environment:
       ORG_RELEASE=9.1.14
     <<: *main_test
-  emacs25-org9.2:
+  emacs25-org92:
     environment:
       ORG_RELEASE=9.2.2
     <<: *main_test
 
-  emacs26-org9.0:
+  emacs26-org90:
     environment:
       ORG_RELEASE=9.0.10
     <<: *main_test
-  emacs26-org9.1:
+  emacs26-org91:
     environment:
       ORG_RELEASE=9.1.14
     <<: *main_test
-  emacs26-org9.2:
+  emacs26-org92:
     environment:
       ORG_RELEASE=9.2.2
     <<: *main_test
@@ -69,27 +69,27 @@ jobs:
 workflows:
   ox-rfc:
     jobs:
-      - emacs24-org8.3:
+      - emacs24-org83:
           erel: "24.3"
-      - emacs24-org9.0:
+      - emacs24-org90:
           erel: "24.3"
-      - emacs24-org9.1:
+      - emacs24-org91:
           erel: "24.3"
-      - emacs24-org9.2:
+      - emacs24-org92:
           erel: "24.3"
 
-      - emacs25-org8.3:
+      - emacs25-org83:
           erel: "25.3"
-      - emacs25-org9.0:
+      - emacs25-org90:
           erel: "25.3"
-      - emacs25-org9.1:
+      - emacs25-org91:
           erel: "25.3"
-      - emacs25-org9.2:
+      - emacs25-org92:
           erel: "25.3"
 
-      - emacs26-org9.0:
+      - emacs26-org90:
           erel: "26.1"
-      - emacs26-org9.1:
+      - emacs26-org91:
           erel: "26.1"
-      - emacs26-org9.2:
+      - emacs26-org92:
           erel: "26.1"
