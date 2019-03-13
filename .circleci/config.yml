@@ -14,7 +14,7 @@ commands:
 
 jobs:
   test:
-    name: "Emacs << parameters.erel >> ORG << parameters.orgrel >>"
+    description: "Emacs << parameters.erel >> ORG << parameters.orgrel >>"
     working_directory: ~/org-rfc-test
     parameters:
       erel:
