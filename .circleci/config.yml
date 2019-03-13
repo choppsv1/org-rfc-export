@@ -25,11 +25,11 @@ workflows:
   test-ox-rfc:
     jobs:
       - test-emacs:
-          erel: 24.3
-          orgrel: 8.3.6
+          erel: "24.3"
+          orgrel: "8.3.6"
       - test-emacs:
-          erel: 25.3
-          orgrel: 9.0.10
+          erel: "25.3"
+          orgrel: "9.0.10"
       - test-emacs:
-          erel: 26.1
-          orgrel: 9.0.10
+          erel: "26.1"
+          orgrel: "9.0.10"
