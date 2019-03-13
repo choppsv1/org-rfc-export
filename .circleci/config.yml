@@ -9,7 +9,7 @@ commands:
         default: "8.3.6"
     steps:
       - run:
-          name: "Test ox-rfc Emacs << parameters.erel >> ORG << parameters.orgrel >>"
+          name: "Test with ORG << parameters.orgrel >>"
           command: "make ORG_RELEASE=<< parameters.orgrel >> test"
 
 jobs:
