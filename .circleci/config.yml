@@ -1,0 +1,32 @@
+version: 2.1
+
+references:
+  main_test: &main_test
+    working_directory: ~/org-rfc-test
+    steps:
+      - checkout
+      - run:
+          name: Emacs tests
+          command: make test
+
+jobs:
+  test-emacs24:
+    docker:
+      - image: "choppsv1/org-rfc-test:24.3"
+    <<: *main_test
+  test-emacs25:
+    docker:
+      - image: "choppsv1/org-rfc-test:25.3"
+    <<: *main_test
+  test-emacs26:
+    docker:
+      - image: "choppsv1/org-rfc-test:26.1"
+    <<: *main_test
+
+workflows:
+  version: 2
+  build:
+    jobs:
+      - test-emacs24
+      - test-emacs25
+      - test-emacs26

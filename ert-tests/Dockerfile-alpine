@@ -1,0 +1,19 @@
+ARG AVERSION
+FROM alpine:$AVERSION
+RUN apk add --no-cache alpine-sdk curl libxml2-dev libxslt-dev py-pip tidyhtml
+RUN apk add --no-cache libxml2 libxslt python-dev
+RUN pip install -U pip
+RUN pip install -U pyang
+
+ARG EVERSION
+RUN curl -O http://ftp.gnu.org/gnu/emacs/emacs-$EVERSION.tar.gz
+RUN tar xf emacs-$EVERSION.tar.gz
+RUN apk add --no-cache ncurses-dev
+
+WORKDIR emacs-$EVERSION
+RUN sh -c "export CANNOT_DUMP=yes && ./configure"
+RUN make
+RUN make install
+
+WORKDIR /work
+CMD [ "bash" ]
