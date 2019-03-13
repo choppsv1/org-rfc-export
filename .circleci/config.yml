@@ -1,82 +1,95 @@
 version: 2.1
 
-commands:
-  testoxrfc:
-    parameters:
-      orgrel:
-        description: "Version of ORG to test with"
-        type: string
-        default: "8.3.6"
-    steps:
-      - run:
-          name: "Test with ORG << parameters.orgrel >>"
-          command: "make ORG_RELEASE=<< parameters.orgrel >> test"
-
 references:
   main_test: &main_test
-    description: "Emacs << parameters.erel >> ORG << parameters.orgrel >>"
+    description: "Emacs << parameters.erel >> "
     parameters:
       erel:
         description: "Version of Emacs to test with"
         type: string
-        default: "24.3"
-      orgrel:
-        description: "Version of ORG to test with"
-        type: string
-        default: "8.3.6"
     docker:
       - image: "choppsv1/org-rfc-test:<< parameters.erel >>"
     working_directory: ~/org-rfc-test
     steps:
       - checkout
-      - testoxrfc:
-          orgrel: "<< parameters.orgrel >>"
+      - run:
+          command: "make ORG_RELEASE=${ORG_RELEASE} test"
 
-# It would be nice if we could actually extract the version from these labels
+# This sort of sucks, I want the names in the test
+# so I can't actually use the parameter stuff
 jobs:
-  test-24:
+  emacs24-org8.3:
+    environment:
+      ORG_RELEASE=8.3.6
     <<: *main_test
-  test-25:
+  emacs24-org9.0:
+    environment:
+      ORG_RELEASE=9.0.10
     <<: *main_test
-  test-26:
+  emacs24-org9.1:
+    environment:
+      ORG_RELEASE=9.1.14
+    <<: *main_test
+  emacs24-org9.2:
+    environment:
+      ORG_RELEASE=9.2.2
+    <<: *main_test
+
+  emacs25-org8.3:
+    environment:
+      ORG_RELEASE=8.3.6
+    <<: *main_test
+  emacs25-org9.0:
+    environment:
+      ORG_RELEASE=9.0.10
+    <<: *main_test
+  emacs25-org9.1:
+    environment:
+      ORG_RELEASE=9.1.14
+    <<: *main_test
+  emacs25-org9.2:
+    environment:
+      ORG_RELEASE=9.2.2
+    <<: *main_test
+
+  emacs26-org9.0:
+    environment:
+      ORG_RELEASE=9.0.10
+    <<: *main_test
+  emacs26-org9.1:
+    environment:
+      ORG_RELEASE=9.1.14
+    <<: *main_test
+  emacs26-org9.2:
+    environment:
+      ORG_RELEASE=9.2.2
     <<: *main_test
 
 
 workflows:
-  test:
+  ox-rfc:
     jobs:
-      - test-24:
+      - emacs24-org8.3:
           erel: "24.3"
-          orgrel: "8.3.6"
-      - test-24:
+      - emacs24-org9.0:
           erel: "24.3"
-          orgrel: "9.0.10"
-      - test-24:
+      - emacs24-org9.1:
           erel: "24.3"
-          orgrel: "9.1.14"
-      - test-24:
+      - emacs24-org9.2:
           erel: "24.3"
-          orgrel: "9.2.2"
 
-      - test-25:
+      - emacs25-org8.3:
           erel: "25.3"
-          orgrel: "8.3.6"
-      - test-25:
+      - emacs25-org9.0:
           erel: "25.3"
-          orgrel: "9.0.10"
-      - test-25:
+      - emacs25-org9.1:
           erel: "25.3"
-          orgrel: "9.1.14"
-      - test-25:
+      - emacs25-org9.2:
           erel: "25.3"
-          orgrel: "9.2.2"
 
-      - test-26:
+      - emacs26-org9.0:
           erel: "26.1"
-          orgrel: "9.0.10"
-      - test-26:
+      - emacs26-org9.1:
           erel: "26.1"
-          orgrel: "9.1.14"
-      - test-26:
+      - emacs26-org9.2:
           erel: "26.1"
-          orgrel: "9.2.2"
