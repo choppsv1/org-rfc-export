@@ -1,32 +1,35 @@
 version: 2.1
 
-references:
-  main_test: &main_test
+jobs:
+  test-emacs:
     working_directory: ~/org-rfc-test
+    parameters:
+      erel:
+        description: "Version of Emacs to test with"
+        type: string
+        default: "24.3"
+      orgrel:
+        description: "Version of ORG to test with"
+        type: string
+        default: "8.3.6"
+    docker:
+      - image: "choppsv1/org-rfc-test:<< parameters.erel >>"
     steps:
       - checkout
       - run:
-          name: Emacs tests
-          command: make test
+          name: "Test ox-rfc Emacs << parameters.erel >> ORG << parameters.orgrel >>"
+          command: "make ORG_RELEASE=<< parameters.orgrel >> test"
 
-jobs:
-  test-emacs24:
-    docker:
-      - image: "choppsv1/org-rfc-test:24.3"
-    <<: *main_test
-  test-emacs25:
-    docker:
-      - image: "choppsv1/org-rfc-test:25.3"
-    <<: *main_test
-  test-emacs26:
-    docker:
-      - image: "choppsv1/org-rfc-test:26.1"
-    <<: *main_test
 
 workflows:
-  version: 2
-  build:
+  test-ox-rfc:
     jobs:
-      - test-emacs24
-      - test-emacs25
-      - test-emacs26
+      - test-emacs:
+          erel: 24.3
+          orgrel: 8.3.6
+      - test-emacs:
+          erel: 25.3
+          orgrel: 9.0.10
+      - test-emacs:
+          erel: 26.1
+          orgrel: 9.0.10
