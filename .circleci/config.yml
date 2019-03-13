@@ -12,10 +12,9 @@ commands:
           name: "Test with ORG << parameters.orgrel >>"
           command: "make ORG_RELEASE=<< parameters.orgrel >> test"
 
-jobs:
-  test:
+references:
+  main_test: &main_test
     description: "Emacs << parameters.erel >> ORG << parameters.orgrel >>"
-    working_directory: ~/org-rfc-test
     parameters:
       erel:
         description: "Version of Emacs to test with"
@@ -27,21 +26,57 @@ jobs:
         default: "8.3.6"
     docker:
       - image: "choppsv1/org-rfc-test:<< parameters.erel >>"
+    working_directory: ~/org-rfc-test
     steps:
       - checkout
       - testoxrfc:
           orgrel: "<< parameters.orgrel >>"
 
+# It would be nice if we could actually extract the version from these labels
+jobs:
+  test-24:
+    <<: *main_test
+  test-25:
+    <<: *main_test
+  test-26:
+    <<: *main_test
+
 
 workflows:
   test:
     jobs:
-      - test:
+      - test-24:
           erel: "24.3"
           orgrel: "8.3.6"
-      - test:
+      - test-24:
+          erel: "24.3"
+          orgrel: "9.0.10"
+      - test-24:
+          erel: "24.3"
+          orgrel: "9.1.14"
+      - test-24:
+          erel: "24.3"
+          orgrel: "9.2.2"
+
+      - test-25:
+          erel: "25.3"
+          orgrel: "8.3.6"
+      - test-25:
           erel: "25.3"
           orgrel: "9.0.10"
-      - test:
+      - test-25:
+          erel: "25.3"
+          orgrel: "9.1.14"
+      - test-25:
+          erel: "25.3"
+          orgrel: "9.2.2"
+
+      - test-26:
           erel: "26.1"
           orgrel: "9.0.10"
+      - test-26:
+          erel: "26.1"
+          orgrel: "9.1.14"
+      - test-26:
+          erel: "26.1"
+          orgrel: "9.2.2"
