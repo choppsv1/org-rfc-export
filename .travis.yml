@@ -83,9 +83,9 @@ matrix:
     # - env:
     #     - EVM_EMACS=emacs-26.1-travis
     #     - ORG_RELEASE=9.1.14
-    - env:
-        - EVM_EMACS=emacs-26.1-travis
-        - ORG_RELEASE=9.2.2
+    # - env:
+    #     - EVM_EMACS=emacs-26.1-travis
+    #     - ORG_RELEASE=9.2.2
 
 
 #     - env: EMACS=emacs23
