@@ -1,7 +1,20 @@
 version: 2.1
 
+commands:
+  testoxrfc:
+    parameters:
+      orgrel:
+        description: "Version of ORG to test with"
+        type: string
+        default: "8.3.6"
+    steps:
+      - run:
+          name: "Test ox-rfc Emacs << parameters.erel >> ORG << parameters.orgrel >>"
+          command: "make ORG_RELEASE=<< parameters.orgrel >> test"
+
 jobs:
-  test-emacs:
+  test:
+    name: "Emacs << parameters.erel >> ORG << parameters.orgrel >>"
     working_directory: ~/org-rfc-test
     parameters:
       erel:
@@ -16,20 +29,19 @@ jobs:
       - image: "choppsv1/org-rfc-test:<< parameters.erel >>"
     steps:
       - checkout
-      - run:
-          name: "Test ox-rfc Emacs << parameters.erel >> ORG << parameters.orgrel >>"
-          command: "make ORG_RELEASE=<< parameters.orgrel >> test"
+      - testoxrfc:
+          orgrel: "<< parameters.orgrel >>"
 
 
 workflows:
-  test-ox-rfc:
+  test:
     jobs:
-      - test-emacs:
+      - test:
           erel: "24.3"
           orgrel: "8.3.6"
-      - test-emacs:
+      - test:
           erel: "25.3"
           orgrel: "9.0.10"
-      - test-emacs:
+      - test:
           erel: "26.1"
           orgrel: "9.0.10"
