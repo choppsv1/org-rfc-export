@@ -1,8 +1,7 @@
 # Adapted from: git@github.com:choppsv1/ietf-docs.git
 # Adapted from: git@github.com:rolandwalker/emacs-travis.git
-TEST_DIR := $(shell pwd)
-PROJ_DIR ?= $(TEST_DIR)/..
-AVERSION ?= 3.6
+TESTDIR := $(shell pwd)
+PROJDIR ?= $(TESTDIR)/..
 
 ORG_RELEASE ?= 8.3.6
 ORG_DIR := /tmp/org-$(ORG_RELEASE)
@@ -11,12 +10,13 @@ ORG_EX := $(ORG_DIR)/lisp/ox.el
 
 EMACS ?= emacs
 EMACS_CLEAN ?= -Q
-EMACS_BATCH := $(EMACS_CLEAN) --batch -L $(ORG_DIR)/lisp
+# So bizarre emacs 25 (only) has no exec-path maybe b/c of cannot dump.
+EMACS_BATCH := $(EMACS_CLEAN) --batch --eval "(add-to-list 'exec-path \"/usr/bin\")" -L $(ORG_DIR)/lisp
 EMACS_TEST_VERSIONS := 24.3 25.3 26.1
 
-AUTOLOADS_FILE := $(TEST_DIR)/$(PACKAGE_NAME)-autoloads.el
+AUTOLOADS_FILE := $(TESTDIR)/$(PACKAGE_NAME)-autoloads.el
 CURL := curl -fL --silent
-TRAVIS_FILE := $(PROJ_DIR)/.travis.yml
+TRAVIS_FILE := $(PROJDIR)/.travis.yml
 
 .PHONY: autoloads build clean test test-autoloads test-travis
 
@@ -30,13 +30,13 @@ build: $(ORG_EX)
 	$(EMACS) $(EMACS_BATCH) --eval \
 	    "(progn                                \
 	      (setq byte-compile-error-on-warn t)  \
-	      (batch-byte-compile))" $(PROJ_DIR)/$(PACKAGE_NAME).el
+	      (batch-byte-compile))" $(PROJDIR)/$(PACKAGE_NAME).el
 
 autoloads:
 	$(EMACS) $(EMACS_BATCH) --eval                       \
 	    "(progn                                          \
 	      (setq generated-autoload-file \"$(AUTOLOADS_FILE)\") \
-	      (update-directory-autoloads \"$(PROJ_DIR)\"))"
+	      (update-directory-autoloads \"$(PROJDIR)\"))"
 
 test-autoloads : autoloads
 	@$(EMACS) $(EMACS_BATCH) -L .. -l "$(AUTOLOADS_FILE)"      || \
@@ -51,12 +51,12 @@ test: build test-autoloads
 
 clean:
 	@rm -rf $(ORG_DIR)
-	@rm -f auto $(AUTOLOADS_FILE) *.elc $(TEST_DIR)/draft-*.xml
+	@rm -f auto $(AUTOLOADS_FILE) *.elc $(TESTDIR)/draft-*.xml
 
 docker-build:
 	docker build --build-arg=UVERSION=16.04 --build-arg=EVERSION=24.3 -t org-rfc-test:24.3 .
-	docker build --build-arg=UVERSION=18.04 --build-arg=EVERSION=26.1 -t org-rfc-test:26.1 .
 	docker build --build-arg=UVERSION=18.04 --build-arg=EVERSION=25.3 -t org-rfc-test:25.3 .
+	docker build --build-arg=UVERSION=18.04 --build-arg=EVERSION=26.1 -t org-rfc-test:26.1 .
 	docker tag org-rfc-test:26.1 org-rfc-test
 
 docker-push:
@@ -64,4 +64,9 @@ docker-push:
 	for f in $(EMACS_TEST_VERSIONS); do docker push choppsv1/org-rfc-test:$$f; done
 
 docker-run:
-	docker run -v $(PROJ_DIR):/work -it org-rfc-test
+	docker run -v $(PROJDIR):/work -it org-rfc-test
+
+EVERSION ?= 25.3
+DOCKER := docker run -v $(PROJDIR):/work -it org-rfc-test:$(EVERSION)
+docker-test:
+	$(DOCKER) bash -c "cp -pr /work /work-test; cd /work-test && make test"

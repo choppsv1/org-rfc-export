@@ -7,6 +7,7 @@ RUN apt-get update && \
 
 RUN apt-get install -y gnutls-bin gnutls-dev libncurses-dev libxml2 libxml2-dev libxslt-dev  python-dev
 
+ENV SHELL=/bin/bash
 ARG EVERSION
 RUN curl -O http://ftp.gnu.org/gnu/emacs/emacs-$EVERSION.tar.gz
 RUN tar xf emacs-$EVERSION.tar.gz
