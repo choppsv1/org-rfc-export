@@ -9,9 +9,8 @@ MELPA: [[https://melpa.org/#/ox-rfc][https://melpa.org/packages/ox-rfc-badge.svg
 This is an org mode export back-end to convert an Org mode formatted file into
 ~xml2rfc~ RFC format. Its direct output is XML that can be input to ~xml2rfc~ to
 further format the file into text, HTML or PDF formats. The code does make some
-assumptions about the organization of the Org mode file in order to properly
-produce and correct RFC formatted and organized file. Both ~xml2rfc~ format
-version 2 and version 3 are supported.
+basic assumptions about the organization of the Org mode file. Both ~xml2rfc~
+format version 2 and version 3 are supported.
 
 Exporting directly to text, HTML and PDF is supported by automatically running
 ~xml2rfc~ on the exported XML; however, this document does not including details
@@ -25,7 +24,6 @@ contributions to improve the code.
 
 ~ox-rfc~ is available in =MELPA= (https://melpa.org/#/ox-rfc) so if you using
 emacs packages you can simply install ~ox-rfc~ using your package setup, e.g.,
-
 
 #+begin_src emacs-lisp
   (package-install 'ox-rfc)
