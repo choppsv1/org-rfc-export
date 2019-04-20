@@ -22,12 +22,22 @@ contributions to improve the code.
 
 ** Quick Install/Use with Makefile:
 
+*** MELPA
+
 ~ox-rfc~ is available in =MELPA= (https://melpa.org/#/ox-rfc) so if you using
 emacs packages you can simply install ~ox-rfc~ using your package setup, e.g.,
 
 #+begin_src emacs-lisp
   (package-install 'ox-rfc)
 #+end_src
+
+*** Spacemacs
+
+~ox-rfc~ is part of the merged ~ietf~ layer in =spacemacs= (currently in the
+develop branch of http://spacemacs.org/) so if you use =spacemacs= then you can
+simply add ~ietf~ to your included layers.
+
+*** Makefile
 
 If you do not use emacs packages (or emacs generally) you can still use a
 =Makefile= rule to download the package. The Makefile below does this as well as
