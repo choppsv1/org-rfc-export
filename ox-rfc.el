@@ -475,7 +475,7 @@ channel."
           (if module-name
               (setq contents (ox-rfc--replace-yang-module-revision contents)
                     revision (ox-rfc--get-yang-module-revision contents)))
-          (if (and revision module-name)
+          (if (and revision module-name (not (string-prefix-p "example-" module-name)))
               (setq codeend "<CODE ENDS>\n"
                     codestart (format "<CODE BEGINS> file \"%s@%s.yang\"\n" module-name revision)))))
     (concat figopen
