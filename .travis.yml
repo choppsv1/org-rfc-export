@@ -67,25 +67,25 @@ matrix:
         - ORG_RELEASE=9.1.14
     - env:
         - EVM_EMACS=emacs-24.3-travis
-        - ORG_RELEASE=9.2.2
+        - ORG_RELEASE=9.2.6
     - env:
-        - EVM_EMACS=emacs-25.1-travis
+        - EVM_EMACS=emacs-25.3-travis
         - ORG_RELEASE=8.3.6
     - env:
-        - EVM_EMACS=emacs-25.1-travis
+        - EVM_EMACS=emacs-25.3-travis
         - ORG_RELEASE=9.0.10
     - env:
-        - EVM_EMACS=emacs-25.1-travis
+        - EVM_EMACS=emacs-25.3-travis
         - ORG_RELEASE=9.1.14
     - env:
-        - EVM_EMACS=emacs-25.1-travis
+        - EVM_EMACS=emacs-25.3-travis
+        - ORG_RELEASE=9.2.6
+    - env:
+        - EVM_EMACS=emacs-26.3-travis
+        - ORG_RELEASE=9.1.14
+    - env:
+        - EVM_EMACS=emacs-26.3-travis
         - ORG_RELEASE=9.2.2
-    # - env:
-    #     - EVM_EMACS=emacs-26.1-travis
-    #     - ORG_RELEASE=9.1.14
-    # - env:
-    #     - EVM_EMACS=emacs-26.1-travis
-    #     - ORG_RELEASE=9.2.2
 
 
 #     - env: EMACS=emacs23
