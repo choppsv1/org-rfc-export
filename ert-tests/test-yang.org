@@ -73,7 +73,7 @@ pyang -f tree $file
     // RFC Ed.: replace XXXX with actual RFC number and
     // remove this note.
 
-    revision 2019-02-17 {
+    revision 1900-01-01 {
       description "Initial Revision";
       reference "RFC XXXX: Cool YANG Module";
     }

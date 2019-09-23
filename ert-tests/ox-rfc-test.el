@@ -61,7 +61,8 @@
     (with-temp-file tmpvfile
       (insert (ox-rfc-load-tidy-xml-as-string verify-name))
       (dolist (x rubs)
-        (replace-regexp x "" nil (point-min) (point-max))))
+        (replace-regexp x "" nil (point-min) (point-max)))
+      (replace-regexp "revision 1900-01-01" (concat "revision " (format-time-string "%Y-%m-%d"))))
     (let ((diffout (shell-command-to-string (format "diff -c %s %s" tmpvfile tmpfile))))
       (if (and diffout (not (string= "" diffout)))
           (message "DIFF: %s" diffout))
