@@ -116,7 +116,7 @@
   :type 'int
   :group 'org-export-rfc)
 
-(setq ox-rfc-revision-regex "\\<revision[ \t]+\\([0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\}\\)[\n\t ]*")
+(defconst ox-rfc-revision-regex "\\<revision[ \t]+\\([0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\}\\)[\n\t ]*")
 
 
 ;;; Define Back-End
