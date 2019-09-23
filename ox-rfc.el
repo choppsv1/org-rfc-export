@@ -116,6 +116,8 @@
   :type 'int
   :group 'org-export-rfc)
 
+(setq ox-rfc-revision-regex "\\<revision[ \t]+\\([0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\}\\)[\n\t ]*")
+
 
 ;;; Define Back-End
 
@@ -232,9 +234,11 @@ Return value is a symbol among `left', `center', `right' and
 
 (defun ox-rfc--replace-yang-module-revision (body)
   "Get yang module name from body"
-  (save-match-data
-    (replace-regexp-in-string "\\<revision[ \t]+\\(1900-01-01\\)"
-                              (format-time-string "%Y-%m-%d") body nil nil 1)))
+  (if (not body)
+      body
+    (save-match-data
+      (replace-regexp-in-string ox-rfc-revision-regex
+                                (format-time-string "%Y-%m-%d") body nil nil 1))))
 
 (defun ox-rfc--get-yang-module-file-name (body)
   "Get yang module name from body"
@@ -246,7 +250,7 @@ Return value is a symbol among `left', `center', `right' and
 (defun ox-rfc--get-yang-module-revision (body)
   "Get yang module name from body"
   (save-match-data
-    (if (not (string-match "\\<revision[ \t]+\\([0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\}\\)[\n\t ]*" body))
+    (if (not (string-match ox-rfc-revision-regex body))
         nil
       (org-trim (match-string 1 body)))))
 
@@ -254,8 +258,17 @@ Return value is a symbol among `left', `center', `right' and
   "Run a block with YANG XML through pyang.
 This function is called by `org-babel-execute-src-block'."
   (let ((cmd (or (cdr (assoc :cmd params)) "pyang"))
-        (cmdline (or (cdr (assoc :cmdline params)) "--keep-comments -Werror -f yang")))
-    (ox-rfc--replace-yang-module-revision (org-babel-eval (concat cmd " " cmdline) body))))
+        (cmdline (or (cdr (assoc :cmdline params)) "--keep-comments -Werror -f yang"))
+        content)
+    (setq content (org-babel-eval (concat cmd " " cmdline) body))
+    (if (not content)
+        (let ((err-str "*no stderr output from pyang*")
+              (err-buf (get-buffer org-babel-error-buffer-name)))
+          (when err-buf
+            (with-current-buffer err-buf
+              (setq err-str (buffer-string))))
+          (error "Error: from pyang: %s" err-str))
+      (ox-rfc--replace-yang-module-revision (org-babel-eval (concat cmd " " cmdline) body)))))
 
 (defun ox-rfc-url-ref-fetch-to-cache (url &optional reload)
   (let* ((fname (file-name-nondirectory (url-filename (url-generic-parse-url url))))
