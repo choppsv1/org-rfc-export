@@ -2,7 +2,7 @@
 
 * Org Mode RFC XML Exporter
 
-Travis (master): [[https://travis-ci.org/choppsv1/org-rfc-export][https://travis-ci.org/choppsv1/org-rfc-export.svg?branch=master]]
+# Travis (master): [[https://travis-ci.org/choppsv1/org-rfc-export][https://travis-ci.org/choppsv1/org-rfc-export.svg?branch=master]]
 CircleCI [[https://circleci.com/gh/choppsv1/org-rfc-export][https://circleci.com/gh/choppsv1/org-rfc-export.svg?style=svg]]
 MELPA: [[https://melpa.org/#/ox-rfc][https://melpa.org/packages/ox-rfc-badge.svg]]
 
