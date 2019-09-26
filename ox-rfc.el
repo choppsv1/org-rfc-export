@@ -1106,9 +1106,7 @@ test succeeded or not.
   (interactive "P")
   (save-excursion
     (let ((test-block-names (cl-remove-if-not (lambda (x) (string-prefix-p "test-" x)) (org-babel-src-block-names)))
-          (success t)
-          test-name)
-
+          (success t))
       (dolist (test-name test-block-names)
         (when (not (and fail-fast (not success)))
           (princ (format "EXECUTE: %s" test-name))
