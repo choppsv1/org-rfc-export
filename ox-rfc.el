@@ -1095,6 +1095,31 @@ channel."
 ;;; Interactive function
 
 ;;;###autoload
+(defun ox-rfc-run-test-blocks (&optional fail-fast)
+  "Run all code-blocks with names that start with 'test-' return
+true only if all code-blocks succeeded. If FAIL-FAST is true then
+return nil immediately when a code-block fails.
+
+This function searches for the string 'FAIL' to determine if the
+test succeeded or not.
+"
+  (interactive "P")
+  (save-excursion
+    (let ((test-block-names (cl-remove-if-not (lambda (x) (string-prefix-p "test-" x)) (org-babel-src-block-names)))
+          (success t)
+          test-name)
+
+      (dolist (test-name test-block-names)
+        (when (not (and fail-fast (not success)))
+          (princ (format "EXECUTE: %s" test-name))
+          (org-babel-goto-named-src-block test-name)
+          (let ((results (org-babel-execute-src-block)))
+            (if (string-match-p "FAIL" (format "%s" results))
+                (setq success nil))
+            (princ (format "RESULT %s: %s\n" test-name results)))))
+      success)))
+
+;;;###autoload
 (defun ox-rfc-export-as-xml (&optional async subtreep visible-only)
   "Export current buffer to a XML buffer.
 
