@@ -33,7 +33,7 @@ pyang -f tree $file
 
 #+CAPTION: A Cool Module
 #+name: cool-module
-#+header: :file cool-module.yang :results output code silent
+#+header: :file cool-module.yang :results output code file silent
 #+begin_src yang :exports code
   module cool-module {
     namespace "urn:ietf:cool";
