@@ -127,6 +127,7 @@ Two of three variables always need to be set. They are listed below. One of
 - RFC_NAME :: The base name of the internet draft, if not specified the Org file
               name is used.
 - RFC_OBSOLETES :: Comma separated list of RFC numbers this document obsoletes.
+- RFC_SHORT_TITLE :: The abbreviated title for page footers, defaults to title.
 - RFC_STREAM :: The ~submissionType <rfc>~ attribute (default "IETF").
 - RFC_UPDATES :: Comma separated list of RFC numbers this document updates.
 - RFC_VERSION :: The standard Internet Draft version number (i.e., 2 base-10

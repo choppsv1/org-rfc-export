@@ -189,6 +189,7 @@
     (:rfc-ipr "RFC_IPR" nil "trust200902" t)
     (:rfc-name "RFC_NAME" nil nil t)
     (:rfc-obsoletes "RFC_OBSOLETES" nil nil space)
+    (:rfc-short-title "RFC_SHORT_TITLE" nil nil t)
     (:rfc-stream "RFC_STREAM" nil "IETF" t)
     (:rfc-updates "RFC_UPDATES" nil nil space)
     (:rfc-version "RFC_VERSION" nil "00" t)
@@ -893,6 +894,8 @@ holding export options."
         (obsoletes (plist-get info :rfc-obsoletes))
         (stream (or (plist-get info :rfc-stream) "IETF"))
         (title (org-export-data (plist-get info :title) info))
+        (short-title (or (plist-get info :rfc-short-title)
+                         (org-export-data (plist-get info :title) info)))
         (updates (plist-get info :rfc-updates))
         (with-toc (if (plist-get info :with-toc) "yes" "no"))
         (toc-inc (if (plist-get info :with-toc) "true" "false"))
@@ -926,7 +929,7 @@ holding export options."
           "    version=\"3\""))
      ">
   <front>
-    <title abbrev=\"" title "\">" title "</title>\n"
+    <title abbrev=\"" short-title "\">" title "</title>\n"
   (ox-rfc-author-list info)
   "  <date/>"
   (or (plist-get info :abstract) "")
