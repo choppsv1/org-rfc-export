@@ -1091,7 +1091,7 @@ CONTENTS is nil.  INFO is a plist used as a communication
 channel."
   (let ((value (org-element-property :value verbatim)))
     (if (ox-rfc-render-v3)
-        (format "<tt>%s</tt>" value)
+        (format "'<tt>%s</tt>'" value)
       (format "<spanx style='verb'>%s</spanx>" value))))
 
 
