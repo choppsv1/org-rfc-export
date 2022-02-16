@@ -5,7 +5,8 @@ PROJDIR ?= $(TESTDIR)/..
 
 ORG_RELEASE ?= 8.3.6
 ORG_DIR := /tmp/org-$(ORG_RELEASE)
-ORG_URL := https://code.orgmode.org/bzg/org-mode/archive/release_$(ORG_RELEASE).tar.gz
+# ORG_URL := https://code.orgmode.org/bzg/org-mode/archive/release_$(ORG_RELEASE).tar.gz
+ORG_URL := https://git.savannah.gnu.org/cgit/emacs/org-mode.git/snapshot/org-mode-release_$(ORG_RELEASE).tar.gz
 ORG_EX := $(ORG_DIR)/lisp/ox.el
 
 EMACS ?= emacs
