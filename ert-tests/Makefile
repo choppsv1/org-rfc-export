@@ -22,6 +22,7 @@ TRAVIS_FILE := $(PROJDIR)/.travis.yml
 .PHONY: autoloads build clean test test-autoloads test-travis
 
 $(ORG_EX):
+	curl -fLO $(ORG_URL) | file $(notdir $(ORG_URL))
 	mkdir -p $(ORG_DIR)
 	(cd $(ORG_DIR) && $(CURL) $(ORG_URL) | tar --strip-components=1 -xzf -)
 	(cd $(ORG_DIR) && make autoloads lisp)

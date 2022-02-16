@@ -18,78 +18,67 @@ references:
 # This sort of sucks, I want the names in the test
 # so I can't actually use the parameter stuff
 jobs:
-  emacs24-org83:
+  emacs25-org93:
     environment:
-      ORG_RELEASE=8.3.6
+      ORG_RELEASE=9.3.8
     <<: *main_test
-  emacs24-org90:
+  emacs25-org94:
     environment:
-      ORG_RELEASE=9.0.10
+      ORG_RELEASE=9.4.4
     <<: *main_test
-  emacs24-org91:
+  emacs25-org95:
     environment:
-      ORG_RELEASE=9.1.14
-    <<: *main_test
-  emacs24-org92:
-    environment:
-      ORG_RELEASE=9.2.2
+      ORG_RELEASE=9.5.2
     <<: *main_test
 
-  emacs25-org83:
+  emacs26-org93:
     environment:
-      ORG_RELEASE=8.3.6
+      ORG_RELEASE=9.3.8
     <<: *main_test
-  emacs25-org90:
+  emacs26-org94:
     environment:
-      ORG_RELEASE=9.0.10
+      ORG_RELEASE=9.4.4
     <<: *main_test
-  emacs25-org91:
+  emacs26-org95:
     environment:
-      ORG_RELEASE=9.1.14
-    <<: *main_test
-  emacs25-org92:
-    environment:
-      ORG_RELEASE=9.2.2
+      ORG_RELEASE=9.5.2
     <<: *main_test
 
-  emacs26-org90:
+  emacs27-org93:
     environment:
-      ORG_RELEASE=9.0.10
+      ORG_RELEASE=9.3.8
     <<: *main_test
-  emacs26-org91:
+  emacs27-org94:
     environment:
-      ORG_RELEASE=9.1.14
+      ORG_RELEASE=9.4.4
     <<: *main_test
-  emacs26-org92:
+  emacs27-org95:
     environment:
-      ORG_RELEASE=9.2.2
+      ORG_RELEASE=9.5.2
     <<: *main_test
+
 
 
 workflows:
   ox-rfc:
     jobs:
-      - emacs24-org83:
-          erel: "24.3"
-      - emacs24-org90:
-          erel: "24.3"
-      - emacs24-org91:
-          erel: "24.3"
-      - emacs24-org92:
-          erel: "24.3"
+      - emacs25-org93:
+          erel: "25.3"
+      # - emacs25-org94:
+      #     erel: "25.3"
+      # - emacs25-org95:
+      #     erel: "25.3"
 
-      - emacs25-org83:
-          erel: "25.3"
-      - emacs25-org90:
-          erel: "25.3"
-      - emacs25-org91:
-          erel: "25.3"
-      - emacs25-org92:
-          erel: "25.3"
+      # - emacs26-org93:
+      #     erel: "26.1"
+      - emacs26-org94:
+          erel: "26.1"
+      # - emacs26-org95:
+      #     erel: "26.1"
 
-      - emacs26-org90:
-          erel: "26.1"
-      - emacs26-org91:
-          erel: "26.1"
-      - emacs26-org92:
-          erel: "26.1"
+      # - emacs27-org93:
+      #     erel: "27.2"
+      # - emacs27-org94:
+      #     erel: "27.2"
+      - emacs27-org95:
+          erel: "27.2"
