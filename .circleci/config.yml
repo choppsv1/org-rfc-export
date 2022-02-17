@@ -64,17 +64,17 @@ workflows:
     jobs:
       - emacs25-org93:
           erel: "25.3"
-      # - emacs25-org94:
-      #     erel: "25.3"
-      # - emacs25-org95:
-      #     erel: "25.3"
+      - emacs25-org94:
+          erel: "25.3"
+      - emacs25-org95:
+          erel: "25.3"
 
-      # - emacs26-org93:
-      #     erel: "26.1"
+      - emacs26-org93:
+          erel: "26.1"
       - emacs26-org94:
           erel: "26.1"
-      # - emacs26-org95:
-      #     erel: "26.1"
+      - emacs26-org95:
+          erel: "26.1"
 
       - emacs27-org93:
           erel: "27.2"
