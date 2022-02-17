@@ -76,9 +76,9 @@ workflows:
       # - emacs26-org95:
       #     erel: "26.1"
 
-      # - emacs27-org93:
-      #     erel: "27.2"
-      # - emacs27-org94:
-      #     erel: "27.2"
+      - emacs27-org93:
+          erel: "27.2"
+      - emacs27-org94:
+          erel: "27.2"
       - emacs27-org95:
           erel: "27.2"
