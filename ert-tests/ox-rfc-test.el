@@ -31,6 +31,7 @@
 (defun ox-rfc-load-tidy-xml-as-string (pathname)
   "Pass PATHNAME through tidy and return a string"
   (let ((tidycmd (format "%s %s %s" (executable-find "tidy") ox-rfc-tidy-args pathname)))
+    (message "tidy cmd is: '%s'" tidycmd)
     (shell-command-to-string tidycmd)))
 
 (defun test-generated (infile &optional trytidy v2)
