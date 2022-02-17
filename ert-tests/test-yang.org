@@ -25,15 +25,16 @@ This section would describe the "Cool YANG Module".
 ** YANG Tree
 
 #+CAPTION: Cool Module YANG tree diagram.
-#+begin_src shell  :var file=cool-module :results output verbatim replace :wrap example :exports results
-pyang -f tree $file
+#+begin_src shell :var module=cool-module :results output verbatim replace :wrap example :exports results
+  pyang -P build --tree-line-length=69 -f tree ${module} 2> err.out;
 #+end_src
 
 * YANG Module
 
 #+CAPTION: A Cool Module
-#+name: cool-module
-#+header: :file cool-module.yang :results output code silent
+#+NAME: cool-module
+#+HEADER: :var dep1=dep-babel
+#+HEADER: :file cool-module.yang :results output file silent :cache yes
 #+begin_src yang :exports code
   module cool-module {
     namespace "urn:ietf:cool";
@@ -94,6 +95,13 @@ pyang -f tree $file
 
 * Informative References
 ** RFC8342
+
+#+name: dep-babel
+#+begin_src emacs-lisp :results none :exports none
+    (org-babel-do-load-languages 'org-babel-load-languages '((shell . t)))
+    (setq fill-column 69)
+    (setq org-confirm-babel-evaluate nil)
+#+end_src
 
 # Local Variables:
 # fill-column: 69
