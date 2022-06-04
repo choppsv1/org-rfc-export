@@ -471,10 +471,11 @@ CONTENTS is nil.  _INFO is a plist used as a communication
 channel."
 
   (let* ((caption (car (org-export-get-caption a-block)))
+         (capstr (string-join (org-export-get-caption a-block)))
          (v3 (ox-rfc-render-v3))
          (v2 (not v3))
-         (titleattr (if (and v2 caption) (format " title=\"%s\" anchor=\"%s\"" caption (ox-rfc--headline-to-anchor caption)) ""))
-         (nameattr (if (and v3 caption) (format "<name>%s</name>" caption) ""))
+         (titleattr (if (and v2 caption) (format " title=\"%s\" anchor=\"%s\"" capstr (ox-rfc--headline-to-anchor capstr)) ""))
+         (nameattr (if (and v3 caption) (format "<name>%s</name>" capstr) ""))
          (figopen (if (or v2 caption) (format "<figure%s>%s" titleattr nameattr) ""))
          (figclose (if (or v2 caption) "</figure>" ""))
          (codetag (if (and is-src (ox-rfc-render-v3)) "sourcecode" "artwork"))
