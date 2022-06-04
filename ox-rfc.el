@@ -42,6 +42,7 @@
 (require 'ox)
 (require 'url-parse)
 (require 'ox-ascii)
+(require 'subr-x)
 
 
 ;;; User-Configurable Variables
