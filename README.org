@@ -110,10 +110,10 @@ Two of three variables always need to be set. They are listed below. One of
   ,#+RFC_IPR: trust200902
   ,#+RFC_NAME:
   ,#+RFC_OBSOLETES:
-  ,#+RFC_STREAM: "IETF"
+  ,#+RFC_STREAM: IETF
   ,#+RFC_UPDATES:
   ,#+RFC_VERSION: 00
-  ,#+RFC_XML_VERSION: "3"
+  ,#+RFC_XML_VERSION: 3
 #+end_example
 
 - AFFILIATION :: This is the affiliation for the first author.

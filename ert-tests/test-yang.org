@@ -75,6 +75,8 @@ This section would describe the "Cool YANG Module".
     // remove this note.
 
     revision 1900-01-01 {
+      // the string for January 1, 1900 will be auto-updated to the current date.
+      // the value is not printed here as it messes up unit-tests :)
       description "Initial Revision";
       reference "RFC XXXX: Cool YANG Module";
     }

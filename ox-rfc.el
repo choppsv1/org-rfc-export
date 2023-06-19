@@ -113,11 +113,13 @@
   :group 'org-export-rfc)
 
 (defcustom ox-rfc-xml-version 3
-  "If non-nil try and use tidy to cleanup generated XML"
+  "default rfc xml version"
   :type 'int
   :group 'org-export-rfc)
 
 (defconst ox-rfc-revision-regex "\\<revision[ \t]+\\([0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\}\\)[\n\t ]*")
+
+(defconst ox-rfc-revision-none-regex "\\<revision[ \t]+\\(1900-01-01\\)[\n\t ]*")
 
 
 ;;; Define Back-End
@@ -235,11 +237,11 @@ Return value is a symbol among `left', `center', `right' and
   (concat "sec-" (replace-regexp-in-string "[^[:alnum:]]+" "-" (downcase headline))))
 
 (defun ox-rfc--replace-yang-module-revision (body)
-  "Get yang module name from body"
+  "Replace revision 1900-01-01 with current date"
   (if (not body)
       body
     (save-match-data
-      (replace-regexp-in-string ox-rfc-revision-regex
+      (replace-regexp-in-string ox-rfc-revision-none-regex
                                 (format-time-string "%Y-%m-%d") body nil nil 1))))
 
 (defun ox-rfc--get-yang-module-file-name (body)

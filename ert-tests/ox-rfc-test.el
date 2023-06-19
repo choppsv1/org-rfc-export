@@ -38,8 +38,8 @@
   "Check that we produce the expected XML for file named INFILE."
   (let ((ox-rfc-try-tidy trytidy)
         (ox-rfc-xml-version (if v2 2 3))
-        (tmpfile (make-temp-file "ert-ox-rfc"))
-        (tmpvfile (make-temp-file "ert-ox-rfc"))
+        (tmpfile (make-temp-file "ert-ox-rfc-actual"))
+        (tmpvfile (make-temp-file "ert-ox-rfc-verify"))
         (rubs '("anchor=\"org[^\"]*\"" "target=\"org[^\"]*\""))
         tidyxml
         (verify-name (concat (file-name-base infile) "-verify.xml"))
@@ -63,8 +63,8 @@
       (insert (ox-rfc-load-tidy-xml-as-string verify-name))
       (dolist (x rubs)
         (replace-regexp x "" nil (point-min) (point-max)))
-      (replace-regexp "1900-01-01" (format-time-string "%Y-%m-%d")))
-    (let ((diffout (shell-command-to-string (format "diff -c %s %s" tmpvfile tmpfile))))
+      (replace-regexp "1900-01-01" (format-time-string "%Y-%m-%d") nil (point-min) (point-max)))
+    (let ((diffout (shell-command-to-string (format "diff -c %s %s" tmpvfile tmpfile))))
       (if (and diffout (not (string= "" diffout)))
           (message "DIFF: %s" diffout))
       (should

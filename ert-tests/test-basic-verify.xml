@@ -116,20 +116,21 @@ as <xref target="StudyScarlet"/>.</t>
 </reference>
 
 
-<reference anchor="I-D.iab-styleguide">
+<reference anchor="I-D.iab-styleguide" target="https://datatracker.ietf.org/doc/html/draft-iab-styleguide-02">
 <front>
 <title>RFC Style Guide</title>
-
-<author fullname="Heather Flanagan"></author>
-<author fullname="Sandy Ginoza"></author>
-<date month="April" day="9" year="2014" />
-
+           <author>
+             <organization>RFC Editor</organization>
+           </author>
+           <author fullname="Heather Flanagan" initials="H." surname="Flanagan">
+             <organization>RFC</organization>
+           </author>
+           <date day="9" month="April" year="2014" />
 <abstract>
 <t>This document describes the fundamental and unique style conventions and editorial policies currently in use for the RFC Series. It captures the RFC Editor's basic requirements and offers guidance regarding the style and structure of an RFC. Additional guidance is captured on a website that reflects the experimental nature of that guidance and prepares it for future inclusion in the RFC Style Guide. This document obsoletes RFC 2223, "Instructions to RFC Authors".</t>
 </abstract>
 </front>
 <seriesInfo name="Internet-Draft" value="draft-iab-styleguide-02" />
-<format type="TXT" target="https://www.ietf.org/archive/id/draft-iab-styleguide-02.txt" />
 </reference>
 </references>
 
