@@ -338,6 +338,28 @@ This function is called by `org-babel-execute-src-block'."
 (defun ox-rfc-std--cache-name (ref)
   (concat (file-name-as-directory ox-rfc-ref-cache-directory) (ox-rfc-std--basename ref)))
 
+(defun ox-rfc-std--url-retrieve-body (url)
+  "Retrieve URL synchronously and return its response body as a string.
+If the final HTTP status (after following any redirects) is not
+in the 2xx range, log the failing URL and status with `message'
+and signal an error, rather than returning the error page body."
+  (let ((buf (url-retrieve-synchronously url t t)))
+    (unless buf
+      (error "ox-rfc: fetching %s failed: no response" url))
+    (unwind-protect
+        (with-current-buffer buf
+          (goto-char (point-min))
+          (unless (looking-at "HTTP/[0-9.]+ +\\([0-9]+\\)")
+            (error "ox-rfc: fetching %s failed: malformed HTTP response" url))
+          (let ((status (string-to-number (match-string 1))))
+            (if (or (< status 200) (>= status 300))
+                (progn
+                  (message "ox-rfc: fetching reference %s failed with HTTP %d" url status)
+                  (error "ox-rfc: fetching %s failed with HTTP %d" url status))
+              (re-search-forward "\n\n\\|\r\n\r\n" nil 'move)
+              (buffer-substring-no-properties (point) (point-max)))))
+      (kill-buffer buf))))
+
 (defun ox-rfc-std-ref-fetch-to-cache (ref &optional reload)
   "Fetch the bibliography xml.
 The document is identified by BASENAME. If RELOAD is specified
@@ -345,7 +367,11 @@ then the cache is overwritten."
   (let* ((pathname (ox-rfc-std--cache-name ref)))
     (unless (and (file-exists-p pathname) (not reload))
       (make-directory ox-rfc-ref-cache-directory t)
-      (url-copy-file (ox-rfc-std--url ref) pathname t))
+      (let* ((url (ox-rfc-std--url ref))
+             (body (ox-rfc-std--url-retrieve-body url)))
+        (message "ox-rfc: fetched reference %s from %s" ref url)
+        (with-temp-file pathname
+          (insert body))))
     pathname))
 
 (defun ox-rfc-get-tidy ()
